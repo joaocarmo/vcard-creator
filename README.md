@@ -1,7 +1,8 @@
 # vcard-creator
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
 
-A JavaScript vCard creator library for both node.js and the web
+A JavaScript vCard creator library for both node.js and the web. Outputs the
+vCard text that should be saved as a \*.vcf file.
 
 ## Origin
 This is based on jeroendesloovere's
@@ -9,7 +10,7 @@ This is based on jeroendesloovere's
 
 ## Installation
 
-``` bash
+```bash
 $ npm install --save vcard-creator
 ```
 
@@ -48,7 +49,7 @@ Output
 ```
 BEGIN:VCARD
 VERSION:3.0
-REV:2017-08-29T16:47:14.849Z
+REV:2017-08-31T17:00:15.850Z
 N;CHARSET=utf-8:Desloovere;Jeroen;;;
 FN;CHARSET=utf-8:Jeroen Desloovere
 ORG;CHARSET=utf-8:Siesqo
@@ -57,9 +58,8 @@ ROLE;CHARSET=utf-8:Data Protection Officer
 EMAIL;INTERNET:info@jeroendesloovere.be
 TEL;PREF;WORK:1234121212
 TEL;WORK:123456789
-ADR;WORK;POSTAL;CHARSET=utf-8:null;null;street;worktown;null;workpostcode
- ;Belgium
-
- URL:http://www.jeroendesloovere.be
+ADR;WORK;POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;workpos
+ tcode;Belgium
+URL:http://www.jeroendesloovere.be
 END:VCARD
 ```

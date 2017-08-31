@@ -20,7 +20,7 @@ vcard.addRole('Data Protection Officer')
 vcard.addEmail('info@jeroendesloovere.be')
 vcard.addPhoneNumber(1234121212, 'PREF;WORK')
 vcard.addPhoneNumber(123456789, 'WORK')
-vcard.addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
+vcard.addAddress('name', 'extended', 'street', 'worktown', 'state', 'workpostcode', 'Belgium')
 vcard.addURL('http://www.jeroendesloovere.be')
 
 console.log(vcard.toString())
