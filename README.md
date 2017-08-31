@@ -1,5 +1,6 @@
 # vcard-creator
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
+
 A JavaScript vCard creator library for both node.js and the web
 
 ## Origin
