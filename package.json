@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A JavaScript vCard creator library for both node.js and the web",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,5 @@
     "url": "https://github.com/joaocarmo/vcard-creator/issues"
   },
   "homepage": "https://github.com/joaocarmo/vcard-creator#readme",
-  "dependencies": {
-    "transliteration": "^1.6.2"
-  }
+  "dependencies": {}
 }

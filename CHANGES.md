@@ -1,3 +1,9 @@
+## 0.0.2
+> Sep 1, 2017
+
+- Removed the _transliteration_ dependency in order to be compatible with
+_UglifyJS_
+
 ## 0.0.1
 > Aug 31, 2017
 
