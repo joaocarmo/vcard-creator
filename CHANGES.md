@@ -1,3 +1,8 @@
+## 0.0.3
+> Apr 25, 2018
+
+- Removed the _index.js_ and exposed the module directly from the _lib_ folder
+
 ## 0.0.2
 > Sep 1, 2017
 

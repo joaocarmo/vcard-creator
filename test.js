@@ -1,4 +1,5 @@
-var { vCard } = require('./index')
+#!/usr/bin/env node
+var { vCard } = require('./')
 
 // define vcard
 var vcard = new vCard()
