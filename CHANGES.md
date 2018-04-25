@@ -1,3 +1,8 @@
+## 0.0.4
+> Apr 26, 2018
+
+- Exposed the library as a compiled bundle to avoid dependencies
+
 ## 0.0.3
 > Apr 25, 2018
 

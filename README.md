@@ -1,7 +1,7 @@
 # vcard-creator
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
 
-A JavaScript vCard creator library for both node.js and the web. Outputs the
+A JavaScript vCard 3.0 creator library for both node.js and the web. Outputs the
 vCard text that should be saved as a \*.vcf file.
 
 ## Origin
@@ -10,8 +10,8 @@ This is based on jeroendesloovere's
 
 ## Installation
 
-```bash
-$ npm install --save vcard-creator
+```
+$ npm install vcard-creator
 ```
 
 ## Example
@@ -62,4 +62,15 @@ ADR;WORK;POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;workpos
  tcode;Belgium
 URL:http://www.jeroendesloovere.be
 END:VCARD
+```
+
+## Forking / Contributing
+
+If you're interested in the development of this project, you can some commands
+to compile and test your changes.
+
+```
+$ npm run build
+
+$ npm test
 ```
