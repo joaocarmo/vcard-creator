@@ -20,15 +20,15 @@ $ npm install vcard-creator
 
 It's exposed through the _window_ global object as explained below.
 
-index.html
+`index.html`
 ```html
 <head>
-  <script type="text/javascript" src="../dist/vcard-creator.js"></script>
+  <script type="text/javascript" src="./vcard-creator.js"></script>
   <script type="text/javascript" src="./foo.js"></script>
 </head>
 ```
 
-foo.js
+`foo.js`
 ```javascript
 // define vcard
 var vCard = window.vcard_creator.vCard;
@@ -54,7 +54,7 @@ Also available with ES6.
 import { vCard } from 'vcard-creator'
 
 // define vcard
-var vcard = new vCard()
+const vcard = new vCard()
 ```
 
 ## Example
