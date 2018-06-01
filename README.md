@@ -14,12 +14,55 @@ This is based on jeroendesloovere's
 $ npm install vcard-creator
 ```
 
+## Usage
+
+#### On the web
+
+It's exposed through the _window_ global object as explained below.
+
+index.html
+```html
+<head>
+  <script type="text/javascript" src="../dist/vcard-creator.js"></script>
+  <script type="text/javascript" src="./foo.js"></script>
+</head>
+```
+
+foo.js
+```javascript
+// define vcard
+var vCard = window.vcard_creator.vCard;
+var vcard = new vCard();
+
+// ...
+```
+
+#### With a bundler / Node.js
+
+With a bundler (e.g. webpack) or in Node.js you can just require / import it.
+
+```javascript
+var { vCard } = require('vcard-creator')
+
+// define a new vCard
+var vcard = new vCard()
+```
+
+Also available with ES6.
+
+```javascript
+import { vCard } from 'vcard-creator'
+
+// define vcard
+var vcard = new vCard()
+```
+
 ## Example
 
 ```javascript
 var { vCard } = require('vcard-creator')
 
-// define vcard
+// define a new vCard
 var vcard = new vCard()
 
 // define variables
@@ -73,4 +116,8 @@ to use commands to compile and test your changes.
 $ npm run build
 
 $ npm test
+
+$ npm run test-web-build
+
+$ npm run test-web-export
 ```

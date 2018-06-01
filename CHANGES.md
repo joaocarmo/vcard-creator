@@ -1,3 +1,10 @@
+## 0.0.5
+> Jun 1, 2018
+
+- Added tests for CLI, compiled for web (i.g. webpack) and not compiled (i.g.
+used from the global _window_ object)
+- Updated the [README.md](README.md)
+
 ## 0.0.4
 > Apr 26, 2018
 
