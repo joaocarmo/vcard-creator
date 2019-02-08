@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A JavaScript vCard creator library for both node.js and the web",
   "main": "dist/vcard-creator.js",
   "scripts": {
@@ -24,7 +24,7 @@
   "homepage": "https://github.com/joaocarmo/vcard-creator#readme",
   "dependencies": {},
   "devDependencies": {
-    "webpack": "^4.10.2",
-    "webpack-cli": "^2.1.5"
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3"
   }
 }

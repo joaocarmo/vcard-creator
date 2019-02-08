@@ -1,3 +1,9 @@
+## 0.0.6
+> Feb 8, 2019
+
+- Updated the dependencies to resolve the security vulnerability in
+[lodash](https://nvd.nist.gov/vuln/detail/CVE-2018-16487)
+
 ## 0.0.5
 > Jun 1, 2018
 
