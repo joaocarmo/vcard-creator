@@ -1,3 +1,11 @@
+
+## 0.1.0
+> Apr 1, 2019
+
+- Changed the named export to a default export, making it incompatible with
+previous versions [BREAKING]
+- Renamed the global object from `vcard_creator` to `vcardcreator`
+
 ## 0.0.6
 > Feb 8, 2019
 

@@ -1,4 +1,4 @@
-import { vCard } from '../'
+import vCard from '../'
 
 // define vcard
 var vcard = new vCard()

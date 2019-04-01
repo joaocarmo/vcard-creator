@@ -1,5 +1,5 @@
 // define vcard
-var vCard = window.vcard_creator.vCard;
+var vCard = window.vcardcreator.default;
 var vcard = new vCard();
 
 // define variables
