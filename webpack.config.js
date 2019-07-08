@@ -20,7 +20,7 @@ const testConfig = {
 const prodConfig = {
   mode,
   context: libFolder,
-  entry: './vCard.js',
+  entry: './VCard.js',
   resolve: {
     extensions: ['.js'],
   },

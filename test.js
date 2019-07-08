@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-var vCard = require('./').default
+var VCard = require('./').default
 
-// define vcard
-var vcard = new vCard()
+// define vCard
+var vCard = new VCard()
 
 // define variables
 var lastname = 'Desloovere'
@@ -12,16 +12,16 @@ var prefix = ''
 var suffix = ''
 
 // add personal data
-vcard.addName(lastname, firstname, additional, prefix, suffix)
+vCard.addName(lastname, firstname, additional, prefix, suffix)
 
 // add work data
-vcard.addCompany('Siesqo')
-vcard.addJobtitle('Web Developer')
-vcard.addRole('Data Protection Officer')
-vcard.addEmail('info@jeroendesloovere.be')
-vcard.addPhoneNumber(1234121212, 'PREF;WORK')
-vcard.addPhoneNumber(123456789, 'WORK')
-vcard.addAddress('name', 'extended', 'street', 'worktown', 'state', 'workpostcode', 'Belgium')
-vcard.addURL('http://www.jeroendesloovere.be')
+vCard.addCompany('Siesqo')
+vCard.addJobtitle('Web Developer')
+vCard.addRole('Data Protection Officer')
+vCard.addEmail('info@jeroendesloovere.be')
+vCard.addPhoneNumber(1234121212, 'PREF;WORK')
+vCard.addPhoneNumber(123456789, 'WORK')
+vCard.addAddress('name', 'extended', 'street', 'worktown', 'state', 'workpostcode', 'Belgium')
+vCard.addURL('http://www.jeroendesloovere.be')
 
-console.log(vcard.toString())
+console.log(vCard.toString())

@@ -6,7 +6,7 @@ It outputs the vCard text that should be saved as a `*.vcf` file.
 
 ## Origin
 This is based on _jeroendesloovere_'s
-[vcard](https://github.com/jeroendesloovere/vcard) for PHP.
+[vCard](https://github.com/jeroendesloovere/vcard) for PHP.
 
 ## Installation
 
@@ -23,16 +23,16 @@ It's exposed through the _window_ global object as explained below.
 `index.html`
 ```html
 <head>
-  <script type="text/javascript" src="./vcard-creator.js"></script>
-  <script type="text/javascript" src="./foo.js"></script>
+  <script type="text/javascript" src="./js/vcard-creator.js"></script>
+  <script type="text/javascript" src="./js/foo.js"></script>
 </head>
 ```
 
 `foo.js`
 ```javascript
-// define vcard
-var vCard = window.vcardcreator.default;
-var vcard = new vCard();
+// define vCard
+var VCard = window.vcardcreator.default;
+var myVCard = new VCard();
 
 // ...
 ```
@@ -42,28 +42,28 @@ var vcard = new vCard();
 With a bundler (e.g. webpack) or in Node.js you can just require / import it.
 
 ```javascript
-var { vCard } = require('vcard-creator')
+var VCard = require('vcard-creator')
 
 // define a new vCard
-var vcard = new vCard()
+var myVCard = new VCard()
 ```
 
-Also available with ES6.
+Or in ES6 syntax...
 
 ```javascript
-import { vCard } from 'vcard-creator'
+import VCard from 'vcard-creator'
 
-// define vcard
-const vcard = new vCard()
+// define vCard
+const myVCard = new VCard()
 ```
 
 ## Example
 
 ```javascript
-var { vCard } = require('vcard-creator')
+var VCard = require('vcard-creator')
 
 // define a new vCard
-var vcard = new vCard()
+var myVCard = new VCard()
 
 // define variables
 var lastname = 'Desloovere'
@@ -76,16 +76,16 @@ var suffix = ''
 vcard.addName(lastname, firstname, additional, prefix, suffix)
 
 // add work data
-vcard.addCompany('Siesqo')
-vcard.addJobtitle('Web Developer')
-vcard.addRole('Data Protection Officer')
-vcard.addEmail('info@jeroendesloovere.be')
-vcard.addPhoneNumber(1234121212, 'PREF;WORK')
-vcard.addPhoneNumber(123456789, 'WORK')
-vcard.addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
-vcard.addURL('http://www.jeroendesloovere.be')
+myVCard.addCompany('Siesqo')
+myVCard.addJobtitle('Web Developer')
+myVCard.addRole('Data Protection Officer')
+myVCard.addEmail('info@jeroendesloovere.be')
+myVCard.addPhoneNumber(1234121212, 'PREF;WORK')
+myVCard.addPhoneNumber(123456789, 'WORK')
+myVCard.addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
+myVCard.addURL('http://www.jeroendesloovere.be')
 
-console.log(vcard.toString())
+console.log(myVCard.toString())
 ```
 
 Output

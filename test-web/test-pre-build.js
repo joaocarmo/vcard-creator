@@ -1,7 +1,7 @@
-import vCard from '../'
+import VCard from '../'
 
 // define vcard
-var vcard = new vCard()
+var vcard = new VCard()
 
 // define variables
 var lastname = 'Desloovere'

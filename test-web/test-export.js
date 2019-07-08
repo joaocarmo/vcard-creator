@@ -1,6 +1,6 @@
 // define vcard
-var vCard = window.vcardcreator.default;
-var vcard = new vCard();
+var VCard = window.vcardcreator.default;
+var vcard = new VCard();
 
 // define variables
 var lastname = 'Desloovere';
