@@ -1,24 +1,31 @@
+// Imports
+const path = require('path')
+const options = require('./babel.config')
+
 const mode = process.env.NODE_ENV === 'development' ? 'development' : 'production'
+const libFolder = path.join(__dirname, 'lib')
+const distFolder = path.join(__dirname, 'dist')
+const testFolder = path.join(__dirname, 'test-web')
 
 const testConfig = {
   mode,
-  context: __dirname + '/test-web',
+  context: testFolder,
   entry: './test-pre-build.js',
   output: {
-    path: __dirname + '/test-web',
+    path: testFolder,
     filename: 'test-build.js',
   },
 }
 
 const prodConfig = {
   mode,
-  context: __dirname + '/lib',
+  context: libFolder,
   entry: './vCard.js',
   resolve: {
     extensions: ['.js'],
   },
   output: {
-    path: __dirname + '/dist',
+    path: distFolder,
     filename: 'vcard-creator.js',
     library: 'vcardcreator',
     libraryTarget: 'umd',
@@ -31,18 +38,7 @@ const prodConfig = {
         exclude: /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    browsers: ['last 2 versions', 'ie >= 11'],
-                  },
-                },
-              ],
-            ],
-          },
+          options,
         },
       },
     ],

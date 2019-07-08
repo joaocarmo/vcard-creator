@@ -5,7 +5,7 @@ A JavaScript vCard 3.0 creator library for both node.js and the web.
 It outputs the vCard text that should be saved as a `*.vcf` file.
 
 ## Origin
-This is based on jeroendesloovere's
+This is based on _jeroendesloovere_'s
 [vcard](https://github.com/jeroendesloovere/vcard) for PHP.
 
 ## Installation
