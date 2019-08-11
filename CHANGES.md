@@ -1,5 +1,11 @@
 
 ## 0.1.0
+> Aug 11, 2019
+
+- Updated the dependencies to resolve the security vulnerability
+[CVE-2019-10744](https://github.com/lodash/lodash/pull/4336)
+
+## 0.1.0
 > Apr 1, 2019
 
 - Changed the named export to a default export, making it incompatible with
