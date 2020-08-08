@@ -1,44 +1,43 @@
-// Imports
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path')
-const options = require('./babel.config')
+const babelOptions = require('./babel.config')
 
-const mode = process.env.NODE_ENV === 'development' ? 'development' : 'production'
-const libFolder = path.join(__dirname, 'lib')
-const distFolder = path.join(__dirname, 'dist')
-const testFolder = path.join(__dirname, 'test-web')
+const { NODE_ENV } = process.env
+
+const mode = NODE_ENV || 'development'
 
 const testConfig = {
   mode,
-  context: testFolder,
+  context: path.join(__dirname, 'test-functional'),
   entry: './test-pre-build.js',
   output: {
-    path: testFolder,
+    path: path.join(__dirname, 'test-functional'),
     filename: 'test-build.js',
   },
 }
 
 const prodConfig = {
   mode,
-  context: libFolder,
-  entry: './VCard.js',
-  resolve: {
-    extensions: ['.js'],
-  },
+  context: path.join(__dirname, 'lib'),
+  entry: './VCard.ts',
   output: {
-    path: distFolder,
+    path: path.join(__dirname, 'dist'),
     filename: 'vcard-creator.js',
     library: 'vcardcreator',
     libraryTarget: 'umd',
-    globalObject: `(typeof self !== 'undefined' ? self : this)`,
+    globalObject: 'typeof self !== \'undefined\' ? self : this',
+  },
+  resolve: {
+    extensions: ['.js', '.ts'],
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
+        test: /\.(j|t)s$/,
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options,
+          options: babelOptions,
         },
       },
     ],

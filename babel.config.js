@@ -3,10 +3,14 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        targets: {
-          browsers: ['last 2 versions', 'ie >= 11'],
-        },
+        useBuiltIns: 'usage',
+        modules: 'umd',
+        corejs: '3.6',
       },
     ],
+    '@babel/preset-typescript',
+  ],
+  plugins: [
+    '@babel/plugin-transform-runtime',
   ],
 }
