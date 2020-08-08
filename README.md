@@ -1,17 +1,25 @@
 # vcard-creator
+
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
+[![jest](https://jestjs.io/img/jest-badge.svg)](https://github.com/facebook/jest)
+![tests](https://github.com/joaocarmo/vcard-creator/workflows/Tests/badge.svg)
 
 A JavaScript vCard 3.0 creator library for both node.js and the web.
 It outputs the vCard text that should be saved as a `*.vcf` file.
 
 ## Origin
+
 This is based on _jeroendesloovere_'s
 [vCard](https://github.com/jeroendesloovere/vcard) for PHP.
 
 ## Installation
 
-```
-$ npm install vcard-creator
+```sh
+yarn add vcard-creator
+
+# or
+
+npm install vcard-creator
 ```
 
 ## Usage
@@ -21,6 +29,7 @@ $ npm install vcard-creator
 It's exposed through the _window_ global object as explained below.
 
 `index.html`
+
 ```html
 <head>
   <script type="text/javascript" src="./js/vcard-creator.js"></script>
@@ -29,6 +38,7 @@ It's exposed through the _window_ global object as explained below.
 ```
 
 `foo.js`
+
 ```javascript
 // define vCard
 var VCard = window.vcardcreator.default;
@@ -89,7 +99,8 @@ console.log(myVCard.toString())
 ```
 
 Output
-```
+
+```txt
 BEGIN:VCARD
 VERSION:3.0
 REV:2017-08-31T17:00:15.850Z
@@ -112,12 +123,16 @@ END:VCARD
 If you're interested in the development of this project, you can run some ready
 to use commands to compile and test your changes.
 
-```
-$ npm run build
+```sh
+# Build
+yarn build
 
-$ npm test
+# Test
+yarn test:unit
 
-$ npm run test-web-build
+yarn test:functional
 
-$ npm run test-web-export
+yarn test:web-build
+
+yarn test:web-export
 ```
