@@ -37,4 +37,4 @@ jobs:
     - name: Execute the tests
       run: |
         yarn test:unit
-        yean test:functional
+        yarn test:functional
