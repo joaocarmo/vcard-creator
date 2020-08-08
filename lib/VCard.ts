@@ -1,60 +1,81 @@
 import { Property, DefinedElements } from './types/VCard'
 
 export default class VCard {
-  private charset: string
+  /**
+   * Default Charset
+   *
+   * @var string
+   */
+  public charset = 'utf-8'
 
-  private contentType: string
+  /**
+   * Default ContentType
+   *
+   * @var string
+   */
+  private contentType: 'text/x-vcard' | 'text/x-vcalendar' = 'text/x-vcard'
 
-  private fileExtension: string
+  /**
+   * Default fileExtension
+   *
+   * @var string
+   */
+  private fileExtension: 'vcf' | 'ics' = 'vcf'
 
-  private properties: Property[]
+  /**
+   * Properties
+   *
+   * @var array
+   */
+  private properties: Property[] = []
 
-  private definedElements: DefinedElements
+  /**
+   * definedElements
+   *
+   * @var object
+   */
+  private definedElements: DefinedElements = {}
 
-  private multiplePropertiesForElementAllowed: string[]
+  /**
+   * Multiple properties for element allowed
+   *
+   * @var array
+   */
+  private multiplePropertiesForElementAllowed: string[] = [
+    'email',
+    'address',
+    'phoneNumber',
+    'url',
+  ]
 
-  public constructor() {
-    /**
-     * definedElements
-     *
-     * @var object
-     */
-    this.definedElements = {}
-    /**
-     * Multiple properties for element allowed
-     *
-     * @var array
-     */
-    this.multiplePropertiesForElementAllowed = [
-      'email',
-      'address',
-      'phoneNumber',
-      'url',
-    ]
-    /**
-     * Properties
-     *
-     * @var array
-     */
-    this.properties = []
-    /**
-     * Default Charset
-     *
-     * @var string
-     */
-    this.charset = 'utf-8'
-    /**
-     * Default ContentType
-     *
-     * @var string
-     */
-    this.contentType = 'text/x-vcard'
-    /**
-     * Default fileExtension
-     *
-     * @var string
-     */
-    this.fileExtension = 'vcf'
+  /**
+   * Defines the output format
+   *
+   * @var bool
+   */
+  private useVCalendar = false
+
+  public constructor(format: 'vcard' | 'vcalendar' = 'vcard') {
+    if (format === 'vcalendar') {
+      this.setFormat(format)
+    }
+  }
+
+  /**
+   * Set format
+   *
+   * @param  string format Either 'vcard' or 'vcalendar'
+   */
+  public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
+    if (format === 'vcalendar') {
+      this.contentType = 'text/x-vcalendar'
+      this.fileExtension = 'ics'
+      this.useVCalendar = true
+    } else if (format === 'vcard') {
+      this.contentType = 'text/x-vcard'
+      this.fileExtension = 'vcf'
+      this.useVCalendar = false
+    }
   }
 
   /**
@@ -181,16 +202,35 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    *
    * @param string property LOGO|PHOTO
    * @param string url image url or filename
-   * @param bool include Do we include the image in the vcard or not?
+   * @param bool   include Do we include the image in our vcard or not?
    * @param string element The name of the element to set
+   * @throws VCardException
    */
-  public addMedia(
+  private addMedia(
     property: string,
     url: string,
     include = true,
     element: string,
-  ): this {
-    return this
+  ): void {
+    const value = ''
+    this.setProperty(element, property, value)
+  }
+
+  /**
+   * Add a photo or logo (depending on property name)
+   *
+   * @param string property LOGO|PHOTO
+   * @param string content image content
+   * @param string element The name of the element to set
+   * @throws VCardException
+   */
+  private addMediaContent(
+    property: string,
+    content: string,
+    element: string,
+  ): void {
+    const value = ''
+    this.setProperty(element, property, value)
   }
 
   /**
@@ -343,7 +383,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    *
    * @return string
    */
-  public buildVCard(): string {
+  private buildVCard(): string {
     // init string
     const now = new Date()
     let string = ''
@@ -360,6 +400,16 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     string += 'END:VCARD\r\n'
     // return
     return string
+  }
+
+  /**
+   * Build VCalender (.ics) - Safari (< iOS 8) can not open .vcf files, so we
+   * have build a workaround.
+   *
+   * @return string
+   */
+  private buildVCalendar(): string {
+    return this.getOutput()
   }
 
   /**
@@ -450,7 +500,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return string
    */
   public getOutput(): string {
-    return this.buildVCard()
+    return this.useVCalendar ? this.buildVCalendar() : this.buildVCard()
   }
 
   /**
