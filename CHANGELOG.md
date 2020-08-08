@@ -6,6 +6,7 @@
 
 - Converted to TypeScript
 - Added unit and functional tests
+- Updated the documentation (#1)
 
 ## 0.1.0 (no release)
 

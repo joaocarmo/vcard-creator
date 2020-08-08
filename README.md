@@ -52,7 +52,7 @@ var myVCard = new VCard();
 With a bundler (e.g. webpack) or in Node.js you can just require / import it.
 
 ```javascript
-var VCard = require('vcard-creator')
+var VCard = require('vcard-creator').default
 
 // define a new vCard
 var myVCard = new VCard()
@@ -72,7 +72,7 @@ const myVCard = new VCard()
 Code
 
 ```javascript
-var VCard = require('vcard-creator')
+var VCard = require('vcard-creator').default
 
 // define a new vCard
 var myVCard = new VCard()
