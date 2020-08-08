@@ -69,6 +69,8 @@ const myVCard = new VCard()
 
 ## Example
 
+Code
+
 ```javascript
 var VCard = require('vcard-creator')
 

@@ -18,7 +18,7 @@
     "lint": "eslint .",
     "test:node": "./test-functional/test.js",
     "test:unit": "jest",
-    "test:functional": "./test-functional/test.js",
+    "test:functional": "./test-functional/test.js | tee test-card.vcf",
     "test:web-build": "NODE_ENV=development webpack --mode development && open ./test-functional/test-build.html",
     "test:web-export": "open ./test-functional/test-export.html",
     "type-check:watch": "yarn type-check -- --watch",

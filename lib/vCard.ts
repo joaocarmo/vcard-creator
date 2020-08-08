@@ -1,13 +1,25 @@
-import VCardInterface from './types/vCard'
+import { Property, DefinedElements } from './types/vCard'
 
-export default class VCard implements VCardInterface {
+export default class VCard {
+  private charset: string
+
+  private contentType: string
+
+  private fileExtension: string
+
+  private properties: Property[]
+
+  private definedElements: DefinedElements
+
+  private multiplePropertiesForElementAllowed: string[]
+
   public constructor() {
     /**
      * definedElements
      *
-     * @var array
+     * @var object
      */
-    this.definedElements = []
+    this.definedElements = {}
     /**
      * Multiple properties for element allowed
      *
@@ -60,7 +72,7 @@ export default class VCard implements VCardInterface {
    * or any combination of these: e.g. 'WORK;PARCEL;POSTAL'
    * @return this
    */
-  addAddress(
+  public addAddress(
     name = '',
     extended = '',
     street = '',
@@ -69,9 +81,11 @@ export default class VCard implements VCardInterface {
     zip = '',
     country = '',
     type = 'WORK;POSTAL',
-  ) {
+  ): this {
     // init value
-    const value = `${name};${extended};${street};${city};${region};${zip};${country}`
+    const value = `\
+${name};${extended};${street};${city};${region};${zip};${country}\
+`
     // set property
     this.setProperty(
       'address',
@@ -87,7 +101,7 @@ export default class VCard implements VCardInterface {
    * @param  string date Format is YYYY-MM-DD
    * @return this
    */
-  addBirthday(date) {
+  public addBirthday(date: string): this {
     this.setProperty(
       'birthday',
       'BDAY',
@@ -103,7 +117,7 @@ export default class VCard implements VCardInterface {
    * @param string department
    * @return this
    */
-  addCompany(company, department = '') {
+  public addCompany(company: string, department = ''): this {
     this.setProperty(
       'company',
       `ORG${this.getCharsetString()}`,
@@ -123,7 +137,7 @@ export default class VCard implements VCardInterface {
    * or any combination of these: e.g. 'PREF;WORK'
    * @return this
    */
-  addEmail(address, type = '') {
+  public addEmail(address: string, type = ''): this {
     this.setProperty(
       'email',
       `EMAIL;INTERNET${(type !== '') ? `;${type}` : ''}`,
@@ -138,7 +152,7 @@ export default class VCard implements VCardInterface {
    * @param  string jobtitle The jobtitle for the person.
    * @return this
    */
-  addJobtitle(jobtitle) {
+  public addJobtitle(jobtitle: string): this {
     this.setProperty(
       'jobtitle',
       `TITLE${this.getCharsetString()}`,
@@ -153,7 +167,7 @@ export default class VCard implements VCardInterface {
    * @param  string role The role for the person.
    * @return this
    */
-  addRole(role) {
+  public addRole(role: string): this {
     this.setProperty(
       'role',
       `ROLE${this.getCharsetString()}`,
@@ -167,10 +181,15 @@ export default class VCard implements VCardInterface {
    *
    * @param string property LOGO|PHOTO
    * @param string url image url or filename
-   * @param bool include Do we include the image in our vcard or not?
+   * @param bool include Do we include the image in the vcard or not?
    * @param string element The name of the element to set
    */
-  addMedia(property, url, include = true, element) {
+  public addMedia(
+    property: string,
+    url: string,
+    include = true,
+    element: string,
+  ): this {
     return this
   }
 
@@ -184,13 +203,13 @@ export default class VCard implements VCardInterface {
    * @param  string [optional] suffix
    * @return this
    */
-  addName(
+  public addName(
     lastName = '',
     firstName = '',
     additional = '',
     prefix = '',
     suffix = '',
-  ) {
+  ): this {
     // define values with non-empty values
     const values = [
       prefix,
@@ -200,7 +219,9 @@ export default class VCard implements VCardInterface {
       suffix,
     ].filter((m) => !!m)
     // set property
-    const property = `${lastName};${firstName};${additional};${prefix};${suffix}`
+    const property = `\
+${lastName};${firstName};${additional};${prefix};${suffix}\
+`
     this.setProperty(
       'name',
       `N${this.getCharsetString()}`,
@@ -224,7 +245,7 @@ export default class VCard implements VCardInterface {
    * @param  string note
    * @return this
    */
-  addNote(note) {
+  public addNote(note: string): this {
     this.setProperty(
       'note',
       `NOTE${this.getCharsetString()}`,
@@ -239,7 +260,7 @@ export default class VCard implements VCardInterface {
    * @param array categories
    * @return this
    */
-  addCategories(categories) {
+  public addCategories(categories: string[]): this {
     this.setProperty(
       'categories',
       `CATEGORIES${this.getCharsetString()}`,
@@ -258,11 +279,11 @@ export default class VCard implements VCardInterface {
    * or any senseful combination, e.g. 'PREF;WORK;VOICE'
    * @return this
    */
-  addPhoneNumber(number, type = '') {
+  public addPhoneNumber(number: number, type = ''): this {
     this.setProperty(
       'phoneNumber',
       `TEL${(type !== '') ? `;${type}` : ''}`,
-      number,
+      `${number}`,
     )
     return this
   }
@@ -271,10 +292,10 @@ export default class VCard implements VCardInterface {
    * Add Logo
    *
    * @param  string url image url or filename
-   * @param  bool include Include the image in our vcard?
+   * @param  bool include Include the image in the vcard?
    * @return this
    */
-  addLogo(url, include = true) {
+  public addLogo(url: string, include = true): this {
     this.addMedia(
       'LOGO',
       url,
@@ -288,10 +309,10 @@ export default class VCard implements VCardInterface {
   * Add Photo
   *
   * @param  string url image url or filename
-  * @param  bool include Include the image in our vcard?
+  * @param  bool include Include the image in the vcard?
   * @return this
   */
-  addPhoto(url, include = true) {
+  public addPhoto(url: string, include = true): this {
     this.addMedia(
       'PHOTO',
       url,
@@ -308,7 +329,7 @@ export default class VCard implements VCardInterface {
    * @param  string [optional] type Type may be WORK | HOME
    * @return this
    */
-  addURL(url, type = '') {
+  public addURL(url: string, type = ''): this {
     this.setProperty(
       'url',
       `URL${(type !== '') ? `;${type}` : ''}`,
@@ -322,7 +343,7 @@ export default class VCard implements VCardInterface {
    *
    * @return string
    */
-  buildVCard() {
+  public buildVCard(): string {
     // init string
     const now = new Date()
     let string = ''
@@ -346,14 +367,14 @@ export default class VCard implements VCardInterface {
    *
    * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
    * @param  string text
-   * @return mixed
+   * @return string
    */
-  fold(text) {
+  private fold(text: string): string {
     if (text.length <= 75) {
       return text
     }
     // split, wrap and trim trailing separator
-    const chunks = text.match(/.{1,73}/g)
+    const chunks = text.match(/.{1,73}/g) as string[]
     const wrapped = chunks.join('\r\n ').trim()
     return `${wrapped}\r\n`
   }
@@ -365,7 +386,7 @@ export default class VCard implements VCardInterface {
    * @param  string text
    * @return string
    */
-  escape(text) {
+  private escape(text: string): string {
     let escapedText = (`${text}`).replace('\r\n', '\\n')
     escapedText = escapedText.replace('\n', '\\n')
     return escapedText
@@ -377,7 +398,7 @@ export default class VCard implements VCardInterface {
    *
    * @return string
    */
-  toString() {
+  public toString(): string {
     return this.getOutput()
   }
 
@@ -386,7 +407,7 @@ export default class VCard implements VCardInterface {
    *
    * @return string
    */
-  getCharset() {
+  public getCharset(): string {
     return this.charset
   }
 
@@ -395,7 +416,7 @@ export default class VCard implements VCardInterface {
    *
    * @return string
    */
-  getCharsetString() {
+  public getCharsetString(): string {
     let charsetString = ''
     if (this.charset === 'utf-8') {
       charsetString = `;CHARSET=${this.charset}`
@@ -408,7 +429,7 @@ export default class VCard implements VCardInterface {
    *
    * @return string
    */
-  getContentType() {
+  public getContentType(): string {
     return this.contentType
   }
 
@@ -417,18 +438,18 @@ export default class VCard implements VCardInterface {
    *
    * @return string
    */
-  getFileExtension() {
+  public getFileExtension(): string {
     return this.fileExtension
   }
 
   /**
    * Get output as string
-   * iOS devices (and safari < iOS 8 in particular) can not read .vcf (= vcard) files.
-   * So I build a workaround to build a .ics (= vcalender) file.
+   * iOS devices (and safari < iOS 8 in particular)can not read .vcf (= vcard)
+   * files. So there is a workaround to build a .ics (= vcalender) file.
    *
    * @return string
    */
-  getOutput() {
+  public getOutput(): string {
     return this.buildVCard()
   }
 
@@ -437,7 +458,7 @@ export default class VCard implements VCardInterface {
    *
    * @return array
    */
-  getProperties() {
+  public getProperties(): Property[] {
     return this.properties
   }
 
@@ -447,9 +468,10 @@ export default class VCard implements VCardInterface {
    * @param  string key
    * @return bool
    */
-  hasProperty(key) {
+  public hasProperty(key: string): boolean {
     const pproperties = this.getProperties()
-    pproperties.forEach((property) => {
+    // eslint-disable-next-line consistent-return
+    pproperties.forEach((property: Property) => {
       if (property.key === key && property.value !== '') {
         return true
       }
@@ -460,26 +482,27 @@ export default class VCard implements VCardInterface {
   /**
    * Set charset
    *
-   * @param  mixed charset
+   * @param  string charset
    * @return void
    */
-  setCharset(charset) {
+  public setCharset(charset: string): void {
     this.charset = charset
   }
 
   /**
    * Set property
    *
-   * @param  string element The element name you want to set, f.e.: name, email, phoneNumber, ...
+   * @param  string element The element name you want to set,
+   *                e.g.: name, email, phoneNumber, ...
    * @param  string key
    * @param  string value
    * @throws VCardException
    */
-  setProperty(element, key, value) {
+  public setProperty(element: string, key: string, value: string): void {
     if (this.multiplePropertiesForElementAllowed.indexOf(element) < 0
           && this.definedElements[element]
     ) {
-      throw `This element already exists (${element})`
+      throw new Error(`This element already exists (${element})`)
     }
     // we define that we set this element
     this.definedElements[element] = true

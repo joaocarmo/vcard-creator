@@ -36,4 +36,5 @@ jobs:
       run: yarn build:types
     - name: Execute the tests
       run: |
-        yarn test
+        yarn test:unit
+        yean test:functional

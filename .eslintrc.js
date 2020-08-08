@@ -25,6 +25,7 @@ module.exports = {
   ],
   rules: {
     semi: ['error', 'never'],
+    'class-methods-use-this': ['error', { exceptMethods: ['fold', 'escape'] }],
     'import/extensions': [
       'error',
       'ignorePackages',

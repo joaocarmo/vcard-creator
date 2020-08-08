@@ -1,3 +1,8 @@
-export default interface VCardInterface {
-  any
+export interface Property {
+  key: string
+  value: string
+}
+
+export interface DefinedElements {
+  [key: string]: boolean
 }
