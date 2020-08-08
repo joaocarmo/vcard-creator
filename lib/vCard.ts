@@ -1,4 +1,4 @@
-import { Property, DefinedElements } from './types/vCard'
+import { Property, DefinedElements } from './types/VCard'
 
 export default class VCard {
   private charset: string
