@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A JavaScript vCard creator library for both node.js and the web",
   "main": "dist/vcard-creator.js",
   "directories": {
@@ -28,6 +28,10 @@
     "type": "git",
     "url": "git+https://github.com/joaocarmo/vcard-creator.git"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "tag": "latest"
+  },
   "keywords": [
     "vcard",
     "node",
@@ -39,7 +43,6 @@
     "url": "https://github.com/joaocarmo/vcard-creator/issues"
   },
   "homepage": "https://github.com/joaocarmo/vcard-creator#readme",
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/plugin-transform-runtime": "^7.11.0",
@@ -61,5 +64,6 @@
     "typescript": "^3.9.7",
     "webpack": "^4.39.1",
     "webpack-cli": "^3.3.6"
-  }
+  },
+  "dependencies": {}
 }
