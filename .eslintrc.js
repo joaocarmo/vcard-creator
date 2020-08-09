@@ -25,7 +25,6 @@ module.exports = {
   ],
   rules: {
     semi: ['error', 'never'],
-    'class-methods-use-this': ['error', { exceptMethods: ['fold', 'escape'] }],
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -34,6 +33,7 @@ module.exports = {
         ts: 'never',
       },
     ],
+    '@typescript-eslint/prefer-regexp-exec': 'off',
   },
   overrides: [
     {

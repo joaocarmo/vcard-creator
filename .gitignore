@@ -62,3 +62,4 @@ dist/
 
 # Test files
 *.vcf
+*.ics

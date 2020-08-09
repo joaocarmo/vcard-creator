@@ -24,7 +24,7 @@ npm install vcard-creator
 
 ## Usage
 
-#### On the web
+### On the web
 
 It's exposed through the _window_ global object as explained below.
 
@@ -33,13 +33,13 @@ It's exposed through the _window_ global object as explained below.
 ```html
 <head>
   <script type="text/javascript" src="./js/vcard-creator.js"></script>
-  <script type="text/javascript" src="./js/foo.js"></script>
+  <script type="text/javascript" src="./js/main.js"></script>
 </head>
 ```
 
-`foo.js`
+`main.js`
 
-```javascript
+```js
 // define vCard
 var VCard = window.vcardcreator.default;
 var myVCard = new VCard();
@@ -47,11 +47,11 @@ var myVCard = new VCard();
 // ...
 ```
 
-#### With a bundler / Node.js
+### With a bundler / Node.js
 
 With a bundler (e.g. webpack) or in Node.js you can just require / import it.
 
-```javascript
+```js
 var VCard = require('vcard-creator').default
 
 // define a new vCard
@@ -60,18 +60,35 @@ var myVCard = new VCard()
 
 Or in ES6 syntax...
 
-```javascript
+```js
 import VCard from 'vcard-creator'
 
 // define vCard
 const myVCard = new VCard()
 ```
 
+### iCalendar format
+
+For Apple devices that don't support the `vcf` file format, there is a
+workaround. Specify the format of the output as `vcalendar` and then save it
+with a `ics` file extension instead.
+
+The trick is to create an iCalendar file with a vCard attached.
+
+```js
+// define a new vCard as 'vcalendar'
+var myVCalendar = new VCard('vcalendar')
+
+// or set it afterwards
+var myOtherVCalendar = new VCard()
+myOtherVCalendar.setFormat('vcalendar')
+```
+
 ## Example
 
 Code
 
-```javascript
+```js
 var VCard = require('vcard-creator').default
 
 // define a new vCard

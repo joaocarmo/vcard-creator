@@ -1,60 +1,89 @@
 import { Property, DefinedElements } from './types/VCard'
+import {
+  b64encode, chunkSplit, escape, fold,
+} from './utils/functions'
 
 export default class VCard {
-  private charset: string
+  /**
+   * Default Charset
+   *
+   * @var string
+   */
+  public charset = 'utf-8'
 
-  private contentType: string
+  /**
+   * Default ContentType
+   *
+   * @var string
+   */
+  private contentType: 'text/x-vcard' | 'text/x-vcalendar' = 'text/x-vcard'
 
-  private fileExtension: string
+  /**
+   * Default filename
+   *
+   * @var string
+   */
+  private filename = 'vcard'
 
-  private properties: Property[]
+  /**
+   * Default fileExtension
+   *
+   * @var string
+   */
+  private fileExtension = 'vcf'
 
-  private definedElements: DefinedElements
+  /**
+   * Properties
+   *
+   * @var array
+   */
+  private properties: Property[] = []
 
-  private multiplePropertiesForElementAllowed: string[]
+  /**
+   * definedElements
+   *
+   * @var object
+   */
+  private definedElements: DefinedElements = {}
 
-  public constructor() {
-    /**
-     * definedElements
-     *
-     * @var object
-     */
-    this.definedElements = {}
-    /**
-     * Multiple properties for element allowed
-     *
-     * @var array
-     */
-    this.multiplePropertiesForElementAllowed = [
-      'email',
-      'address',
-      'phoneNumber',
-      'url',
-    ]
-    /**
-     * Properties
-     *
-     * @var array
-     */
-    this.properties = []
-    /**
-     * Default Charset
-     *
-     * @var string
-     */
-    this.charset = 'utf-8'
-    /**
-     * Default ContentType
-     *
-     * @var string
-     */
-    this.contentType = 'text/x-vcard'
-    /**
-     * Default fileExtension
-     *
-     * @var string
-     */
-    this.fileExtension = 'vcf'
+  /**
+   * Multiple properties for element allowed
+   *
+   * @var array
+   */
+  private multiplePropertiesForElementAllowed: string[] = [
+    'email',
+    'address',
+    'phoneNumber',
+    'url',
+  ]
+
+  /**
+   * Defines the output format
+   *
+   * @var bool
+   */
+  private useVCalendar = false
+
+  public constructor(format: 'vcard' | 'vcalendar' = 'vcard') {
+    if (format === 'vcalendar') {
+      this.setFormat(format)
+    }
+  }
+
+  /**
+   * Set format
+   *
+   * @param  string format Either 'vcard' or 'vcalendar'
+   */
+  public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
+    if (format === 'vcalendar') {
+      this.contentType = 'text/x-vcalendar'
+      this.useVCalendar = true
+    } else if (format === 'vcard') {
+      this.contentType = 'text/x-vcard'
+      this.useVCalendar = false
+    }
   }
 
   /**
@@ -92,6 +121,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `ADR${(type !== '') ? `;${type}` : ''}${this.getCharsetString()}`,
       value,
     )
+
     return this
   }
 
@@ -107,6 +137,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       'BDAY',
       date,
     )
+
     return this
   }
 
@@ -124,6 +155,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       company
           + (department !== '' ? `;${department}` : ''),
     )
+
     return this
   }
 
@@ -143,6 +175,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `EMAIL;INTERNET${(type !== '') ? `;${type}` : ''}`,
       address,
     )
+
     return this
   }
 
@@ -158,6 +191,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `TITLE${this.getCharsetString()}`,
       jobtitle,
     )
+
     return this
   }
 
@@ -173,6 +207,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `ROLE${this.getCharsetString()}`,
       role,
     )
+
     return this
   }
 
@@ -181,15 +216,40 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    *
    * @param string property LOGO|PHOTO
    * @param string url image url or filename
-   * @param bool include Do we include the image in the vcard or not?
+   * @param bool   include Do we include the image in our vcard or not?
    * @param string element The name of the element to set
+   * @throws VCardException
+   * @return this
    */
-  public addMedia(
+  private addMedia(
     property: string,
     url: string,
     include = true,
     element: string,
   ): this {
+    const value = ''
+    this.setProperty(element, property, value)
+
+    return this
+  }
+
+  /**
+   * Add a photo or logo (depending on property name)
+   *
+   * @param string property LOGO|PHOTO
+   * @param string content image content
+   * @param string element The name of the element to set
+   * @throws VCardException
+   * @return this
+   */
+  private addMediaContent(
+    property: string,
+    content: string,
+    element: string,
+  ): this {
+    const value = ''
+    this.setProperty(element, property, value)
+
     return this
   }
 
@@ -236,6 +296,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
         values.join(' ').trim(),
       )
     }
+
     return this
   }
 
@@ -251,6 +312,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `NOTE${this.getCharsetString()}`,
       note,
     )
+
     return this
   }
 
@@ -266,6 +328,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `CATEGORIES${this.getCharsetString()}`,
       categories.join(',').trim(),
     )
+
     return this
   }
 
@@ -285,6 +348,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `TEL${(type !== '') ? `;${type}` : ''}`,
       `${number}`,
     )
+
     return this
   }
 
@@ -302,6 +366,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       include,
       'logo',
     )
+
     return this
   }
 
@@ -319,6 +384,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       include,
       'photo',
     )
+
     return this
   }
 
@@ -335,6 +401,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `URL${(type !== '') ? `;${type}` : ''}`,
       url,
     )
+
     return this
   }
 
@@ -343,53 +410,68 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    *
    * @return string
    */
-  public buildVCard(): string {
-    // init string
+  private buildVCard(): string {
+    // init date
     const now = new Date()
+
+    // init string
     let string = ''
     string += 'BEGIN:VCARD\r\n'
     string += 'VERSION:3.0\r\n'
     string += `REV:${now.toISOString()}\r\n`
+
     // loop all properties
     const properties = this.getProperties()
     properties.forEach((property) => {
-      // add to string
-      string += this.fold(`${property.key}:${this.escape(property.value)}\r\n`)
+      string += fold(`${property.key}:${escape(property.value)}\r\n`)
     })
-    // add to string
+
     string += 'END:VCARD\r\n'
-    // return
+
     return string
   }
 
   /**
-   * Fold a line according to RFC2425 section 5.8.1.
+   * Build VCalender (.ics) - Safari (< iOS 8) can not open .vcf files, so we
+   * have build a workaround.
    *
-   * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
-   * @param  string text
    * @return string
    */
-  private fold(text: string): string {
-    if (text.length <= 75) {
-      return text
-    }
-    // split, wrap and trim trailing separator
-    const chunks = text.match(/.{1,73}/g) as string[]
-    const wrapped = chunks.join('\r\n ').trim()
-    return `${wrapped}\r\n`
-  }
+  private buildVCalendar(): string {
+    // init dates
+    const nowISO = new Date().toISOString()
+    const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
+    const dtstart = `${nowBase}00`
+    const dtend = `${nowBase}01`
 
-  /**
-   * Escape newline characters according to RFC2425 section 5.8.4.
-   *
-   * @link   http://tools.ietf.org/html/rfc2425#section-5.8.4
-   * @param  string text
-   * @return string
-   */
-  private escape(text: string): string {
-    let escapedText = (`${text}`).replace('\r\n', '\\n')
-    escapedText = escapedText.replace('\n', '\\n')
-    return escapedText
+    // base64 it to be used as an attachemnt to the "calendar appointment"
+    const b64vcard = b64encode(this.buildVCard())
+
+    // chunk the single long line of b64 text in accordance with RFC2045
+    // (and the exact line length determined from the original .ics file
+    // exported from Apple calendar
+    const b64mline = chunkSplit(b64vcard, 74, '\n')
+
+    // need to indent all the lines by 1 space for the iPhone
+    const b64final = b64mline.replace(/(.+)/g, ' $1')
+
+    // init string
+    const string = `\
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;TZID=Europe/London:${dtstart}
+DTEND;TZID=Europe/London:${dtend}
+SUMMARY:Click the attachment to save to your contacts
+DTSTAMP:${dtstart}Z
+ATTACH;VALUE=BINARY;ENCODING=BASE64;FMTTYPE=text/directory;
+ X-APPLE-FILENAME=${this.getFilename()}.${this.getFileExtension()}:
+${b64final}\
+END:VEVENT
+END:VCALENDAR
+`
+
+    return string
   }
 
   /**
@@ -421,6 +503,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     if (this.charset === 'utf-8') {
       charsetString = `;CHARSET=${this.charset}`
     }
+
     return charsetString
   }
 
@@ -431,6 +514,15 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    */
   public getContentType(): string {
     return this.contentType
+  }
+
+  /**
+   * Get filename
+   *
+   * @return string
+   */
+  public getFilename(): string {
+    return this.filename
   }
 
   /**
@@ -450,7 +542,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return string
    */
   public getOutput(): string {
-    return this.buildVCard()
+    return this.useVCalendar ? this.buildVCalendar() : this.buildVCard()
   }
 
   /**
@@ -476,6 +568,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
         return true
       }
     })
+
     return false
   }
 
@@ -487,6 +580,20 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    */
   public setCharset(charset: string): void {
     this.charset = charset
+  }
+
+  /**
+   * Set filename
+   *
+   * @param  string $value
+   * @return void
+   */
+  public setFilename(value: string): void {
+    if (!value) {
+      return
+    }
+
+    this.filename = value
   }
 
   /**

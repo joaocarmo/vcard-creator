@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A JavaScript vCard creator library for both node.js and the web",
   "main": "dist/vcard-creator.js",
   "directories": {
@@ -13,12 +13,11 @@
   "scripts": {
     "build:types": "tsc -p tsconfig.declaration.json",
     "build": "NODE_ENV=production webpack --mode production",
-    "clean": "rm -rf ./dist/ && rm -rf ./node_modules/.cache/",
+    "clean": "rm -rf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
-    "test:node": "./test-functional/test.js",
     "test:unit": "jest",
-    "test:functional": "./test-functional/test.js | tee test-card.vcf",
+    "test:functional": "(./test-functional/test-vcard.js | tee vcard.vcf) && (./test-functional/test-vcalendar.js | tee vcard.ics)",
     "test:web-build": "NODE_ENV=development webpack --mode development && open ./test-functional/test-build.html",
     "test:web-export": "open ./test-functional/test-export.html",
     "type-check:watch": "yarn type-check -- --watch",
@@ -45,6 +44,7 @@
   "homepage": "https://github.com/joaocarmo/vcard-creator#readme",
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-transform-runtime": "^7.11.0",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-typescript": "^7.10.4",
