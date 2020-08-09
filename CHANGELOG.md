@@ -2,7 +2,7 @@
 
 ## 0.3.0
 
-> Aug 8, 2020
+> Aug 9, 2020
 
 - Added support for iCalendar data files
 

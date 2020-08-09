@@ -1,4 +1,7 @@
 import { Property, DefinedElements } from './types/VCard'
+import {
+  b64encode, chunkSplit, escape, fold,
+} from './utils/functions'
 
 export default class VCard {
   /**
@@ -27,7 +30,7 @@ export default class VCard {
    *
    * @var string
    */
-  private fileExtension: 'vcf' | 'ics' = 'vcf'
+  private fileExtension = 'vcf'
 
   /**
    * Properties
@@ -76,11 +79,9 @@ export default class VCard {
   public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
     if (format === 'vcalendar') {
       this.contentType = 'text/x-vcalendar'
-      this.fileExtension = 'ics'
       this.useVCalendar = true
     } else if (format === 'vcard') {
       this.contentType = 'text/x-vcard'
-      this.fileExtension = 'vcf'
       this.useVCalendar = false
     }
   }
@@ -422,7 +423,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     // loop all properties
     const properties = this.getProperties()
     properties.forEach((property) => {
-      string += this.fold(`${property.key}:${this.escape(property.value)}\r\n`)
+      string += fold(`${property.key}:${escape(property.value)}\r\n`)
     })
 
     string += 'END:VCARD\r\n'
@@ -444,12 +445,12 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     const dtend = `${nowBase}01`
 
     // base64 it to be used as an attachemnt to the "calendar appointment"
-    const b64vcard = this.b64encode(this.buildVCard())
+    const b64vcard = b64encode(this.buildVCard())
 
     // chunk the single long line of b64 text in accordance with RFC2045
     // (and the exact line length determined from the original .ics file
     // exported from Apple calendar
-    const b64mline = this.chunkSplit(b64vcard, 74, '\n')
+    const b64mline = chunkSplit(b64vcard, 74, '\n')
 
     // need to indent all the lines by 1 space for the iPhone
     const b64final = b64mline.replace(/(.+)/g, ' $1')
@@ -465,94 +466,12 @@ SUMMARY:Click the attachment to save to your contacts
 DTSTAMP:${dtstart}Z
 ATTACH;VALUE=BINARY;ENCODING=BASE64;FMTTYPE=text/directory;
  X-APPLE-FILENAME=${this.getFilename()}.${this.getFileExtension()}:
-${b64final}
+${b64final}\
 END:VEVENT
 END:VCALENDAR
 `
 
     return string
-  }
-
-  /**
-   * Encodes data with MIME base64
-   *
-   * @param  data text
-   * @return string
-   */
-  private b64encode(data: string): string {
-    // for the browser
-    const browserGlobal: Window = globalThis as unknown as Window
-    if (typeof browserGlobal?.btoa === 'function') {
-      return browserGlobal.btoa(data)
-    }
-
-    // for node.js
-    const nodeGlobal: NodeJS.Global = globalThis as unknown as NodeJS.Global
-    if (typeof nodeGlobal?.Buffer === 'function') {
-      return nodeGlobal.Buffer.from(data).toString('base64')
-    }
-
-    return ''
-  }
-
-  /**
-   * Split a string into smaller chunks
-   * e.g., to match RFC 2045 semantics
-   *
-   * @link   https://tools.ietf.org/html/rfc2045
-   * @param  body text
-   * @return string
-   */
-  private chunkSplit(
-    body: string,
-    chunklen = 76,
-    end = '\r\n',
-  ): string {
-    const chunklength = chunklen || 76
-    const ending = end || '\r\n'
-
-    if (chunklen < 1) {
-      return ''
-    }
-
-    const chunks = body.match(
-      new RegExp(`.{0,${chunklength}}`, 'g'),
-    ) as string[]
-
-    return chunks.join(ending)
-  }
-
-  /**
-   * Fold a line according to RFC2425 section 5.8.1.
-   *
-   * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
-   * @param  string text
-   * @return string
-   */
-  private fold(text: string): string {
-    if (text.length <= 75) {
-      return text
-    }
-
-    // split, wrap and trim trailing separator
-    const chunks = text.match(/.{1,73}/g) as string[]
-    const wrapped = chunks.join('\r\n ').trim()
-
-    return `${wrapped}\r\n`
-  }
-
-  /**
-   * Escape newline characters according to RFC2425 section 5.8.4.
-   *
-   * @link   http://tools.ietf.org/html/rfc2425#section-5.8.4
-   * @param  string text
-   * @return string
-   */
-  private escape(text: string): string {
-    let escapedText = (`${text}`).replace('\r\n', '\\n')
-    escapedText = escapedText.replace('\n', '\\n')
-
-    return escapedText
   }
 
   /**
