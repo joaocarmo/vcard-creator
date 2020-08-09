@@ -25,7 +25,10 @@ module.exports = {
   ],
   rules: {
     semi: ['error', 'never'],
-    'class-methods-use-this': ['error', { exceptMethods: ['fold', 'escape'] }],
+    'class-methods-use-this': [
+      'error',
+      { exceptMethods: ['fold', 'escape', 'b64encode', 'chunkSplit'] },
+    ],
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -34,6 +37,7 @@ module.exports = {
         ts: 'never',
       },
     ],
+    '@typescript-eslint/prefer-regexp-exec': 'off',
   },
   overrides: [
     {

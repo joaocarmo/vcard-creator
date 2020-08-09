@@ -16,6 +16,13 @@ export default class VCard {
   private contentType: 'text/x-vcard' | 'text/x-vcalendar' = 'text/x-vcard'
 
   /**
+   * Default filename
+   *
+   * @var string
+   */
+  private filename = 'vcard'
+
+  /**
    * Default fileExtension
    *
    * @var string
@@ -113,6 +120,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `ADR${(type !== '') ? `;${type}` : ''}${this.getCharsetString()}`,
       value,
     )
+
     return this
   }
 
@@ -128,6 +136,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       'BDAY',
       date,
     )
+
     return this
   }
 
@@ -145,6 +154,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       company
           + (department !== '' ? `;${department}` : ''),
     )
+
     return this
   }
 
@@ -164,6 +174,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `EMAIL;INTERNET${(type !== '') ? `;${type}` : ''}`,
       address,
     )
+
     return this
   }
 
@@ -179,6 +190,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `TITLE${this.getCharsetString()}`,
       jobtitle,
     )
+
     return this
   }
 
@@ -194,6 +206,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
       `ROLE${this.getCharsetString()}`,
       role,
     )
+
     return this
   }
 
@@ -205,15 +218,18 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @param bool   include Do we include the image in our vcard or not?
    * @param string element The name of the element to set
    * @throws VCardException
+   * @return this
    */
   private addMedia(
     property: string,
     url: string,
     include = true,
     element: string,
-  ): void {
+  ): this {
     const value = ''
     this.setProperty(element, property, value)
+
+    return this
   }
 
   /**
@@ -223,14 +239,17 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @param string content image content
    * @param string element The name of the element to set
    * @throws VCardException
+   * @return this
    */
   private addMediaContent(
     property: string,
     content: string,
     element: string,
-  ): void {
+  ): this {
     const value = ''
     this.setProperty(element, property, value)
+
+    return this
   }
 
   /**
@@ -276,6 +295,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
         values.join(' ').trim(),
       )
     }
+
     return this
   }
 
@@ -291,6 +311,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `NOTE${this.getCharsetString()}`,
       note,
     )
+
     return this
   }
 
@@ -306,6 +327,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `CATEGORIES${this.getCharsetString()}`,
       categories.join(',').trim(),
     )
+
     return this
   }
 
@@ -325,6 +347,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `TEL${(type !== '') ? `;${type}` : ''}`,
       `${number}`,
     )
+
     return this
   }
 
@@ -342,6 +365,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       include,
       'logo',
     )
+
     return this
   }
 
@@ -359,6 +383,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       include,
       'photo',
     )
+
     return this
   }
 
@@ -375,6 +400,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `URL${(type !== '') ? `;${type}` : ''}`,
       url,
     )
+
     return this
   }
 
@@ -384,21 +410,23 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return string
    */
   private buildVCard(): string {
-    // init string
+    // init date
     const now = new Date()
+
+    // init string
     let string = ''
     string += 'BEGIN:VCARD\r\n'
     string += 'VERSION:3.0\r\n'
     string += `REV:${now.toISOString()}\r\n`
+
     // loop all properties
     const properties = this.getProperties()
     properties.forEach((property) => {
-      // add to string
       string += this.fold(`${property.key}:${this.escape(property.value)}\r\n`)
     })
-    // add to string
+
     string += 'END:VCARD\r\n'
-    // return
+
     return string
   }
 
@@ -409,7 +437,89 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return string
    */
   private buildVCalendar(): string {
-    return this.getOutput()
+    // init dates
+    const nowISO = new Date().toISOString()
+    const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
+    const dtstart = `${nowBase}00`
+    const dtend = `${nowBase}01`
+
+    // base64 it to be used as an attachemnt to the "calendar appointment"
+    const b64vcard = this.b64encode(this.buildVCard())
+
+    // chunk the single long line of b64 text in accordance with RFC2045
+    // (and the exact line length determined from the original .ics file
+    // exported from Apple calendar
+    const b64mline = this.chunkSplit(b64vcard, 74, '\n')
+
+    // need to indent all the lines by 1 space for the iPhone
+    const b64final = b64mline.replace(/(.+)/g, ' $1')
+
+    // init string
+    const string = `\
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;TZID=Europe/London:${dtstart}
+DTEND;TZID=Europe/London:${dtend}
+SUMMARY:Click the attachment to save to your contacts
+DTSTAMP:${dtstart}Z
+ATTACH;VALUE=BINARY;ENCODING=BASE64;FMTTYPE=text/directory;
+ X-APPLE-FILENAME=${this.getFilename()}.${this.getFileExtension()}:
+${b64final}
+END:VEVENT
+END:VCALENDAR
+`
+
+    return string
+  }
+
+  /**
+   * Encodes data with MIME base64
+   *
+   * @param  data text
+   * @return string
+   */
+  private b64encode(data: string): string {
+    // for the browser
+    const browserGlobal: Window = globalThis as unknown as Window
+    if (typeof browserGlobal?.btoa === 'function') {
+      return browserGlobal.btoa(data)
+    }
+
+    // for node.js
+    const nodeGlobal: NodeJS.Global = globalThis as unknown as NodeJS.Global
+    if (typeof nodeGlobal?.Buffer === 'function') {
+      return nodeGlobal.Buffer.from(data).toString('base64')
+    }
+
+    return ''
+  }
+
+  /**
+   * Split a string into smaller chunks
+   * e.g., to match RFC 2045 semantics
+   *
+   * @link   https://tools.ietf.org/html/rfc2045
+   * @param  body text
+   * @return string
+   */
+  private chunkSplit(
+    body: string,
+    chunklen = 76,
+    end = '\r\n',
+  ): string {
+    const chunklength = chunklen || 76
+    const ending = end || '\r\n'
+
+    if (chunklen < 1) {
+      return ''
+    }
+
+    const chunks = body.match(
+      new RegExp(`.{0,${chunklength}}`, 'g'),
+    ) as string[]
+
+    return chunks.join(ending)
   }
 
   /**
@@ -423,9 +533,11 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     if (text.length <= 75) {
       return text
     }
+
     // split, wrap and trim trailing separator
     const chunks = text.match(/.{1,73}/g) as string[]
     const wrapped = chunks.join('\r\n ').trim()
+
     return `${wrapped}\r\n`
   }
 
@@ -439,6 +551,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   private escape(text: string): string {
     let escapedText = (`${text}`).replace('\r\n', '\\n')
     escapedText = escapedText.replace('\n', '\\n')
+
     return escapedText
   }
 
@@ -471,6 +584,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     if (this.charset === 'utf-8') {
       charsetString = `;CHARSET=${this.charset}`
     }
+
     return charsetString
   }
 
@@ -481,6 +595,15 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    */
   public getContentType(): string {
     return this.contentType
+  }
+
+  /**
+   * Get filename
+   *
+   * @return string
+   */
+  public getFilename(): string {
+    return this.filename
   }
 
   /**
@@ -526,6 +649,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
         return true
       }
     })
+
     return false
   }
 
@@ -537,6 +661,20 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    */
   public setCharset(charset: string): void {
     this.charset = charset
+  }
+
+  /**
+   * Set filename
+   *
+   * @param  string $value
+   * @return void
+   */
+  public setFilename(value: string): void {
+    if (!value) {
+      return
+    }
+
+    this.filename = value
   }
 
   /**
