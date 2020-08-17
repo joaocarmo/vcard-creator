@@ -86,20 +86,20 @@ myOtherVCalendar.setFormat('vcalendar')
 
 ## Example
 
-Code
+Code (ES2015+)
 
 ```js
-var VCard = require('vcard-creator').default
+import VCard from 'vcard-creator'
 
 // define a new vCard
-var myVCard = new VCard()
+const myVCard = new VCard()
 
 // define variables
-var lastname = 'Desloovere'
-var firstname = 'Jeroen'
-var additional = ''
-var prefix = ''
-var suffix = ''
+const lastname = 'Desloovere'
+const firstname = 'Jeroen'
+const additional = ''
+const prefix = ''
+const suffix = ''
 
 myVCard
   // add personal data
