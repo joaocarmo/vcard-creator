@@ -101,18 +101,18 @@ var additional = ''
 var prefix = ''
 var suffix = ''
 
-// add personal data
-myVCard.addName(lastname, firstname, additional, prefix, suffix)
-
-// add work data
-myVCard.addCompany('Siesqo')
-myVCard.addJobtitle('Web Developer')
-myVCard.addRole('Data Protection Officer')
-myVCard.addEmail('info@jeroendesloovere.be')
-myVCard.addPhoneNumber(1234121212, 'PREF;WORK')
-myVCard.addPhoneNumber(123456789, 'WORK')
-myVCard.addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
-myVCard.addURL('http://www.jeroendesloovere.be')
+myVCard
+  // add personal data
+  .addName(lastname, firstname, additional, prefix, suffix)
+  // add work data
+  .addCompany('Siesqo')
+  .addJobtitle('Web Developer')
+  .addRole('Data Protection Officer')
+  .addEmail('info@jeroendesloovere.be')
+  .addPhoneNumber(1234121212, 'PREF;WORK')
+  .addPhoneNumber(123456789, 'WORK')
+  .addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
+  .addURL('http://www.jeroendesloovere.be')
 
 console.log(myVCard.toString())
 ```
