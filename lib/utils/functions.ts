@@ -55,8 +55,8 @@ export function chunkSplit(
   * @return string
   */
 export function escape(text: string): string {
-  let escapedText = (`${text}`).replace('\r\n', '\\n')
-  escapedText = escapedText.replace('\n', '\\n')
+  let escapedText = (`${text}`).replace(/\r\n/g, '\\n')
+  escapedText = escapedText.replace(/\n/g, '\\n')
 
   return escapedText
 }
