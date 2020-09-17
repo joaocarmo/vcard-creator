@@ -1,6 +1,6 @@
 import { Property, DefinedElements } from './types/VCard'
 import {
-  b64encode, chunkSplit, escape, fold, determineMimeTypeFromUrl
+  b64encode, chunkSplit, escape, fold, determineMimeTypeFromUrl,
 } from './utils/functions'
 
 export default class VCard {
@@ -227,18 +227,18 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
     include = true,
     element: string,
   ): this {
-    let value = '',
-        mime = '';
+    let value = ''
+    let mime = ''
 
     if (include) {
       mime = determineMimeTypeFromUrl(url)
       value = url || ''
     }
-    
+
     this.setProperty(
-      element, 
-      `${property}${ !!mime ? `:MEDIATYPE=${mime}` : '' }`, 
-      value
+      element,
+      `${property}${mime ? `:MEDIATYPE=${mime}` : ''}`,
+      value,
     )
 
     return this
