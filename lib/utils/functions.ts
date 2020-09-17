@@ -79,3 +79,39 @@ export function fold(text: string): string {
 
   return `${wrapped}\r\n`
 }
+
+/**
+ * Get the MIME type from a URL, if possible
+ * 
+ * @link   https://tools.ietf.org/html/rfc6350#section-6.2.4
+ * @param  string url 
+ * @return string
+ */
+export function determineMimeTypeFromUrl(url: string): string {
+  const ext: string | undefined = url.split('.').pop();
+  const format = getMimeFromFormat(ext);
+  
+  return format;
+}
+
+/**
+ * Get the MIME type if a valid file ext is passed in
+ * 
+ * @link  https://www.iana.org/assignments/media-types/media-types.xhtml#image
+ * @param string format 
+ * @return string
+ */
+function getMimeFromFormat (format?: string): string {
+  switch (format) {
+    case 'jpeg':
+    case 'jpg':
+      return 'image/jpeg';
+    case 'png':
+    case 'gif':
+      return `image/${format}`
+    case 'svg':
+      return 'image/svg+xml'
+    default:
+      return '';
+  }
+}
