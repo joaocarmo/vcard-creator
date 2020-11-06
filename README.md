@@ -28,7 +28,7 @@ npm install vcard-creator
 
 ### As an ESM module (web)
 
-Load **vcard-creator** directly from [skypack](https://cdn.skypack.dev) (CDN).
+Load **vcard-creator** directly from [skypack](https://skypack.dev) (CDN).
 
 ```html
 <script type="module">

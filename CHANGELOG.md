@@ -7,6 +7,7 @@
 - Updated the documentation to include information about using the module in the
 browser (ESM)
 - Updated the `package.json` to comply with ESM best practices
+- Updated the dependencies
 
 ## 0.3.0
 
