@@ -224,6 +224,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   private addMedia(
     property: string,
     url: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     include = true,
     element: string,
   ): this {

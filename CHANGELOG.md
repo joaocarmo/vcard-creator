@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1
+
+> Nov 6, 2020
+
+- Updated the documentation to include information about using the module in the
+browser (ESM)
+- Updated the `package.json` to comply with ESM best practices
+- Updated the dependencies
+
 ## 0.3.0
 
 > Aug 9, 2020

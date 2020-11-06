@@ -1,11 +1,18 @@
 {
   "name": "vcard-creator",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A JavaScript vCard creator library for both node.js and the web",
-  "main": "dist/vcard-creator.js",
+  "main": "./dist/vcard-creator.js",
+  "exports": {
+    "import": "./dist/vcard-creator.js"
+  },
+  "types": "./dist/VCard.d.ts",
   "directories": {
     "lib": "lib"
   },
+  "files": [
+    "dist"
+  ],
   "browserslist": [
     "last 2 version",
     "not dead"
@@ -43,27 +50,27 @@
   },
   "homepage": "https://github.com/joaocarmo/vcard-creator#readme",
   "devDependencies": {
-    "@babel/core": "^7.11.5",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.11.5",
-    "@babel/preset-env": "^7.11.5",
-    "@babel/preset-typescript": "^7.10.4",
-    "@types/jest": "^26.0.10",
-    "@typescript-eslint/eslint-plugin": "^4.0.1",
-    "@typescript-eslint/parser": "^4.0.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-typescript": "^7.12.1",
+    "@types/jest": "^26.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "babel-core": "^6.26.3",
-    "babel-jest": "^26.3.0",
+    "babel-jest": "^26.6.3",
     "babel-loader": "^8.1.0",
-    "core-js": "^3.6.5",
-    "eslint": "^7.7.0",
+    "core-js": "^3.7.0",
+    "eslint": "^7.12.1",
     "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jest": "^23.20.0",
-    "jest": "^26.4.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.0",
+    "jest": "^26.6.3",
     "jest-date-mock": "^1.0.8",
-    "typescript": "^4.0.2",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "typescript": "^4.0.5",
+    "webpack": "^5.4.0",
+    "webpack-cli": "^4.2.0"
   },
   "dependencies": {}
 }
