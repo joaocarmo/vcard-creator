@@ -26,7 +26,19 @@ npm install vcard-creator
 
 ## Usage
 
-### On the web
+### As an ESM module (web)
+
+Load **vcard-creator** directly from [skypack](https://cdn.skypack.dev) (CDN).
+
+```html
+<script type="module">
+  import VCard from "https://cdn.skypack.dev/vcard-creator"
+</script>
+```
+
+Demo available in [codepen](https://codepen.io/joaocarmo/pen/PozdprL).
+
+### On the web (self-hosted)
 
 It's exposed through the _window_ global object as explained below.
 
