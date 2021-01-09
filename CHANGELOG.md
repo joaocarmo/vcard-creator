@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+> Jab 9, 2021
+
+- Fixes the [subpath exports](https://nodejs.org/api/packages.html#packages_subpath_exports)
+
 ## 0.3.1
 
 > Jab 9, 2021
