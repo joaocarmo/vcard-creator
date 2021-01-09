@@ -1,13 +1,13 @@
 # Changelog
 
-## 0.3.2
+## 0.3.1
 
 > Jab 9, 2021
 
 - Updated the TypeScript declaration file's output to match the name of the
 bundle (#11)
 
-## 0.3.1
+## 0.3.0 (no release)
 
 > Nov 6, 2020
 
