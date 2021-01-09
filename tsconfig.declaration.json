@@ -2,6 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "emitDeclarationOnly": true,
-    "noEmit": false
-  }
+    "isolatedModules": false,
+    "module": "amd",
+    "noEmit": false,
+    "outFile": "dist/vcard-creator.js"
+  },
 }
