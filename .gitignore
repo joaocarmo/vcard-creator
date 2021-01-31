@@ -3,6 +3,7 @@
 
 # Build
 dist/
+test-functional/test-build.js
 
 # Logs
 logs
