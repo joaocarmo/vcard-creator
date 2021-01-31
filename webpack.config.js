@@ -19,7 +19,7 @@ const testConfig = {
 const prodConfig = {
   mode,
   context: path.join(__dirname, 'lib'),
-  entry: './VCard.ts',
+  entry: './index.ts',
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'vcard-creator.js',

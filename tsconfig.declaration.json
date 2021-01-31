@@ -5,6 +5,7 @@
     "isolatedModules": false,
     "module": "amd",
     "noEmit": false,
-    "outFile": "dist/vcard-creator.js"
+    "outDir": "dist"
   },
+  "files": ["lib/index.ts"]
 }
