@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+> Jab 31, 2021
+
+- Fixes the exported typings ([#13](https://github.com/joaocarmo/vcard-creator/issues/13))
+
 ## 0.3.2
 
 > Jab 9, 2021

@@ -5,7 +5,7 @@ module.exports = {
       {
         useBuiltIns: 'usage',
         modules: 'umd',
-        corejs: '3.6',
+        corejs: '3.8',
       },
     ],
     '@babel/preset-typescript',
