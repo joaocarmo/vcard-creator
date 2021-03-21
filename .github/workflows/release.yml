@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '14'
+      - uses: c-hive/gha-yarn-cache@v1
       - name: Install dependencies
         run: |
           yarn --frozen-lockfile
