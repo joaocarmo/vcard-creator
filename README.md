@@ -72,7 +72,7 @@ var VCard = require('vcard-creator').default
 var myVCard = new VCard()
 ```
 
-Or in ES6 syntax...
+Or...
 
 ```js
 import VCard from 'vcard-creator'
@@ -99,8 +99,6 @@ myOtherVCalendar.setFormat('vcalendar')
 ```
 
 ## Example
-
-Code (ES2015+)
 
 ```js
 import VCard from 'vcard-creator'
