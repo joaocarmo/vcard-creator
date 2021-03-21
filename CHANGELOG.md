@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+> Mar 21, 2021
+
+- Removed `@deprecated` from the `toString()` method
+- Added a custom error object `VCardException`
+- Removed the `include` argument from the `addLogo()` and `addPhoto()` methods
+
 ## 0.3.4
 
 > Mar 21, 2021

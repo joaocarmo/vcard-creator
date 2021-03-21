@@ -322,11 +322,10 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Logo
    *
    * @param  string url image url or filename
-   * @param  bool include Include the image in the vcard?
    * @return this
    */
-  public addLogo(url: string, include = true): this {
-    this.addMedia('LOGO', url, include, 'logo')
+  public addLogo(url: string): this {
+    this.addMedia('LOGO', url, 'logo')
 
     return this
   }
@@ -335,11 +334,10 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Photo
    *
    * @param  string url image url or filename
-   * @param  bool include Include the image in the vcard?
    * @return this
    */
-  public addPhoto(url: string, include = true): this {
-    this.addMedia('PHOTO', url, include, 'photo')
+  public addPhoto(url: string): this {
+    this.addMedia('PHOTO', url, 'photo')
 
     return this
   }
