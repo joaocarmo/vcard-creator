@@ -2,13 +2,12 @@ name: Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,22 +15,22 @@ jobs:
         node-version: [10.x, 12.x, 14.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Install dependencies
-      run: yarn --frozen-lockfile
-    - name: Lint the source files
-      run: yarn lint
-    - name: Type check
-      run: yarn type-check
-    - name: Build the library
-      run: yarn build
-    - name: Build the typings
-      run: yarn build:types
-    - name: Execute the tests
-      run: |
-        yarn test:unit
-        yarn test:functional
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+      - name: Lint the source files
+        run: yarn lint
+      - name: Type check
+        run: yarn type-check
+      - name: Build the library
+        run: yarn build
+      - name: Build the typings
+        run: yarn build:types
+      - name: Execute the tests
+        run: |
+          yarn test:unit
+          yarn test:functional

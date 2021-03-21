@@ -11,18 +11,17 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:prettier/recommended',
+    'prettier',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 11,
+    ecmaVersion: 12,
     sourceType: 'module',
     project: './tsconfig.eslint.json',
     tsconfigRootDir: __dirname,
   },
-  plugins: [
-    'jest',
-    '@typescript-eslint',
-  ],
+  plugins: ['jest', '@typescript-eslint', 'prettier'],
   rules: {
     semi: ['error', 'never'],
     'import/extensions': [

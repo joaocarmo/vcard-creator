@@ -17,14 +17,14 @@
 > Jab 9, 2021
 
 - Updated the TypeScript declaration file's output to match the name of the
-bundle (#11)
+  bundle (#11)
 
 ## 0.3.0 (no release)
 
 > Nov 6, 2020
 
 - Updated the documentation to include information about using the module in the
-browser (ESM)
+  browser (ESM)
 - Updated the `package.json` to comply with ESM best practices
 - Updated the dependencies
 
@@ -47,14 +47,14 @@ browser (ESM)
 > Aug 11, 2019
 
 - Updated the dependencies to resolve the security vulnerability
-[CVE-2019-10744](https://github.com/lodash/lodash/pull/4336)
+  [CVE-2019-10744](https://github.com/lodash/lodash/pull/4336)
 
 ## 0.1.0
 
 > Apr 1, 2019
 
 - Changed the named export to a default export, making it incompatible with
-previous versions [BREAKING]
+  previous versions [BREAKING]
 - Renamed the global object from `vcard_creator` to `vcardcreator` [BREAKING]
 - Renamed the constructor `VCard` [BREAKING]
 
@@ -63,14 +63,14 @@ previous versions [BREAKING]
 > Feb 8, 2019
 
 - Updated the dependencies to resolve the security vulnerability in
-[lodash](https://nvd.nist.gov/vuln/detail/CVE-2018-16487)
+  [lodash](https://nvd.nist.gov/vuln/detail/CVE-2018-16487)
 
 ## 0.0.5
 
 > Jun 1, 2018
 
 - Added tests for CLI, compiled for web (i.g. webpack) and not compiled (i.g.
-used from the global _window_ object)
+  used from the global _window_ object)
 - Updated the [README.md](README.md)
 
 ## 0.0.4
@@ -90,7 +90,7 @@ used from the global _window_ object)
 > Sep 1, 2017
 
 - Removed the _transliteration_ dependency in order to be compatible with
-_UglifyJS_
+  _UglifyJS_
 
 ## 0.0.1
 

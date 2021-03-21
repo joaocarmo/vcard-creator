@@ -25,7 +25,7 @@ const prodConfig = {
     filename: 'vcard-creator.js',
     library: 'vcardcreator',
     libraryTarget: 'umd',
-    globalObject: 'typeof self !== \'undefined\' ? self : this',
+    globalObject: "typeof self !== 'undefined' ? self : this",
   },
   resolve: {
     extensions: ['.js', '.ts'],

@@ -32,7 +32,7 @@ Load **vcard-creator** directly from [skypack](https://skypack.dev) (CDN).
 
 ```html
 <script type="module">
-  import VCard from "https://cdn.skypack.dev/vcard-creator"
+  import VCard from 'https://cdn.skypack.dev/vcard-creator'
 </script>
 ```
 
@@ -55,8 +55,8 @@ It's exposed through the _window_ global object as explained below.
 
 ```js
 // define vCard
-var VCard = window.vcardcreator.default;
-var myVCard = new VCard();
+var VCard = window.vcardcreator.default
+var myVCard = new VCard()
 
 // ...
 ```

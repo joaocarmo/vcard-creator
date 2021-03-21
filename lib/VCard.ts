@@ -1,7 +1,5 @@
 import { Property, DefinedElements } from './types/VCard'
-import {
-  b64encode, chunkSplit, escape, fold,
-} from './utils/functions'
+import { b64encode, chunkSplit, escape, fold } from './utils/functions'
 
 export default class VCard {
   /**
@@ -118,7 +116,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
     // set property
     this.setProperty(
       'address',
-      `ADR${(type !== '') ? `;${type}` : ''}${this.getCharsetString()}`,
+      `ADR${type !== '' ? `;${type}` : ''}${this.getCharsetString()}`,
       value,
     )
 
@@ -132,11 +130,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return this
    */
   public addBirthday(date: string): this {
-    this.setProperty(
-      'birthday',
-      'BDAY',
-      date,
-    )
+    this.setProperty('birthday', 'BDAY', date)
 
     return this
   }
@@ -152,8 +146,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
     this.setProperty(
       'company',
       `ORG${this.getCharsetString()}`,
-      company
-          + (department !== '' ? `;${department}` : ''),
+      company + (department !== '' ? `;${department}` : ''),
     )
 
     return this
@@ -172,7 +165,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   public addEmail(address: string, type = ''): this {
     this.setProperty(
       'email',
-      `EMAIL;INTERNET${(type !== '') ? `;${type}` : ''}`,
+      `EMAIL;INTERNET${type !== '' ? `;${type}` : ''}`,
       address,
     )
 
@@ -186,11 +179,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return this
    */
   public addJobtitle(jobtitle: string): this {
-    this.setProperty(
-      'jobtitle',
-      `TITLE${this.getCharsetString()}`,
-      jobtitle,
-    )
+    this.setProperty('jobtitle', `TITLE${this.getCharsetString()}`, jobtitle)
 
     return this
   }
@@ -202,11 +191,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return this
    */
   public addRole(role: string): this {
-    this.setProperty(
-      'role',
-      `ROLE${this.getCharsetString()}`,
-      role,
-    )
+    this.setProperty('role', `ROLE${this.getCharsetString()}`, role)
 
     return this
   }
@@ -272,22 +257,14 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
     suffix = '',
   ): this {
     // define values with non-empty values
-    const values = [
-      prefix,
-      firstName,
-      additional,
-      lastName,
-      suffix,
-    ].filter((m) => !!m)
+    const values = [prefix, firstName, additional, lastName, suffix].filter(
+      (m) => !!m,
+    )
     // set property
     const property = `\
 ${lastName};${firstName};${additional};${prefix};${suffix}\
 `
-    this.setProperty(
-      'name',
-      `N${this.getCharsetString()}`,
-      property,
-    )
+    this.setProperty('name', `N${this.getCharsetString()}`, property)
     // is property FN set?
     if (!this.hasProperty('FN')) {
       // set property
@@ -308,11 +285,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return this
    */
   public addNote(note: string): this {
-    this.setProperty(
-      'note',
-      `NOTE${this.getCharsetString()}`,
-      note,
-    )
+    this.setProperty('note', `NOTE${this.getCharsetString()}`, note)
 
     return this
   }
@@ -346,7 +319,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   public addPhoneNumber(number: number, type = ''): this {
     this.setProperty(
       'phoneNumber',
-      `TEL${(type !== '') ? `;${type}` : ''}`,
+      `TEL${type !== '' ? `;${type}` : ''}`,
       `${number}`,
     )
 
@@ -361,30 +334,20 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return this
    */
   public addLogo(url: string, include = true): this {
-    this.addMedia(
-      'LOGO',
-      url,
-      include,
-      'logo',
-    )
+    this.addMedia('LOGO', url, include, 'logo')
 
     return this
   }
 
   /**
-  * Add Photo
-  *
-  * @param  string url image url or filename
-  * @param  bool include Include the image in the vcard?
-  * @return this
-  */
+   * Add Photo
+   *
+   * @param  string url image url or filename
+   * @param  bool include Include the image in the vcard?
+   * @return this
+   */
   public addPhoto(url: string, include = true): this {
-    this.addMedia(
-      'PHOTO',
-      url,
-      include,
-      'photo',
-    )
+    this.addMedia('PHOTO', url, include, 'photo')
 
     return this
   }
@@ -397,11 +360,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return this
    */
   public addURL(url: string, type = ''): this {
-    this.setProperty(
-      'url',
-      `URL${(type !== '') ? `;${type}` : ''}`,
-      url,
-    )
+    this.setProperty('url', `URL${type !== '' ? `;${type}` : ''}`, url)
 
     return this
   }
@@ -607,8 +566,9 @@ END:VCALENDAR
    * @throws VCardException
    */
   public setProperty(element: string, key: string, value: string): void {
-    if (this.multiplePropertiesForElementAllowed.indexOf(element) < 0
-          && this.definedElements[element]
+    if (
+      this.multiplePropertiesForElementAllowed.indexOf(element) < 0 &&
+      this.definedElements[element]
     ) {
       throw new Error(`This element already exists (${element})`)
     }

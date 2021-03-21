@@ -20,7 +20,15 @@ vcard
   .addEmail('info@jeroendesloovere.be')
   .addPhoneNumber(1234121212, 'PREF;WORK')
   .addPhoneNumber(123456789, 'WORK')
-  .addAddress('name', 'extended', 'street', 'worktown', 'state', 'workpostcode', 'Belgium')
+  .addAddress(
+    'name',
+    'extended',
+    'street',
+    'worktown',
+    'state',
+    'workpostcode',
+    'Belgium',
+  )
   .addURL('http://www.jeroendesloovere.be')
 
 var output = vcard.toString()
