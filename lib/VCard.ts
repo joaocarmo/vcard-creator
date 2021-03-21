@@ -436,7 +436,6 @@ END:VCALENDAR
 
   /**
    * Get output as string
-   * @deprecated in the future
    *
    * @return string
    */
