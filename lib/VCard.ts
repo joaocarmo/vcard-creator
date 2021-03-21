@@ -1,3 +1,4 @@
+import VCardException from './VCardException'
 import { Property, DefinedElements } from './types/VCard'
 import { b64encode, chunkSplit, escape, fold } from './utils/functions'
 
@@ -201,18 +202,10 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    *
    * @param string property LOGO|PHOTO
    * @param string url image url or filename
-   * @param bool   include Do we include the image in our vcard or not?
    * @param string element The name of the element to set
-   * @throws VCardException
    * @return this
    */
-  private addMedia(
-    property: string,
-    url: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    include = true,
-    element: string,
-  ): this {
+  private addMedia(property: string, url: string, element: string): this {
     const value = ''
     this.setProperty(element, property, value)
 
@@ -225,7 +218,6 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @param string property LOGO|PHOTO
    * @param string content image content
    * @param string element The name of the element to set
-   * @throws VCardException
    * @return this
    */
   private addMediaContent(
@@ -569,11 +561,11 @@ END:VCALENDAR
       this.multiplePropertiesForElementAllowed.indexOf(element) < 0 &&
       this.definedElements[element]
     ) {
-      throw new Error(`This element already exists (${element})`)
+      throw new VCardException(`This element already exists (${element})`)
     }
-    // we define that we set this element
+
     this.definedElements[element] = true
-    // adding property
+
     this.properties.push({
       key,
       value,
