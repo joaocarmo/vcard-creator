@@ -73,8 +73,8 @@ export default class VCard {
   /**
    * Set format
    *
-   * @param  string format Either 'vcard' or 'vcalendar'
-   * @return void
+   * @param {string} format Either 'vcard' or 'vcalendar'
+   * @return {void}
    */
   public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
     if (format === 'vcalendar') {
@@ -89,17 +89,17 @@ export default class VCard {
   /**
    * Add address
    *
-   * @param  string [optional] name
-   * @param  string [optional] extended
-   * @param  string [optional] street
-   * @param  string [optional] city
-   * @param  string [optional] region
-   * @param  string [optional] zip
-   * @param  string [optional] country
-   * @param  string [optional] type
-   * type may be DOM | INTL | POSTAL | PARCEL | HOME | WORK
+   * @param {string} [name='']
+   * @param {string} [extended='']
+   * @param {string} [street='']
+   * @param {string} [city='']
+   * @param {string} [region='']
+   * @param {string} [zip='']
+   * @param {string} [country='']
+   * @param {string} [type='']
+   * 'type' may be DOM | INTL | POSTAL | PARCEL | HOME | WORK
    * or any combination of these: e.g. 'WORK;PARCEL;POSTAL'
-   * @return this
+   * @return {this}
    */
   public addAddress(
     name = '',
@@ -126,8 +126,8 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add birthday
    *
-   * @param  string date Format is YYYY-MM-DD
-   * @return this
+   * @param {string} date Format is YYYY-MM-DD
+   * @return {this}
    */
   public addBirthday(date: string): this {
     this.setProperty('birthday', 'BDAY', date)
@@ -138,9 +138,9 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add company
    *
-   * @param string company
-   * @param string department
-   * @return this
+   * @param {string} company
+   * @param {string} department
+   * @return {this}
    */
   public addCompany(company: string, department = ''): this {
     this.setProperty(
@@ -155,12 +155,12 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add email
    *
-   * @param  string address The e-mail address
-   * @param  string [optional] type
+   * @param {string} address The e-mail address
+   * @param {string} [optional] type
    * The type of the email address
    * type may be  PREF | WORK | HOME
    * or any combination of these: e.g. 'PREF;WORK'
-   * @return this
+   * @return {this}
    */
   public addEmail(address: string, type = ''): this {
     this.setProperty(
@@ -175,8 +175,8 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add jobtitle
    *
-   * @param  string jobtitle The jobtitle for the person.
-   * @return this
+   * @param {string} jobtitle The jobtitle for the person.
+   * @return {this}
    */
   public addJobtitle(jobtitle: string): this {
     this.setProperty('jobtitle', `TITLE${this.getCharsetString()}`, jobtitle)
@@ -187,8 +187,8 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add role
    *
-   * @param  string role The role for the person.
-   * @return this
+   * @param {string} role The role for the person.
+   * @return {this}
    */
   public addRole(role: string): this {
     this.setProperty('role', `ROLE${this.getCharsetString()}`, role)
@@ -199,10 +199,10 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param string property LOGO|PHOTO
-   * @param string url image url or filename
-   * @param string element The name of the element to set
-   * @return this
+   * @param {string} property LOGO|PHOTO
+   * @param {string} url image url or filename
+   * @param {string} element The name of the element to set
+   * @return {this}
    */
   private addMedia(property: string, url: string, element: string): this {
     this.setProperty(element, property, `VALUE=uri:${url}`)
@@ -213,10 +213,10 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param string property LOGO|PHOTO
-   * @param string content image content
-   * @param string element The name of the element to set
-   * @return this
+   * @param {string} property LOGO|PHOTO
+   * @param {string} content image content
+   * @param {string} element The name of the element to set
+   * @return {this}
    */
   private addMediaContent(
     property: string,
@@ -232,12 +232,12 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add name
    *
-   * @param  string [optional] lastName
-   * @param  string [optional] firstName
-   * @param  string [optional] additional
-   * @param  string [optional] prefix
-   * @param  string [optional] suffix
-   * @return this
+   * @param {string} [lastName='']
+   * @param {string} [firstName='']
+   * @param {string} [additional='']
+   * @param {string} [prefix='']
+   * @param {string} [suffix='']
+   * @return {this}
    */
   public addName(
     lastName = '',
@@ -270,8 +270,8 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add note
    *
-   * @param  string note
-   * @return this
+   * @param {string} note
+   * @return {this}
    */
   public addNote(note: string): this {
     this.setProperty('note', `NOTE${this.getCharsetString()}`, note)
@@ -282,8 +282,8 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add categories
    *
-   * @param array categories
-   * @return this
+   * @param {Array<string>} categories
+   * @return {this}
    */
   public addCategories(categories: string[]): this {
     this.setProperty(
@@ -298,12 +298,12 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add phone number
    *
-   * @param  string number
-   * @param  string [optional] type
+   * @param {string} number
+   * @param {string} [type='']
    * Type may be PREF | WORK | HOME | VOICE | FAX | MSG |
    * CELL | PAGER | BBS | CAR | MODEM | ISDN | VIDEO
    * or any senseful combination, e.g. 'PREF;WORK;VOICE'
-   * @return this
+   * @return {this}
    */
   public addPhoneNumber(number: number, type = ''): this {
     this.setProperty(
@@ -318,8 +318,8 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add Logo
    *
-   * @param  string url image url or filename
-   * @return this
+   * @param {string} url image url or filename
+   * @return {this}
    */
   public addLogo(url: string): this {
     this.addMedia('LOGO', url, 'logo')
@@ -331,8 +331,8 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Photo
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   * @param  string url image url or filename
-   * @return this
+   * @param {string} url image url or filename
+   * @return {this}
    */
   public addPhoto(url: string): this {
     this.addMedia('PHOTO', url, 'photo')
@@ -343,9 +343,9 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add URL
    *
-   * @param  string url
-   * @param  string [optional] type Type may be WORK | HOME
-   * @return this
+   * @param {string} url
+   * @param {string} [type=''] Type may be WORK | HOME
+   * @return {this}
    */
   public addURL(url: string, type = ''): this {
     this.setProperty('url', `URL${type !== '' ? `;${type}` : ''}`, url)
@@ -356,7 +356,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Build vCard (.vcf)
    *
-   * @return string
+   * @return {string}
    */
   private buildVCard(): string {
     const now = new Date()
@@ -381,7 +381,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Build VCalender (.ics) - Safari (< iOS 8) can not open .vcf files, so we
    * have build a workaround.
    *
-   * @return string
+   * @return {string}
    */
   private buildVCalendar(): string {
     const nowISO = new Date().toISOString()
@@ -421,7 +421,7 @@ END:VCALENDAR
   /**
    * Get output as string
    *
-   * @return string
+   * @return {string}
    */
   public toString(): string {
     return this.getOutput()
@@ -430,7 +430,7 @@ END:VCALENDAR
   /**
    * Get charset
    *
-   * @return string
+   * @return {string}
    */
   public getCharset(): string {
     return this.charset
@@ -439,7 +439,7 @@ END:VCALENDAR
   /**
    * Get charset string
    *
-   * @return string
+   * @return {string}
    */
   public getCharsetString(): string {
     let charsetString = ''
@@ -454,7 +454,7 @@ END:VCALENDAR
   /**
    * Get content type
    *
-   * @return string
+   * @return {string}
    */
   public getContentType(): string {
     return this.contentType
@@ -463,7 +463,7 @@ END:VCALENDAR
   /**
    * Get filename
    *
-   * @return string
+   * @return {string}
    */
   public getFilename(): string {
     return this.filename
@@ -472,7 +472,7 @@ END:VCALENDAR
   /**
    * Get file extension
    *
-   * @return string
+   * @return {string}
    */
   public getFileExtension(): string {
     return this.fileExtension
@@ -484,7 +484,7 @@ END:VCALENDAR
    * iOS devices (and safari < iOS 8 in particular)can not read .vcf (= vcard)
    * files. So there is a workaround to build a .ics (= vcalender) file.
    *
-   * @return string
+   * @return {string}
    */
   public getOutput(): string {
     return this.useVCalendar ? this.buildVCalendar() : this.buildVCard()
@@ -493,7 +493,7 @@ END:VCALENDAR
   /**
    * Get properties
    *
-   * @return array
+   * @return {Array<{key: string, value: string}>}
    */
   public getProperties(): Property[] {
     return this.properties
@@ -502,8 +502,8 @@ END:VCALENDAR
   /**
    * Has property
    *
-   * @param  string key
-   * @return bool
+   * @param {string} key
+   * @return {boolean}
    */
   public hasProperty(key: string): boolean {
     const pproperties = this.getProperties()
@@ -520,8 +520,8 @@ END:VCALENDAR
   /**
    * Set charset
    *
-   * @param  string charset
-   * @return void
+   * @param {string} charset
+   * @return {void}
    */
   public setCharset(charset: string): void {
     this.charset = charset
@@ -530,8 +530,8 @@ END:VCALENDAR
   /**
    * Set filename
    *
-   * @param  string $value
-   * @return void
+   * @param {string} $value
+   * @return {void}
    */
   public setFilename(value: string): void {
     if (!value) {
@@ -544,12 +544,12 @@ END:VCALENDAR
   /**
    * Set property
    *
-   * @param  string element The element name you want to set,
+   * @param {string} element The element name you want to set,
    *                e.g.: name, email, phoneNumber, ...
-   * @param  string key
-   * @param  string value
+   * @param {string} key
+   * @param {string} value
    * @throws VCardException
-   * @return void
+   * @return {void}
    */
   public setProperty(element: string, key: string, value: string): void {
     if (

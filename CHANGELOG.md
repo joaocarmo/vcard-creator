@@ -8,6 +8,7 @@
 - Added a custom error object `VCardException`
 - Removed the `include` argument from the `addLogo()` and `addPhoto()` methods
 - Removed unnecessary comments
+- Added the missing functionality to the `addLogo()` and `addPhoto()` methods
 
 ## 0.3.4
 
