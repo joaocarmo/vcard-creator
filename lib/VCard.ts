@@ -205,8 +205,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return this
    */
   private addMedia(property: string, url: string, element: string): this {
-    const value = ''
-    this.setProperty(element, property, value)
+    this.setProperty(element, property, `VALUE=uri:${url}`)
 
     return this
   }
@@ -444,6 +443,7 @@ END:VCALENDAR
    */
   public getCharsetString(): string {
     let charsetString = ''
+
     if (this.charset === 'utf-8') {
       charsetString = `;CHARSET=${this.charset}`
     }

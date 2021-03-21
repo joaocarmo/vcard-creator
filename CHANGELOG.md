@@ -7,6 +7,7 @@
 - Removed `@deprecated` from the `toString()` method
 - Added a custom error object `VCardException`
 - Removed the `include` argument from the `addLogo()` and `addPhoto()` methods
+- Removed unnecessary comments
 
 ## 0.3.4
 
