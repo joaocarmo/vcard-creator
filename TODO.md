@@ -1,3 +1,3 @@
-# To do
+# TODO
 
-- Implement the _addMedia_ class method (and others)
+- Open to requests

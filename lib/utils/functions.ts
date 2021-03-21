@@ -1,17 +1,17 @@
 /**
  * Encodes data with MIME base64
  *
- * @param  data text
- * @return string
+ * @param  {string} data text
+ * @return {string}
  */
 export function b64encode(data: string): string {
-  // for the browser
+  // For the browser
   const browserGlobal: Window = (globalThis as unknown) as Window
   if (typeof browserGlobal?.btoa === 'function') {
     return browserGlobal.btoa(data)
   }
 
-  // for node.js
+  // For Node.js
   const nodeGlobal: NodeJS.Global = (globalThis as unknown) as NodeJS.Global
   if (typeof nodeGlobal?.Buffer === 'function') {
     return nodeGlobal.Buffer.from(data).toString('base64')
@@ -25,8 +25,8 @@ export function b64encode(data: string): string {
  * e.g., to match RFC 2045 semantics
  *
  * @link   https://tools.ietf.org/html/rfc2045
- * @param  body text
- * @return string
+ * @param  {string} body text
+ * @return {string}
  */
 export function chunkSplit(body: string, chunklen = 76, end = '\r\n'): string {
   const chunklength = chunklen || 76
@@ -45,8 +45,8 @@ export function chunkSplit(body: string, chunklen = 76, end = '\r\n'): string {
  * Escape newline characters according to RFC2425 section 5.8.4.
  *
  * @link   http://tools.ietf.org/html/rfc2425#section-5.8.4
- * @param  string text
- * @return string
+ * @param  {string} text
+ * @return {string}
  */
 export function escape(text: string): string {
   let escapedText = `${text}`.replace(/\r\n/g, '\\n')
@@ -59,8 +59,8 @@ export function escape(text: string): string {
  * Fold a line according to RFC2425 section 5.8.1.
  *
  * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
- * @param  string text
- * @return string
+ * @param  {string} text
+ * @return {string}
  */
 export function fold(text: string): string {
   if (text.length <= 75) {

@@ -73,7 +73,7 @@ export default class VCard {
   /**
    * Set format
    *
-   * @param {string} format Either 'vcard' or 'vcalendar'
+   * @param  {string} format Either 'vcard' or 'vcalendar'
    * @return {void}
    */
   public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
@@ -89,14 +89,14 @@ export default class VCard {
   /**
    * Add address
    *
-   * @param {string} [name='']
-   * @param {string} [extended='']
-   * @param {string} [street='']
-   * @param {string} [city='']
-   * @param {string} [region='']
-   * @param {string} [zip='']
-   * @param {string} [country='']
-   * @param {string} [type='']
+   * @param  {string} [name='']
+   * @param  {string} [extended='']
+   * @param  {string} [street='']
+   * @param  {string} [city='']
+   * @param  {string} [region='']
+   * @param  {string} [zip='']
+   * @param  {string} [country='']
+   * @param  {string} [type='']
    * 'type' may be DOM | INTL | POSTAL | PARCEL | HOME | WORK
    * or any combination of these: e.g. 'WORK;PARCEL;POSTAL'
    * @return {this}
@@ -126,7 +126,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add birthday
    *
-   * @param {string} date Format is YYYY-MM-DD
+   * @param  {string} date Format is YYYY-MM-DD
    * @return {this}
    */
   public addBirthday(date: string): this {
@@ -138,8 +138,8 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add company
    *
-   * @param {string} company
-   * @param {string} department
+   * @param  {string} company
+   * @param  {string} department
    * @return {this}
    */
   public addCompany(company: string, department = ''): this {
@@ -155,9 +155,9 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add email
    *
-   * @param {string} address The e-mail address
-   * @param {string} [optional] type
-   * The type of the email address
+   * @param  {string} address The e-mail address
+   * @param  {string} [optional] type
+   * The 'type' of the email address
    * type may be  PREF | WORK | HOME
    * or any combination of these: e.g. 'PREF;WORK'
    * @return {this}
@@ -175,7 +175,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add jobtitle
    *
-   * @param {string} jobtitle The jobtitle for the person.
+   * @param  {string} jobtitle The jobtitle for the person.
    * @return {this}
    */
   public addJobtitle(jobtitle: string): this {
@@ -187,7 +187,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add role
    *
-   * @param {string} role The role for the person.
+   * @param  {string} role The role for the person.
    * @return {this}
    */
   public addRole(role: string): this {
@@ -199,9 +199,9 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param {string} property LOGO|PHOTO
-   * @param {string} url image url or filename
-   * @param {string} element The name of the element to set
+   * @param  {string} property LOGO|PHOTO
+   * @param  {string} url image url or filename
+   * @param  {string} element The name of the element to set
    * @return {this}
    */
   private addMedia(property: string, url: string, element: string): this {
@@ -213,9 +213,9 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param {string} property LOGO|PHOTO
-   * @param {string} content image content
-   * @param {string} element The name of the element to set
+   * @param  {string} property LOGO|PHOTO
+   * @param  {string} content image content
+   * @param  {string} element The name of the element to set
    * @return {this}
    */
   private addMediaContent(
@@ -232,11 +232,11 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add name
    *
-   * @param {string} [lastName='']
-   * @param {string} [firstName='']
-   * @param {string} [additional='']
-   * @param {string} [prefix='']
-   * @param {string} [suffix='']
+   * @param  {string} [lastName='']
+   * @param  {string} [firstName='']
+   * @param  {string} [additional='']
+   * @param  {string} [prefix='']
+   * @param  {string} [suffix='']
    * @return {this}
    */
   public addName(
@@ -270,7 +270,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add note
    *
-   * @param {string} note
+   * @param  {string} note
    * @return {this}
    */
   public addNote(note: string): this {
@@ -282,7 +282,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add categories
    *
-   * @param {Array<string>} categories
+   * @param  {Array<string>} categories
    * @return {this}
    */
   public addCategories(categories: string[]): this {
@@ -298,9 +298,9 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add phone number
    *
-   * @param {string} number
-   * @param {string} [type='']
-   * Type may be PREF | WORK | HOME | VOICE | FAX | MSG |
+   * @param  {string} number
+   * @param  {string} [type='']
+   * 'type' may be PREF | WORK | HOME | VOICE | FAX | MSG |
    * CELL | PAGER | BBS | CAR | MODEM | ISDN | VIDEO
    * or any senseful combination, e.g. 'PREF;WORK;VOICE'
    * @return {this}
@@ -318,7 +318,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add Logo
    *
-   * @param {string} url image url or filename
+   * @param  {string} url image url or filename
    * @return {this}
    */
   public addLogo(url: string): this {
@@ -331,7 +331,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Photo
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   * @param {string} url image url or filename
+   * @param  {string} url image url or filename
    * @return {this}
    */
   public addPhoto(url: string): this {
@@ -343,8 +343,8 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add URL
    *
-   * @param {string} url
-   * @param {string} [type=''] Type may be WORK | HOME
+   * @param  {string} url
+   * @param  {string} [type=''] Type may be WORK | HOME
    * @return {this}
    */
   public addURL(url: string, type = ''): this {
@@ -502,7 +502,7 @@ END:VCALENDAR
   /**
    * Has property
    *
-   * @param {string} key
+   * @param  {string} key
    * @return {boolean}
    */
   public hasProperty(key: string): boolean {
@@ -520,7 +520,7 @@ END:VCALENDAR
   /**
    * Set charset
    *
-   * @param {string} charset
+   * @param  {string} charset
    * @return {void}
    */
   public setCharset(charset: string): void {
@@ -530,7 +530,7 @@ END:VCALENDAR
   /**
    * Set filename
    *
-   * @param {string} $value
+   * @param  {string} $value
    * @return {void}
    */
   public setFilename(value: string): void {
@@ -544,10 +544,10 @@ END:VCALENDAR
   /**
    * Set property
    *
-   * @param {string} element The element name you want to set,
-   *                e.g.: name, email, phoneNumber, ...
-   * @param {string} key
-   * @param {string} value
+   * @param  {string} element The element name you want to set,
+   *                          e.g.: name, email, phoneNumber, ...
+   * @param  {string} key
+   * @param  {string} value
    * @throws VCardException
    * @return {void}
    */
