@@ -74,6 +74,7 @@ export default class VCard {
    * Set format
    *
    * @param  string format Either 'vcard' or 'vcalendar'
+   * @return void
    */
   public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
     if (format === 'vcalendar') {
@@ -110,11 +111,9 @@ export default class VCard {
     country = '',
     type = 'WORK;POSTAL',
   ): this {
-    // init value
     const value = `\
 ${name};${extended};${street};${city};${region};${zip};${country}\
 `
-    // set property
     this.setProperty(
       'address',
       `ADR${type !== '' ? `;${type}` : ''}${this.getCharsetString()}`,
@@ -248,18 +247,17 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
     prefix = '',
     suffix = '',
   ): this {
-    // define values with non-empty values
+    // Define values with non-empty values
     const values = [prefix, firstName, additional, lastName, suffix].filter(
       (m) => !!m,
     )
-    // set property
+
     const property = `\
 ${lastName};${firstName};${additional};${prefix};${suffix}\
 `
     this.setProperty('name', `N${this.getCharsetString()}`, property)
-    // is property FN set?
+    // Is property FN set?
     if (!this.hasProperty('FN')) {
-      // set property
       this.setProperty(
         'fullname',
         `FN${this.getCharsetString()}`,
@@ -333,6 +331,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add Photo
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    * @param  string url image url or filename
    * @return this
    */
@@ -361,16 +360,14 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return string
    */
   private buildVCard(): string {
-    // init date
     const now = new Date()
 
-    // init string
     let string = ''
     string += 'BEGIN:VCARD\r\n'
     string += 'VERSION:3.0\r\n'
     string += `REV:${now.toISOString()}\r\n`
 
-    // loop all properties
+    // Loop all properties
     const properties = this.getProperties()
     properties.forEach((property) => {
       string += fold(`${property.key}:${escape(property.value)}\r\n`)
@@ -388,24 +385,22 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return string
    */
   private buildVCalendar(): string {
-    // init dates
     const nowISO = new Date().toISOString()
     const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
     const dtstart = `${nowBase}00`
     const dtend = `${nowBase}01`
 
-    // base64 it to be used as an attachemnt to the "calendar appointment"
+    // Base 64 it to be used as an attachemnt to the 'calendar appointment
     const b64vcard = b64encode(this.buildVCard())
 
-    // chunk the single long line of b64 text in accordance with RFC2045
+    // Chunk the single long line of b64 text in accordance with RFC2045
     // (and the exact line length determined from the original .ics file
     // exported from Apple calendar
     const b64mline = chunkSplit(b64vcard, 74, '\n')
 
-    // need to indent all the lines by 1 space for the iPhone
+    // Need to indent all the lines by 1 space for the iPhone
     const b64final = b64mline.replace(/(.+)/g, ' $1')
 
-    // init string
     const string = `\
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -485,6 +480,7 @@ END:VCALENDAR
 
   /**
    * Get output as string
+   *
    * iOS devices (and safari < iOS 8 in particular)can not read .vcf (= vcard)
    * files. So there is a workaround to build a .ics (= vcalender) file.
    *
@@ -553,6 +549,7 @@ END:VCALENDAR
    * @param  string key
    * @param  string value
    * @throws VCardException
+   * @return void
    */
   public setProperty(element: string, key: string, value: string): void {
     if (
