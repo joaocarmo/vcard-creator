@@ -15,11 +15,10 @@
   ],
   "browserslist": [
     "last 2 version",
-    "maintained node versions",
     "not dead"
   ],
   "scripts": {
-    "build:types": "tsc -p tsconfig.declaration.json",
+    "build:types": "tsc -p tsconfig.declaration.json && mv dist/index.d.ts dist/vcard-creator.d.ts",
     "build": "NODE_ENV=production webpack --mode production",
     "clean": "rm -rf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",

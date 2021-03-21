@@ -1,20 +1,26 @@
 # Changelog
 
+## 0.3.4
+
+> Mar 21, 2021
+
+- Fixes the exported typings ([#13](https://github.com/joaocarmo/vcard-creator/issues/13)) to have the same name as the distribution file
+
 ## 0.3.3
 
-> Jab 31, 2021
+> Jan 31, 2021
 
 - Fixes the exported typings ([#13](https://github.com/joaocarmo/vcard-creator/issues/13))
 
 ## 0.3.2
 
-> Jab 9, 2021
+> Jan 9, 2021
 
 - Fixes the [subpath exports](https://nodejs.org/api/packages.html#packages_subpath_exports)
 
 ## 0.3.1
 
-> Jab 9, 2021
+> Jan 9, 2021
 
 - Updated the TypeScript declaration file's output to match the name of the
   bundle (#11)
