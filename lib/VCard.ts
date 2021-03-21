@@ -1,6 +1,12 @@
 import VCardException from './VCardException'
 import { Property, DefinedElements } from './types/VCard'
-import { b64encode, chunkSplit, escape, fold } from './utils/functions'
+import {
+  b64encode,
+  chunkSplit,
+  escape,
+  fold,
+  isValidMimeType,
+} from './utils/functions'
 
 export default class VCard {
   /**
@@ -156,7 +162,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * Add email
    *
    * @param  {string} address The e-mail address
-   * @param  {string} [optional] type
+   * @param  {string} [type='']
    * The 'type' of the email address
    * type may be  PREF | WORK | HOME
    * or any combination of these: e.g. 'PREF;WORK'
@@ -199,12 +205,12 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param  {string} property LOGO|PHOTO
-   * @param  {string} url image url or filename
-   * @param  {string} element The name of the element to set
+   * @param  {string} property 'LOGO' | 'PHOTO'
+   * @param  {string} url      Image url or filename
+   * @param  {string} element  The name of the element to set
    * @return {this}
    */
-  private addMedia(property: string, url: string, element: string): this {
+  private addMediaURL(property: string, url: string, element: string): this {
     this.setProperty(element, property, `VALUE=uri:${url}`)
 
     return this
@@ -213,18 +219,28 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param  {string} property LOGO|PHOTO
-   * @param  {string} content image content
-   * @param  {string} element The name of the element to set
+   * @param  {string} property 'LOGO' | 'PHOTO'
+   * @param  {string} content  Image content
+   * @param  {string} mime     Image MIME type
+   * @param  {string} element  The name of the element to set
+   * @throws VCardException
    * @return {this}
    */
   private addMediaContent(
     property: string,
     content: string,
+    mime: string,
     element: string,
   ): this {
-    const value = ''
-    this.setProperty(element, property, value)
+    if (!isValidMimeType(mime)) {
+      throw new VCardException(`The MIME Media Type is invalid (${mime})`)
+    }
+
+    this.setProperty(
+      element,
+      property,
+      `ENCODING=b;TYPE=${mime.toUpperCase()}:${content}`,
+    )
 
     return this
   }
@@ -318,11 +334,26 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add Logo
    *
-   * @param  {string} url image url or filename
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
+   * @param  {string} url Image url or filename
    * @return {this}
    */
-  public addLogo(url: string): this {
-    this.addMedia('LOGO', url, 'logo')
+  public addLogoURL(url: string): this {
+    this.addMediaURL('LOGO', url, 'logo')
+
+    return this
+  }
+
+  /**
+   * Add Logo
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
+   * @param  {string} image     Base64 encoded image content
+   * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
+   * @return {this}
+   */
+  public addLogo(image: string, mime = 'JPEG'): this {
+    this.addMediaContent('LOGO', image, mime, 'logo')
 
     return this
   }
@@ -331,11 +362,25 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Photo
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   * @param  {string} url image url or filename
+   * @param  {string} url Image url or filename
    * @return {this}
    */
-  public addPhoto(url: string): this {
-    this.addMedia('PHOTO', url, 'photo')
+  public addPhotoURL(url: string): this {
+    this.addMediaURL('PHOTO', url, 'photo')
+
+    return this
+  }
+
+  /**
+   * Add Photo
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
+   * @param  {string} image     Base64 encoded image content
+   * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
+   * @return {this}
+   */
+  public addPhoto(image: string, mime = 'JPEG'): this {
+    this.addMediaContent('PHOTO', image, mime, 'photo')
 
     return this
   }

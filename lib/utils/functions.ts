@@ -1,3 +1,5 @@
+import mimeTypes from './mime-types.json'
+
 /**
  * Encodes data with MIME base64
  *
@@ -72,4 +74,20 @@ export function fold(text: string): string {
   const wrapped = chunks.join('\r\n ').trim()
 
   return `${wrapped}\r\n`
+}
+
+/**
+ * Determines whether the given MIME Media Type is one of the IANA registered
+ * image formats
+ *
+ * @link    https://www.iana.org/assignments/media-types/media-types.xhtml#image
+ * @param   {string} mime A string describing the MIME Media Type
+ * @returns {boolean}
+ */
+export function isValidMimeType(mime: string): boolean {
+  if (mime && mimeTypes.includes(mime.toLowerCase())) {
+    return true
+  }
+
+  return false
 }

@@ -1,5 +1,12 @@
 #!/usr/bin/env node
+var fs = require('fs')
 var VCard = require('../dist/vcard-creator').default
+
+// sample image
+var imagePath = './lib/__tests__/assets/sample.jpg'
+
+// read image (base64 enconded)
+var image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
 
 // define vCard
 var vCard = new VCard()
@@ -31,8 +38,6 @@ vCard
     'Belgium',
   )
   .addURL('http://www.jeroendesloovere.be')
-  .addPhoto(
-    'https://live.staticflickr.com/65535/51059209772_bf41a28c7e_q.jpg',
-  )
+  .addPhoto(image, 'JPEG')
 
 console.log(vCard.toString())
