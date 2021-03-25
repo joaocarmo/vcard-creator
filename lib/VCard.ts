@@ -238,8 +238,8 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
 
     this.setProperty(
       element,
-      property,
-      `ENCODING=b;TYPE=${mime.toUpperCase()}:${content}`,
+      `${property};ENCODING=b;TYPE=${mime.toUpperCase()}`,
+      content,
     )
 
     return this
