@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1
+
+> Mar 25, 2021
+
+- Fixes the `addMediaContent()` method ([#17](https://github.com/joaocarmo/vcard-creator/pull/17) thanks to @Falklian)
+- Fixes the `addMediaURL()` method
+
 ## 0.4.0
 
 > Mar 21, 2021

@@ -11,8 +11,7 @@ It outputs the vCard text that should be saved as a `*.vcf` file.
 
 ## Origin
 
-This is based on _jeroendesloovere_'s
-[vCard](https://github.com/jeroendesloovere/vcard) for PHP.
+This is based on _jeroendesloovere_'s [vCard][jeroendesloovere] for PHP.
 
 ## Installation
 
@@ -28,7 +27,7 @@ npm install vcard-creator
 
 ### As an ESM module (web)
 
-Load **vcard-creator** directly from [skypack](https://skypack.dev) (CDN).
+Load **vcard-creator** directly from [skypack][skypack] (CDN).
 
 ```html
 <script type="module">
@@ -36,7 +35,7 @@ Load **vcard-creator** directly from [skypack](https://skypack.dev) (CDN).
 </script>
 ```
 
-Demo available in [codepen](https://codepen.io/joaocarmo/pen/PozdprL).
+Demo available in [codepen][codepen].
 
 ### On the web (self-hosted)
 
@@ -54,11 +53,11 @@ It's exposed through the _window_ global object as explained below.
 `main.js`
 
 ```js
-// define vCard
+// Define a new vCard
 var VCard = window.vcardcreator.default
 var myVCard = new VCard()
 
-// ...
+// ...rest of the code
 ```
 
 ### With a bundler / Node.js
@@ -66,10 +65,10 @@ var myVCard = new VCard()
 With a bundler (e.g. webpack) or in Node.js you can just require / import it.
 
 ```js
-var VCard = require('vcard-creator').default
+const VCard = require('vcard-creator').default
 
-// define a new vCard
-var myVCard = new VCard()
+// Define a new vCard
+const myVCard = new VCard()
 ```
 
 Or...
@@ -77,9 +76,30 @@ Or...
 ```js
 import VCard from 'vcard-creator'
 
-// define vCard
+// Define a new vCard
 const myVCard = new VCard()
 ```
+
+### Including an image
+
+You need to provide the image already properly encoded (base64). Most software
+will probably ignore a photo URL, even if it adheres to the specification.
+
+```js
+// Example in Node.js
+
+const fs = require('fs')
+const VCard = require('vcard-creator').default
+
+const imagePath = './lib/__tests__/assets/sample.jpg'
+const image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
+
+const vCard = new VCard()
+
+vCard.addPhoto(image, 'JPEG')
+```
+
+Include the proper [MIME type][mime-types] (defaults to `JPEG`).
 
 ### iCalendar format
 
@@ -90,11 +110,11 @@ with a `ics` file extension instead.
 The trick is to create an iCalendar file with a vCard attached.
 
 ```js
-// define a new vCard as 'vcalendar'
-var myVCalendar = new VCard('vcalendar')
+// Define a new vCard as 'vcalendar'
+const myVCalendar = new VCard('vcalendar')
 
-// or set it afterwards
-var myOtherVCalendar = new VCard()
+// ...or set it afterwards
+const myOtherVCalendar = new VCard()
 myOtherVCalendar.setFormat('vcalendar')
 ```
 
@@ -103,10 +123,10 @@ myOtherVCalendar.setFormat('vcalendar')
 ```js
 import VCard from 'vcard-creator'
 
-// define a new vCard
+// Define a new vCard
 const myVCard = new VCard()
 
-// define variables
+// Some variables
 const lastname = 'Desloovere'
 const firstname = 'Jeroen'
 const additional = ''
@@ -114,9 +134,9 @@ const prefix = ''
 const suffix = ''
 
 myVCard
-  // add personal data
+  // Add personal data
   .addName(lastname, firstname, additional, prefix, suffix)
-  // add work data
+  // Add work data
   .addCompany('Siesqo')
   .addJobtitle('Web Developer')
   .addRole('Data Protection Officer')
@@ -167,3 +187,10 @@ yarn test:web-build
 
 yarn test:web-export
 ```
+
+<!-- References -->
+
+[codepen]: https://codepen.io/joaocarmo/pen/PozdprL
+[jeroendesloovere]: https://github.com/jeroendesloovere/vcard
+[mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[skypack]: https://skypack.dev
