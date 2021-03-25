@@ -31,6 +31,8 @@ vCard
     'Belgium',
   )
   .addURL('http://www.jeroendesloovere.be')
-  .addPhoto('https://live.staticflickr.com/65535/51059209772_bf41a28c7e_q.jpg')
+  .addPhotoURL(
+    'https://cdn.jsdelivr.net/gh/joaocarmo/vcard-creator@master/lib/__tests__/assets/sample.jpg',
+  )
 
 console.log(vCard.toString())

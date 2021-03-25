@@ -211,7 +211,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return {this}
    */
   private addMediaURL(property: string, url: string, element: string): this {
-    this.setProperty(element, property, `VALUE=uri:${url}`)
+    this.setProperty(element, `${property};VALUE=uri`, url)
 
     return this
   }

@@ -11,8 +11,7 @@ It outputs the vCard text that should be saved as a `*.vcf` file.
 
 ## Origin
 
-This is based on _jeroendesloovere_'s
-[vCard](https://github.com/jeroendesloovere/vcard) for PHP.
+This is based on _jeroendesloovere_'s [vCard][jeroendesloovere] for PHP.
 
 ## Installation
 
@@ -28,7 +27,7 @@ npm install vcard-creator
 
 ### As an ESM module (web)
 
-Load **vcard-creator** directly from [skypack](https://skypack.dev) (CDN).
+Load **vcard-creator** directly from [skypack][skypack] (CDN).
 
 ```html
 <script type="module">
@@ -36,7 +35,7 @@ Load **vcard-creator** directly from [skypack](https://skypack.dev) (CDN).
 </script>
 ```
 
-Demo available in [codepen](https://codepen.io/joaocarmo/pen/PozdprL).
+Demo available in [codepen][codepen].
 
 ### On the web (self-hosted)
 
@@ -80,6 +79,27 @@ import VCard from 'vcard-creator'
 // define vCard
 const myVCard = new VCard()
 ```
+
+### Including an image
+
+You need to provide the image already properly encoded (base64). Most software
+will probably ignore a photo URL, even if it adheres to the specification.
+
+```js
+// Example in Node.js
+
+const fs = require('fs')
+const VCard = require('vcard-creator').default
+
+const imagePath = './lib/__tests__/assets/sample.jpg'
+const image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
+
+const vCard = new VCard()
+
+vCard.addPhoto(image, 'JPEG')
+```
+
+Include the proper [MIME type][mime-types] (defaults to `JPEG`).
 
 ### iCalendar format
 
@@ -167,3 +187,10 @@ yarn test:web-build
 
 yarn test:web-export
 ```
+
+<!-- References -->
+
+[codepen]: https://codepen.io/joaocarmo/pen/PozdprL
+[jeroendesloovere]: https://github.com/jeroendesloovere/vcard
+[mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[skypack]: https://skypack.dev
