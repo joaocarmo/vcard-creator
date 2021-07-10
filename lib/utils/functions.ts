@@ -8,15 +8,15 @@ import mimeTypes from './mime-types.json'
  */
 export function b64encode(data: string): string {
   // For the browser
-  const browserGlobal: Window = globalThis as unknown as Window
-  if (typeof browserGlobal?.btoa === 'function') {
-    return browserGlobal.btoa(data)
+  if (typeof globalThis?.btoa === 'function') {
+    return window.btoa(data)
   }
 
   // For Node.js
-  const nodeGlobal: NodeJS.Global = globalThis as unknown as NodeJS.Global
-  if (typeof nodeGlobal?.Buffer === 'function') {
-    return nodeGlobal.Buffer.from(data).toString('base64')
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  if (typeof globalThis?.Buffer === 'function') {
+    return Buffer.from(data).toString('base64')
   }
 
   return ''
