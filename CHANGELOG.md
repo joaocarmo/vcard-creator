@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 (no release)
+
+> Jul 10, 2021
+
+- Updated the docs
+
 ## 0.4.1
 
 > Mar 25, 2021
