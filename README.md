@@ -82,8 +82,9 @@ const myVCard = new VCard()
 
 ### Including an image
 
-You need to provide the image already properly encoded (base64). Most software
-will probably ignore a photo URL, even if it adheres to the specification.
+You need to provide the image already properly encoded (base64). Note that most
+applications will probably ignore a photo URL, even if it adheres to the
+specification.
 
 ```js
 // Example in Node.js
@@ -91,7 +92,7 @@ will probably ignore a photo URL, even if it adheres to the specification.
 const fs = require('fs')
 const VCard = require('vcard-creator').default
 
-const imagePath = './lib/__tests__/assets/sample.jpg'
+const imagePath = './path/to/my/assets/sample.jpg'
 const image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
 
 const vCard = new VCard()
