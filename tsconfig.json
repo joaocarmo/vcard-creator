@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "strict": true,
     "target": "esnext",
-    "types": ["node"]
+    "types": ["jest", "node"]
   },
   "include": ["lib/**/*.ts"],
   "exclude": ["node_modules", "dist/**/*"]

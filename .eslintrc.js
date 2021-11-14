@@ -7,11 +7,8 @@ module.exports = {
   },
   extends: [
     'airbnb-base',
+    'airbnb-typescript/base',
     'plugin:jest/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'plugin:prettier/recommended',
     'prettier',
   ],
   parser: '@typescript-eslint/parser',
@@ -34,15 +31,6 @@ module.exports = {
     ],
     '@typescript-eslint/prefer-regexp-exec': 'off',
   },
-  overrides: [
-    {
-      files: ['lib/**/__tests__/*'],
-      rules: {
-        '@typescript-eslint/no-unsafe-member-access': 'off',
-        '@typescript-eslint/no-unsafe-call': 'off',
-      },
-    },
-  ],
   settings: {
     'import/resolver': {
       node: {

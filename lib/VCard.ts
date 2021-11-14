@@ -403,7 +403,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    *
    * @return {string}
    */
-  private buildVCard(): string {
+  public buildVCard(): string {
     const now = new Date()
 
     let string = ''
@@ -428,7 +428,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    *
    * @return {string}
    */
-  private buildVCalendar(): string {
+  public buildVCalendar(): string {
     const nowISO = new Date().toISOString()
     const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
     const dtstart = `${nowBase}00`
