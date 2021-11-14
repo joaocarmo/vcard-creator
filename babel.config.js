@@ -3,9 +3,16 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        useBuiltIns: 'usage',
+        corejs: '3.19',
         modules: 'umd',
-        corejs: '3.8',
+        useBuiltIns: 'usage',
+        targets: {
+          browsers:
+            process.env.NODE_ENV === 'development'
+              ? 'last 2 versions'
+              : '> 0.25%, not dead',
+          node: '12',
+        },
       },
     ],
     '@babel/preset-typescript',

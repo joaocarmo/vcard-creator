@@ -1,8 +1,7 @@
 class VCardException extends Error {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(...params: any[]) {
+  constructor(params: string | undefined) {
     // Pass remaining arguments to the parent constructor
-    super(...params)
+    super(params)
 
     // Maintains a proper stack trace where our error was thrown
     if (Error.captureStackTrace) {
