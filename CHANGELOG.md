@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.2
+
+> Jan 9, 2022
+
+- Fixes the issue with the `addPhoneNumber()` method only accepting `number` as
+  a parameter, making it impossible to pass leading zeros ([#27](https://github.com/joaocarmo/vcard-creator/issues/27))
+
 ## 0.4.1 (no release)
 
 > Jul 10, 2021
