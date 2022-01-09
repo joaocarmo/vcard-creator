@@ -6,20 +6,14 @@ import mimeTypes from './mime-types.json'
  * @param  {string} data text
  * @return {string}
  */
-export function b64encode(data: string): string {
-  // For the browser
-  if (typeof globalThis?.btoa === 'function') {
-    return window.btoa(data)
-  }
-
-  // For Node.js
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  if (typeof globalThis?.Buffer === 'function') {
+export function b64encode(data: string) {
+  try {
+    // For the browser
+    return btoa(data)
+  } catch (e) {
+    // For Node.js
     return Buffer.from(data).toString('base64')
   }
-
-  return ''
 }
 
 /**
