@@ -32,7 +32,7 @@ vCard
   )
   .addURL('http://www.jeroendesloovere.be')
   .addPhotoURL(
-    'https://cdn.jsdelivr.net/gh/joaocarmo/vcard-creator@master/lib/__tests__/assets/sample.jpg',
+    'https://cdn.jsdelivr.net/gh/joaocarmo/vcard-creator@main/lib/__tests__/assets/sample.jpg',
   )
 
 console.log(vCard.toString())
