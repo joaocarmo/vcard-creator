@@ -130,7 +130,7 @@ END:VCALENDAR
     clear()
   })
 
-  it('shoud throw on attempting to add the same property', () => {
+  it('should throw on attempting to add the same property', () => {
     // Define vCard
     const vCard = new VCard()
 
@@ -143,12 +143,40 @@ END:VCALENDAR
     }).toThrow(VCardException)
   })
 
-  it('shoud throw on attempting to add an invalid MIME Media Type', () => {
+  it('should throw on attempting to add an invalid MIME Media Type', () => {
     // Define vCard
     const vCard = new VCard()
 
     expect(() => {
       vCard.addPhoto('MIICajCCAdOgAwIBAgICBEUwDQYJKoZIhvcN...', 'foobar')
     }).toThrow(VCardException)
+  })
+
+  it('shoud parse phone numbers correctly', () => {
+    // Setup a fixed date
+    advanceTo(new Date())
+
+    // Define vCard
+    const vCard = new VCard()
+
+    // Add phone numbers
+    vCard
+      .addPhoneNumber(1234121212, 'PREF;WORK')
+      .addPhoneNumber(123456789, 'WORK')
+      .addPhoneNumber('0123456789', 'HOME')
+
+    const vCardOutput = vCard.toString()
+    const expectedOutput = `\
+BEGIN:VCARD\r\n\
+VERSION:3.0\r\n\
+REV:${new Date().toISOString()}\r\n\
+TEL;PREF;WORK:1234121212\r\n\
+TEL;WORK:123456789\r\n\
+TEL;HOME:0123456789\r\n\
+END:VCARD\r\n\
+`
+
+    // Compare the results
+    expect(vCardOutput).toBe(expectedOutput)
   })
 })
