@@ -2,7 +2,7 @@
 
 ## 0.5.0
 
-> Aug 11, 2020
+> Aug 11, 2022
 
 - Enhances the types definitions
 - Reorganizes the files
