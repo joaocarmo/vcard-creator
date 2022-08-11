@@ -408,7 +408,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return {this}
    */
   public addUID(uid: string): this {
-    this.setProperty('uid', `UID${this.getCharsetString()}`, uid)
+    this.setProperty('uid', 'UID', uid)
 
     return this
   }

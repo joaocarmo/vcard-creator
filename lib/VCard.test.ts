@@ -40,6 +40,7 @@ describe('Test vCard', () => {
       )
       .addURL('http://www.jeroendesloovere.be')
       .addPhotoURL(photoURL)
+      .addUID('19950401-080045-40000F192713-0052')
 
     const vCardOutput = vCard.toString()
     const expectedOutput = `\
@@ -58,6 +59,7 @@ ADR;WORK;POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;workpos\r\n\
  tcode;Belgium\r\n\
 URL:http://www.jeroendesloovere.be\r\n\
 PHOTO;VALUE=uri:https://example.com/img/photo.jpg\r\n\
+UID:19950401-080045-40000F192713-0052\r\n\
 END:VCARD\r\n\
 `
 

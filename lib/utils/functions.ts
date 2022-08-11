@@ -6,7 +6,7 @@ import { MIME_TYPES } from './constants'
  * @param  {string} data text
  * @return {string}
  */
-export function b64encode(data: string) {
+export function b64encode(data: string): string {
   try {
     // For the browser
     return btoa(data)
