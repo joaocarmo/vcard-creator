@@ -1,5 +1,11 @@
 import VCardException from './VCardException'
-import { Property, DefinedElements } from './types/VCard'
+import {
+  ContentType,
+  DefinedElements,
+  Element,
+  Format,
+  Property,
+} from './types/VCard'
 import {
   b64encode,
   chunkSplit,
@@ -7,6 +13,7 @@ import {
   fold,
   isValidMimeType,
 } from './utils/functions'
+import * as constants from './utils/constants'
 
 export default class VCard {
   /**
@@ -14,28 +21,28 @@ export default class VCard {
    *
    * @var string
    */
-  public charset = 'utf-8'
+  public charset: string = constants.DEFAULT_CHARACTER_SET
 
   /**
    * Default ContentType
    *
    * @var string
    */
-  private contentType: 'text/x-vcard' | 'text/x-vcalendar' = 'text/x-vcard'
+  private contentType: ContentType = constants.DEFAULT_CONTENT_TYPE
 
   /**
    * Default filename
    *
    * @var string
    */
-  private filename = 'vcard'
+  private filename: string = constants.DEFAULT_FILENAME
 
   /**
    * Default fileExtension
    *
    * @var string
    */
-  private fileExtension = 'vcf'
+  private fileExtension: string = constants.DEFAULT_EXTENSION
 
   /**
    * Properties
@@ -56,22 +63,18 @@ export default class VCard {
    *
    * @var array
    */
-  private multiplePropertiesForElementAllowed: string[] = [
-    'email',
-    'address',
-    'phoneNumber',
-    'url',
-  ]
+  private multiplePropertiesForElementAllowed: Element[] =
+    constants.ALLOWED_MULTIPLE_PROPERTIES
 
   /**
    * Defines the output format
    *
    * @var bool
    */
-  private useVCalendar = false
+  private useVCalendar: boolean = false
 
-  public constructor(format: 'vcard' | 'vcalendar' = 'vcard') {
-    if (format === 'vcalendar') {
+  public constructor(format: Format = constants.DEFAULT_FORMAT) {
+    if (format === constants.Formats.VCALENDAR) {
       this.setFormat(format)
     }
   }
@@ -79,15 +82,15 @@ export default class VCard {
   /**
    * Set format
    *
-   * @param  {string} format Either 'vcard' or 'vcalendar'
+   * @param  {Format} format Either 'vcard' or 'vcalendar'
    * @return {void}
    */
-  public setFormat(format: 'vcard' | 'vcalendar' = 'vcard'): void {
-    if (format === 'vcalendar') {
-      this.contentType = 'text/x-vcalendar'
+  public setFormat(format: Format = constants.DEFAULT_FORMAT): void {
+    if (format === constants.Formats.VCALENDAR) {
+      this.contentType = constants.ContentTypes.VCALENDAR
       this.useVCalendar = true
-    } else if (format === 'vcard') {
-      this.contentType = 'text/x-vcard'
+    } else if (format === constants.Formats.VCARD) {
+      this.contentType = constants.ContentTypes.VCARD
       this.useVCalendar = false
     }
   }
@@ -148,7 +151,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @param  {string} department
    * @return {this}
    */
-  public addCompany(company: string, department = ''): this {
+  public addCompany(company: string, department: string = ''): this {
     this.setProperty(
       'company',
       `ORG${this.getCharsetString()}`,
@@ -168,7 +171,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * or any combination of these: e.g. 'PREF;WORK'
    * @return {this}
    */
-  public addEmail(address: string, type = ''): this {
+  public addEmail(address: string, type: string = ''): this {
     this.setProperty(
       'email',
       `EMAIL;INTERNET${type !== '' ? `;${type}` : ''}`,
@@ -205,12 +208,12 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param  {string} property 'LOGO' | 'PHOTO'
-   * @param  {string} url      Image url or filename
-   * @param  {string} element  The name of the element to set
+   * @param  {string}  property 'LOGO' | 'PHOTO'
+   * @param  {string}  url      Image url or filename
+   * @param  {Element} element  The name of the element to set
    * @return {this}
    */
-  private addMediaURL(property: string, url: string, element: string): this {
+  private addMediaURL(property: string, url: string, element: Element): this {
     this.setProperty(element, `${property};VALUE=uri`, url)
 
     return this
@@ -219,10 +222,10 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   /**
    * Add a photo or logo (depending on property name)
    *
-   * @param  {string} property 'LOGO' | 'PHOTO'
-   * @param  {string} content  Image content
-   * @param  {string} mime     Image MIME type
-   * @param  {string} element  The name of the element to set
+   * @param  {string}  property 'LOGO' | 'PHOTO'
+   * @param  {string}  content  Image content
+   * @param  {string}  mime     Image MIME type
+   * @param  {Element} element  The name of the element to set
    * @throws VCardException
    * @return {this}
    */
@@ -230,7 +233,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
     property: string,
     content: string,
     mime: string,
-    element: string,
+    element: Element,
   ): this {
     if (!isValidMimeType(mime)) {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
@@ -256,11 +259,11 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return {this}
    */
   public addName(
-    lastName = '',
-    firstName = '',
-    additional = '',
-    prefix = '',
-    suffix = '',
+    lastName: string = '',
+    firstName: string = '',
+    additional: string = '',
+    prefix: string = '',
+    suffix: string = '',
   ): this {
     // Define values with non-empty values
     const values = [prefix, firstName, additional, lastName, suffix].filter(
@@ -321,7 +324,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * or any senseful combination, e.g. 'PREF;WORK;VOICE'
    * @return {this}
    */
-  public addPhoneNumber(number: number | string, type = ''): this {
+  public addPhoneNumber(number: number | string, type: string = ''): this {
     this.setProperty(
       'phoneNumber',
       `TEL${type !== '' ? `;${type}` : ''}`,
@@ -489,7 +492,7 @@ END:VCALENDAR
   public getCharsetString(): string {
     let charsetString = ''
 
-    if (this.charset === 'utf-8') {
+    if (this.charset === constants.DEFAULT_CHARACTER_SET) {
       charsetString = `;CHARSET=${this.charset}`
     }
 
@@ -575,7 +578,7 @@ END:VCALENDAR
   /**
    * Set filename
    *
-   * @param  {string} $value
+   * @param  {string} value
    * @return {void}
    */
   public setFilename(value: string): void {
@@ -589,16 +592,16 @@ END:VCALENDAR
   /**
    * Set property
    *
-   * @param  {string} element The element name you want to set,
-   *                          e.g.: name, email, phoneNumber, ...
-   * @param  {string} key
-   * @param  {string} value
+   * @param  {Element} element The element name you want to set,
+   *                           e.g.: name, email, phoneNumber, ...
+   * @param  {string}  key
+   * @param  {string}  value
    * @throws {VCardException}
    * @return {void}
    */
-  public setProperty(element: string, key: string, value: string): void {
+  public setProperty(element: Element, key: string, value: string): void {
     if (
-      this.multiplePropertiesForElementAllowed.indexOf(element) < 0 &&
+      !this.multiplePropertiesForElementAllowed.includes(element) &&
       this.definedElements[element]
     ) {
       throw new VCardException(`This element already exists (${element})`)
