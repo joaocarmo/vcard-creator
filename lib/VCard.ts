@@ -108,14 +108,14 @@ export default class VCard {
    * @return {this}
    */
   public addAddress(
-    name = '',
-    extended = '',
-    street = '',
-    city = '',
-    region = '',
-    zip = '',
-    country = '',
-    type = 'WORK;POSTAL',
+    name: string = '',
+    extended: string = '',
+    street: string = '',
+    city: string = '',
+    region: string = '',
+    zip: string = '',
+    country: string = '',
+    type: string = 'WORK;POSTAL',
   ): this {
     const value = `\
 ${name};${extended};${street};${city};${region};${zip};${country}\
@@ -352,7 +352,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
    * @return {this}
    */
-  public addLogo(image: string, mime = 'JPEG'): this {
+  public addLogo(image: string, mime: string = 'JPEG'): this {
     this.addMediaContent('LOGO', image, mime, 'logo')
 
     return this
@@ -379,7 +379,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
    * @return {this}
    */
-  public addPhoto(image: string, mime = 'JPEG'): this {
+  public addPhoto(image: string, mime: string = 'JPEG'): this {
     this.addMediaContent('PHOTO', image, mime, 'photo')
 
     return this
@@ -392,7 +392,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} [type=''] Type may be WORK | HOME
    * @return {this}
    */
-  public addURL(url: string, type = ''): this {
+  public addURL(url: string, type: string = ''): this {
     this.setProperty('url', `URL${type !== '' ? `;${type}` : ''}`, url)
 
     return this
@@ -593,7 +593,7 @@ END:VCALENDAR
    *                          e.g.: name, email, phoneNumber, ...
    * @param  {string} key
    * @param  {string} value
-   * @throws VCardException
+   * @throws {VCardException}
    * @return {void}
    */
   public setProperty(element: string, key: string, value: string): void {
