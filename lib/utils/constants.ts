@@ -21,6 +21,7 @@ export const DEFAULT_CONTENT_TYPE = ContentTypes.VCARD
 export const DEFAULT_EXTENSION = 'vcf'
 export const DEFAULT_FILENAME = 'vcard'
 export const DEFAULT_FORMAT = Formats.VCARD
+export const DEFAULT_MIME_TYPE = 'JPEG'
 
 export const MIME_TYPES = [
   'aces',

@@ -355,7 +355,10 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
    * @return {this}
    */
-  public addLogo(image: string, mime: string = 'JPEG'): this {
+  public addLogo(
+    image: string,
+    mime: string = constants.DEFAULT_MIME_TYPE,
+  ): this {
     this.addMediaContent('LOGO', image, mime, 'logo')
 
     return this
@@ -382,7 +385,10 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
    * @return {this}
    */
-  public addPhoto(image: string, mime: string = 'JPEG'): this {
+  public addPhoto(
+    image: string,
+    mime: string = constants.DEFAULT_MIME_TYPE,
+  ): this {
     this.addMediaContent('PHOTO', image, mime, 'photo')
 
     return this
