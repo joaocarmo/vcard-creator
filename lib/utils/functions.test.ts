@@ -4,7 +4,7 @@ import {
   escape,
   fold,
   isValidMimeType,
-} from '../functions'
+} from './functions'
 
 describe("testing the 'b64encode' function", () => {
   it('should return an empty string, given an empty string', () => {
