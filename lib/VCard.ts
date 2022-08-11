@@ -402,6 +402,18 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
+   * Add UID
+   *
+   * @param  {string} uid
+   * @return {this}
+   */
+  public addUID(uid: string): this {
+    this.setProperty('uid', `UID${this.getCharsetString()}`, uid)
+
+    return this
+  }
+
+  /**
    * Build vCard (.vcf)
    *
    * @return {string}

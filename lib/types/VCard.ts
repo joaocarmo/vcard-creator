@@ -16,6 +16,7 @@ export type Element =
   | 'phoneNumber'
   | 'photo'
   | 'role'
+  | 'uid'
   | 'url'
 
 export type Format = 'vcalendar' | 'vcard'
