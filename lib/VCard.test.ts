@@ -1,7 +1,7 @@
 import { advanceTo, clear } from 'jest-date-mock'
-import VCard from '../VCard'
-import VCardException from '../VCardException'
-import { b64encode, chunkSplit } from '../utils/functions'
+import VCard from './VCard'
+import VCardException from './VCardException'
+import { b64encode, chunkSplit } from './utils/functions'
 
 describe('Test vCard', () => {
   // Define variables

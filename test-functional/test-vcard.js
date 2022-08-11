@@ -3,7 +3,7 @@ var fs = require('fs')
 var VCard = require('../dist/vcard-creator').default
 
 // sample image
-var imagePath = './lib/__tests__/assets/sample.jpg'
+var imagePath = './lib/assets/sample.jpg'
 
 // read image (base64 enconded)
 var image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
