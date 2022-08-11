@@ -1,4 +1,4 @@
-import mimeTypes from './mime-types.json'
+import { MIME_TYPES } from './constants'
 
 /**
  * Encodes data with MIME base64
@@ -79,7 +79,7 @@ export function fold(text: string): string {
  * @returns {boolean}
  */
 export function isValidMimeType(mime: string): boolean {
-  if (mime && mimeTypes.includes(mime.toLowerCase())) {
+  if (mime && MIME_TYPES.includes(mime.toLowerCase())) {
     return true
   }
 
