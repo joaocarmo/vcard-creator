@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+> Aug 11, 2020
+
+- Enhances the types definitions
+- Reorganizes the files
+- Adds support for `UID` ([#32](https://github.com/joaocarmo/vcard-creator/issues/32))
+
 ## 0.4.2
 
 > Jan 9, 2022
