@@ -1,4 +1,9 @@
-export type MultipleElements = 'address' | 'email' | 'phoneNumber' | 'url'
+export type MultipleElements =
+  | 'address'
+  | 'email'
+  | 'phoneNumber'
+  | 'social'
+  | 'url'
 
 export type ContentType = 'text/x-vcalendar' | 'text/x-vcard'
 
@@ -16,6 +21,7 @@ export type Element =
   | 'phoneNumber'
   | 'photo'
   | 'role'
+  | 'social'
   | 'uid'
   | 'url'
 

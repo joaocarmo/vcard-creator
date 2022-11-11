@@ -37,6 +37,15 @@ vCard
     'workpostcode',
     'Belgium',
   )
+  .addSocial('https://twitter.com/twitteruser', 'Twitter', 'twitteruser')
+  .addSocial('http://www.facebook.com/facebookuser', 'Facebook', 'facebookuser')
+  .addSocial('http://www.flickr.com/photos/flickruser', 'Flickr', 'flickruser')
+  .addSocial(
+    'http://www.linkedin.com/in/linkedinuser',
+    'LinkedIn',
+    'linkedinuser',
+  )
+  .addSocial('http://www.custom.social/customuser', 'Custom', 'customuser')
   .addURL('http://www.jeroendesloovere.be')
   .addPhoto(image, 'JPEG')
 
