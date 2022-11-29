@@ -22,6 +22,7 @@ describe('Test vCard', () => {
     vCard
       // Add personal data
       .addName(lastname, firstname, additional, prefix, suffix)
+      .addNickname(['Jero', 'Jerox'])
       // Add work data
       .addCompany('Siesqo')
       .addJobtitle('Web Developer')
@@ -49,6 +50,7 @@ VERSION:3.0\r\n\
 REV:${new Date().toISOString()}\r\n\
 N;CHARSET=utf-8:Desloovere;Jeroen;;;\r\n\
 FN;CHARSET=utf-8:Jeroen Desloovere\r\n\
+NICKNAME:Jero,Jerox\r\n\
 ORG;CHARSET=utf-8:Siesqo\r\n\
 TITLE;CHARSET=utf-8:Web Developer\r\n\
 ROLE;CHARSET=utf-8:Data Protection Officer\r\n\

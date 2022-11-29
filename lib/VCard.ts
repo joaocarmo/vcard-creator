@@ -287,6 +287,20 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
+   * Add nickname
+   *
+   * @param  {string|Array<string>} nickname
+   */
+  public addNickname(nickname: string | string[]): this {
+    this.setProperty(
+      'nickname',
+      'NICKNAME',
+      Array.isArray(nickname) ? nickname.join(',').trim() : nickname,
+    )
+    return this
+  }
+
+  /**
    * Add note
    *
    * @param  {string} note

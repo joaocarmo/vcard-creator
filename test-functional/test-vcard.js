@@ -21,6 +21,7 @@ var suffix = ''
 vCard
   // add personal data
   .addName(lastname, firstname, additional, prefix, suffix)
+  .addNickname('Jero')
   // add work data
   .addCompany('Siesqo')
   .addJobtitle('Web Developer')
