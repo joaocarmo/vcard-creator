@@ -14,6 +14,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'address',
   'email',
   'phoneNumber',
+  'social',
   'url',
 ]
 export const DEFAULT_CHARACTER_SET = 'utf-8'

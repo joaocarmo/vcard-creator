@@ -408,6 +408,25 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
+   * Add social profile
+   *
+   * @param {string} url  The URL to the user's profile.
+   * @param {string} type The social media type (e.g., Twitter, LinkedIn, etc.)
+   * @param {string} user The user's social media handle/username
+   */
+  public addSocial(url: string, type: string, user: string = ''): this {
+    const socialUser = user !== '' ? `;x-user=${user}` : ''
+    const socialProfile = type !== '' ? `;type=${type}` : ''
+
+    this.setProperty(
+      'social',
+      `X-SOCIALPROFILE${socialProfile}${socialUser}`,
+      url,
+    )
+    return this
+  }
+
+  /**
    * Add UID
    *
    * @param  {string} uid
