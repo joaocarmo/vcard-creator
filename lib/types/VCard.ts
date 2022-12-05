@@ -17,6 +17,7 @@ export type Element =
   | 'jobtitle'
   | 'logo'
   | 'name'
+  | 'nickname'
   | 'note'
   | 'phoneNumber'
   | 'photo'
