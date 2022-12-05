@@ -145,6 +145,7 @@ myVCard
   .addPhoneNumber(1234121212, 'PREF;WORK')
   .addPhoneNumber(123456789, 'WORK')
   .addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
+  .addSocial('https://twitter.com/desloovere_j', 'Twitter', 'desloovere_j')
   .addURL('http://www.jeroendesloovere.be')
 
 console.log(myVCard.toString())
@@ -166,6 +167,8 @@ TEL;PREF;WORK:1234121212
 TEL;WORK:123456789
 ADR;WORK;POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;workpos
  tcode;Belgium
+X-SOCIALPROFILE;type=Twitter;x-user=desloovere_j:https://twitter.com/desl
+oovere_j
 URL:http://www.jeroendesloovere.be
 END:VCARD
 ```

@@ -23,6 +23,7 @@ describe('Test vCard', () => {
       // Add personal data
       .addName(lastname, firstname, additional, prefix, suffix)
       .addNickname(['Jero', 'Jerox'])
+      .addSocial('https://twitter.com/desloovere_j', 'Twitter', 'desloovere_j')
       // Add work data
       .addCompany('Siesqo')
       .addJobtitle('Web Developer')
@@ -51,6 +52,8 @@ REV:${new Date().toISOString()}\r\n\
 N;CHARSET=utf-8:Desloovere;Jeroen;;;\r\n\
 FN;CHARSET=utf-8:Jeroen Desloovere\r\n\
 NICKNAME:Jero,Jerox\r\n\
+X-SOCIALPROFILE;type=Twitter;x-user=desloovere_j:https://twitter.com/desl\r\n\
+ oovere_j\r\n\
 ORG;CHARSET=utf-8:Siesqo\r\n\
 TITLE;CHARSET=utf-8:Web Developer\r\n\
 ROLE;CHARSET=utf-8:Data Protection Officer\r\n\
