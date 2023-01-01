@@ -289,7 +289,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add nickname
    *
-   * @param  {string|string[] nickname
+   * @param  {string|string[]} nickname
    */
   public addNickname(nickname: string | string[]): this {
     this.setProperty(
