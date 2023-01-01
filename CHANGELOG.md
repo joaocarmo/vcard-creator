@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+> Jan 1, 2023
+
+- Adds support for `addNickname`
+  ([#38](https://github.com/joaocarmo/vcard-creator/pull/38)) and `addSocial`
+  ([#39](https://github.com/joaocarmo/vcard-creator/pull/39))
+
 ## 0.5.0
 
 > Aug 11, 2022
