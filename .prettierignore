@@ -1,1 +1,3 @@
-dist
+# Build
+dist/
+test-functional/test-build.js
