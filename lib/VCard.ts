@@ -289,7 +289,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add nickname
    *
-   * @param  {string|Array<string>} nickname
+   * @param  {string|string[]} nickname
    */
   public addNickname(nickname: string | string[]): this {
     this.setProperty(
@@ -297,6 +297,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       'NICKNAME',
       Array.isArray(nickname) ? nickname.join(',').trim() : nickname,
     )
+
     return this
   }
 
@@ -437,6 +438,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       `X-SOCIALPROFILE${socialProfile}${socialUser}`,
       url,
     )
+
     return this
   }
 
