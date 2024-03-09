@@ -479,9 +479,12 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Build VCalender (.ics) - Safari (< iOS 8) can not open .vcf files, so we
-   * have build a workaround.
+   * Build VCalender (.ics) - Safari (< iOS 7) can not open .vcf files, so we
+   * built a workaround.
    *
+   * @deprecated This method is deprecated and will be removed in the next major
+   * or minor release. Use `buildVCard` instead. For more information, see
+   * https://stackoverflow.com/a/11405271/8713532.
    * @return {string}
    */
   public buildVCalendar(): string {
