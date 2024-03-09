@@ -1,7 +1,7 @@
 import { MIME_TYPES } from './constants'
 
 /**
- * Encodes data with MIME base64
+ * Encodes data with MIME base64.
  *
  * @param  {string} data text
  * @return {string}
@@ -17,8 +17,7 @@ export function b64encode(data: string): string {
 }
 
 /**
- * Split a string into smaller chunks
- * e.g., to match RFC 2045 semantics
+ * Split a string into smaller chunks e.g., to match RFC 2045 semantics.
  *
  * @link   https://tools.ietf.org/html/rfc2045
  * @param  {string} body text
@@ -67,8 +66,8 @@ export function fold(text: string): string {
     return text
   }
 
-  // split, wrap and trim trailing separator
-  const chunks = text.match(/.{1,73}/g) as string[]
+  // Split, wrap and trim trailing separator
+  const chunks = text.match(/.{1,73}/g) || []
   const wrapped = chunks.join('\r\n ').trim()
 
   return `${wrapped}\r\n`
@@ -76,7 +75,7 @@ export function fold(text: string): string {
 
 /**
  * Determines whether the given MIME Media Type is one of the IANA registered
- * image formats
+ * image formats.
  *
  * @link    https://www.iana.org/assignments/media-types/media-types.xhtml#image
  * @param   {string} mime A string describing the MIME Media Type
