@@ -16,7 +16,7 @@ This is based on _jeroendesloovere_'s [vCard][jeroendesloovere] for PHP.
 ## Installation
 
 ```sh
-yarn add vcard-creator
+pnpm add vcard-creator
 
 # or
 
@@ -180,16 +180,16 @@ to use commands to compile and test your changes.
 
 ```sh
 # Build
-yarn build
+pnpm build
 
 # Test
-yarn test:unit
+pnpm test:unit
 
-yarn test:functional
+pnpm test:functional
 
-yarn test:web-build
+pnpm test:web-build
 
-yarn test:web-export
+pnpm test:web-export
 ```
 
 <!-- References -->
