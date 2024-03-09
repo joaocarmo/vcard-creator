@@ -494,7 +494,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   public buildVCalendar(): string {
     // eslint-disable-next-line no-console
     console.warn(
-      `The format 'vcalendar' is deprecated and will be removed in the next major or minor release. Use 'vcard' instead.`,
+      `The method 'buildVCalendar' is deprecated and will be removed in the next major or minor release. Use 'buildVCard' instead.`,
     )
 
     const nowISO = new Date().toISOString()
