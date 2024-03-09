@@ -87,6 +87,10 @@ export default class VCard {
    */
   public setFormat(format: Format = constants.DEFAULT_FORMAT): void {
     if (format === constants.Formats.VCALENDAR) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `The format 'vcalendar' is deprecated and will be removed in the next major or minor release. Use 'vcard' instead.`,
+      )
       this.contentType = constants.ContentTypes.VCALENDAR
       this.useVCalendar = true
     } else if (format === constants.Formats.VCARD) {
@@ -488,6 +492,11 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return {string}
    */
   public buildVCalendar(): string {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `The format 'vcalendar' is deprecated and will be removed in the next major or minor release. Use 'vcard' instead.`,
+    )
+
     const nowISO = new Date().toISOString()
     const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
     const dtstart = `${nowBase}00`
