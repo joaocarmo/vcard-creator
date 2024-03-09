@@ -87,6 +87,10 @@ export default class VCard {
    */
   public setFormat(format: Format = constants.DEFAULT_FORMAT): void {
     if (format === constants.Formats.VCALENDAR) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `The format 'vcalendar' is deprecated and will be removed in the next major or minor release. Use 'vcard' instead.`,
+      )
       this.contentType = constants.ContentTypes.VCALENDAR
       this.useVCalendar = true
     } else if (format === constants.Formats.VCARD) {
@@ -479,12 +483,20 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Build VCalender (.ics) - Safari (< iOS 8) can not open .vcf files, so we
-   * have build a workaround.
+   * Build VCalender (.ics) - Safari (< iOS 7) can not open .vcf files, so we
+   * built a workaround.
    *
+   * @deprecated This method is deprecated and will be removed in the next major
+   * or minor release. Use `buildVCard` instead. For more information, see
+   * https://stackoverflow.com/a/11405271/8713532.
    * @return {string}
    */
   public buildVCalendar(): string {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `The method 'buildVCalendar' is deprecated and will be removed in the next major or minor release. Use 'buildVCard' instead.`,
+    )
+
     const nowISO = new Date().toISOString()
     const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
     const dtstart = `${nowBase}00`

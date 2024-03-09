@@ -1,11 +1,13 @@
 import { Element } from '../types/VCard'
 
 export enum ContentTypes {
+  /** @deprecated */
   VCALENDAR = 'text/x-vcalendar',
   VCARD = 'text/x-vcard',
 }
 
 export enum Formats {
+  /** @deprecated */
   VCALENDAR = 'vcalendar',
   VCARD = 'vcard',
 }

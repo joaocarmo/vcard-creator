@@ -102,7 +102,7 @@ vCard.addPhoto(image, 'JPEG')
 
 Include the proper [MIME type][mime-types] (defaults to `JPEG`).
 
-### iCalendar format
+### [DEPRECATED] iCalendar format
 
 For Apple devices that don't support the `vcf` file format, there is a
 workaround. Specify the format of the output as `vcalendar` and then save it
