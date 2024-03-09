@@ -17,49 +17,49 @@ import * as constants from './utils/constants'
 
 export default class VCard {
   /**
-   * Default Charset
+   * Default Charset.
    *
    * @var string
    */
   public charset: string = constants.DEFAULT_CHARACTER_SET
 
   /**
-   * Default ContentType
+   * Default ContentType.
    *
    * @var string
    */
   private contentType: ContentType = constants.DEFAULT_CONTENT_TYPE
 
   /**
-   * Default filename
+   * Default filename.
    *
    * @var string
    */
   private filename: string = constants.DEFAULT_FILENAME
 
   /**
-   * Default fileExtension
+   * Default fileExtension.
    *
    * @var string
    */
   private fileExtension: string = constants.DEFAULT_EXTENSION
 
   /**
-   * Properties
+   * Properties.
    *
    * @var array
    */
   private properties: Property[] = []
 
   /**
-   * definedElements
+   * Defined elements.
    *
    * @var object
    */
   private definedElements: DefinedElements = {}
 
   /**
-   * Multiple properties for element allowed
+   * Multiple properties for element allowed.
    *
    * @var array
    */
@@ -67,7 +67,7 @@ export default class VCard {
     constants.ALLOWED_MULTIPLE_PROPERTIES
 
   /**
-   * Defines the output format
+   * Defines the output format.
    *
    * @var bool
    */
@@ -80,7 +80,7 @@ export default class VCard {
   }
 
   /**
-   * Set format
+   * Set format.
    *
    * @param  {Format} format Either 'vcard' or 'vcalendar'
    * @return {void}
@@ -96,7 +96,7 @@ export default class VCard {
   }
 
   /**
-   * Add address
+   * Add address.
    *
    * @param  {string} [name='']
    * @param  {string} [extended='']
@@ -133,7 +133,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add birthday
+   * Add birthday.
    *
    * @param  {string} date Format is YYYY-MM-DD
    * @return {this}
@@ -145,7 +145,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add company
+   * Add company.
    *
    * @param  {string} company
    * @param  {string} department
@@ -162,7 +162,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add email
+   * Add email.
    *
    * @param  {string} address The e-mail address
    * @param  {string} [type='']
@@ -182,9 +182,9 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add jobtitle
+   * Add jobtitle.
    *
-   * @param  {string} jobtitle The jobtitle for the person.
+   * @param  {string} jobtitle The jobtitle for the person
    * @return {this}
    */
   public addJobtitle(jobtitle: string): this {
@@ -194,9 +194,9 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add role
+   * Add role.
    *
-   * @param  {string} role The role for the person.
+   * @param  {string} role The role for the person
    * @return {this}
    */
   public addRole(role: string): this {
@@ -206,7 +206,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add a photo or logo (depending on property name)
+   * Add a photo or logo (depending on property name).
    *
    * @param  {string}  property 'LOGO' | 'PHOTO'
    * @param  {string}  url      Image url or filename
@@ -220,7 +220,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add a photo or logo (depending on property name)
+   * Add a photo or logo (depending on property name).
    *
    * @param  {string}  property 'LOGO' | 'PHOTO'
    * @param  {string}  content  Image content
@@ -249,7 +249,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
   }
 
   /**
-   * Add name
+   * Add name.
    *
    * @param  {string} [lastName='']
    * @param  {string} [firstName='']
@@ -287,7 +287,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add nickname
+   * Add nickname.
    *
    * @param  {string|string[]} nickname
    */
@@ -330,7 +330,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add phone number
+   * Add phone number.
    *
    * @param  {number | string} number
    * @param  {string} [type='']
@@ -350,7 +350,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add Logo
+   * Add Logo.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
    * @param  {string} url Image url or filename
@@ -363,7 +363,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add Logo
+   * Add Logo.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
    * @param  {string} image     Base64 encoded image content
@@ -380,7 +380,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add Photo
+   * Add Photo URL.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    * @param  {string} url Image url or filename
@@ -393,7 +393,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add Photo
+   * Add Photo.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    * @param  {string} image     Base64 encoded image content
@@ -410,7 +410,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add URL
+   * Add URL.
    *
    * @param  {string} url
    * @param  {string} [type=''] Type may be WORK | HOME
@@ -423,7 +423,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add social profile
+   * Add social profile.
    *
    * @param {string} url  The URL to the user's profile.
    * @param {string} type The social media type (e.g., Twitter, LinkedIn, etc.)
@@ -443,7 +443,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Add UID
+   * Add UID.
    *
    * @param  {string} uid
    * @return {this}
@@ -455,7 +455,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
-   * Build vCard (.vcf)
+   * Build vCard (.vcf).
    *
    * @return {string}
    */
@@ -490,12 +490,14 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     const dtstart = `${nowBase}00`
     const dtend = `${nowBase}01`
 
-    // Base 64 it to be used as an attachemnt to the 'calendar appointment
+    // Base 64 it to be used as an attachemnt to the 'calendar' appointment
     const b64vcard = b64encode(this.buildVCard())
 
-    // Chunk the single long line of b64 text in accordance with RFC2045
-    // (and the exact line length determined from the original .ics file
-    // exported from Apple calendar
+    /*
+     * Chunk the single long line of b64 text in accordance with RFC2045
+     * (and the exact line length determined from the original .ics file
+     * exported from Apple calendar
+     */
     const b64mline = chunkSplit(b64vcard, 74, '\n')
 
     // Need to indent all the lines by 1 space for the iPhone
@@ -520,7 +522,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get output as string
+   * Get output as string.
    *
    * @return {string}
    */
@@ -529,7 +531,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get charset
+   * Get charset.
    *
    * @return {string}
    */
@@ -538,7 +540,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get charset string
+   * Get charset string.
    *
    * @return {string}
    */
@@ -553,7 +555,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get content type
+   * Get content type.
    *
    * @return {string}
    */
@@ -562,7 +564,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get filename
+   * Get filename.
    *
    * @return {string}
    */
@@ -571,7 +573,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get file extension
+   * Get file extension.
    *
    * @return {string}
    */
@@ -580,7 +582,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get output as string
+   * Get output as string.
    *
    * iOS devices (and safari < iOS 8 in particular)can not read .vcf (= vcard)
    * files. So there is a workaround to build a .ics (= vcalender) file.
@@ -592,7 +594,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get properties
+   * Get properties.
    *
    * @return {Array<{key: string, value: string}>}
    */
@@ -601,25 +603,21 @@ END:VCALENDAR
   }
 
   /**
-   * Has property
+   * Has property.
    *
    * @param  {string} key
    * @return {boolean}
    */
   public hasProperty(key: string): boolean {
-    const pproperties = this.getProperties()
-    // eslint-disable-next-line consistent-return
-    pproperties.forEach((property: Property) => {
-      if (property.key === key && property.value !== '') {
-        return true
-      }
-    })
+    const properties = this.getProperties()
 
-    return false
+    return properties.some(
+      (property: Property) => property.key === key && property.value !== '',
+    )
   }
 
   /**
-   * Set charset
+   * Set charset.
    *
    * @param  {string} charset
    * @return {void}
@@ -629,7 +627,7 @@ END:VCALENDAR
   }
 
   /**
-   * Set filename
+   * Set filename.
    *
    * @param  {string} value
    * @return {void}
@@ -643,7 +641,7 @@ END:VCALENDAR
   }
 
   /**
-   * Set property
+   * Set property.
    *
    * @param  {Element} element The element name you want to set,
    *                           e.g.: name, email, phoneNumber, ...
