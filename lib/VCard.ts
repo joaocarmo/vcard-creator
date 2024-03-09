@@ -609,15 +609,11 @@ END:VCALENDAR
    * @return {boolean}
    */
   public hasProperty(key: string): boolean {
-    const pproperties = this.getProperties()
-    // eslint-disable-next-line consistent-return
-    pproperties.forEach((property: Property) => {
-      if (property.key === key && property.value !== '') {
-        return true
-      }
-    })
+    const properties = this.getProperties()
 
-    return false
+    return properties.some(
+      (property: Property) => property.key === key && property.value !== '',
+    )
   }
 
   /**
