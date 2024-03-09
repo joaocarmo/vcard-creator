@@ -6,21 +6,33 @@ on:
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
           ref: 'main'
-      - name: Use Node.js v16 (LTS)
-        uses: actions/setup-node@v3
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
-          cache: 'yarn'
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
           registry-url: https://registry.npmjs.org/
-      - run: yarn --frozen-lockfile
-      - run: |
-          yarn build
-          yarn build:types
-      - run: npm publish
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: |
+          pnpm build
+          pnpm build:types
+
+      - name: Publish to NPM
+        run: pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

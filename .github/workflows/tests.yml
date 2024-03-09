@@ -11,23 +11,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js v16 (LTS)
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
-          cache: 'yarn'
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
       - name: Install dependencies
-        run: yarn --frozen-lockfile
+        run: pnpm install --frozen-lockfile
+
       - name: Lint the source files
-        run: yarn lint
+        run: pnpm lint
+
       - name: Type check
-        run: yarn type-check
+        run: pnpm type-check
+
       - name: Build the library
-        run: yarn build
+        run: pnpm build
+
       - name: Build the typings
-        run: yarn build:types
+        run: pnpm build:types
+
       - name: Execute the tests
         run: |
-          yarn test:unit
-          yarn test:functional
+          pnpm test:unit
+          pnpm test:functional
