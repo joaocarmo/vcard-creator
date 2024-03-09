@@ -32,7 +32,11 @@ export function chunkSplit(body: string, chunklen = 76, end = '\r\n'): string {
     return ''
   }
 
-  const chunks = body.match(new RegExp(`.{0,${chunklength}}`, 'g')) as string[]
+  const chunks = body.match(new RegExp(`.{0,${chunklength}}`, 'g'))
+
+  if (!chunks) {
+    return ''
+  }
 
   return chunks.join(ending)
 }
