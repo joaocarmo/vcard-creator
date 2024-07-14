@@ -19,7 +19,6 @@
     "clean": "rm -rf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
-    "preinstall": "npx only-allow pnpm",
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
     "test:functional": "(./test-functional/test-vcard.js | tee vcard.vcf) && (./test-functional/test-vcalendar.js 2>/dev/null | tee vcard.ics)",
