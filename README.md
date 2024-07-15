@@ -3,8 +3,6 @@
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
 [![jest](https://jestjs.io/img/jest-badge.svg)](https://github.com/facebook/jest)
 ![tests](https://github.com/joaocarmo/vcard-creator/workflows/Tests/badge.svg)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/joaocarmo/vcard-creator.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/joaocarmo/vcard-creator/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/joaocarmo/vcard-creator.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/joaocarmo/vcard-creator/context:javascript)
 
 A JavaScript vCard 3.0 creator library for both node.js and the web.
 It outputs the vCard text that should be saved as a `*.vcf` file.
