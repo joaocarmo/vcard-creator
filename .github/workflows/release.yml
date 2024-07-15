@@ -16,7 +16,9 @@ jobs:
           ref: 'main'
 
       - name: Enable corepack
-        run: corepack enable
+        run: |
+          corepack enable pnpm
+          corepack use pnpm
 
       - name: Use Node.js
         uses: actions/setup-node@v4
