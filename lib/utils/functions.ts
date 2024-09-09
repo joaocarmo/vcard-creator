@@ -10,7 +10,7 @@ export function b64encode(data: string): string {
   try {
     // For the browser
     return btoa(data)
-  } catch (e) {
+  } catch {
     // For Node.js
     return Buffer.from(data).toString('base64')
   }
