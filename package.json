@@ -19,6 +19,7 @@
     "clean": "rm -rf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
+    "prepare": "husky",
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
     "test:functional": "(./test-functional/test-vcard.js | tee vcard.vcf) && (./test-functional/test-vcalendar.js 2>/dev/null | tee vcard.ics)",
@@ -27,6 +28,12 @@
     "test:web-export": "open ./test-functional/test-export.html",
     "type-check:watch": "pnpm type-check --watch",
     "type-check": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
   },
   "repository": {
     "type": "git",
@@ -70,8 +77,10 @@
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.5",
     "jest": "^29.7.0",
     "jest-date-mock": "^1.0.10",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.2",
