@@ -87,7 +87,6 @@ export default class VCard {
    */
   public setFormat(format: Format = constants.DEFAULT_FORMAT): void {
     if (format === constants.Formats.VCALENDAR) {
-       
       console.warn(
         `The format 'vcalendar' is deprecated and will be removed in the next major or minor release. Use 'vcard' instead.`,
       )
@@ -492,7 +491,6 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @return {string}
    */
   public buildVCalendar(): string {
-     
     console.warn(
       `The method 'buildVCalendar' is deprecated and will be removed in the next major or minor release. Use 'buildVCard' instead.`,
     )
