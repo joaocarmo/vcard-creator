@@ -123,9 +123,12 @@ export default class VCard {
     country: string = '',
     type: string = 'WORK;POSTAL',
   ): this {
-    const value = `\
-${name};${extended};${street};${city};${region};${zip};${country}\
-`
+    const value = [name, extended, street, city, region, zip, country]
+      .filter((part) => part !== null && part !== '')
+      .join(';')
+
+    if (value === '') return this
+
     this.setProperty(
       'address',
       `ADR${type !== '' ? `;${type}` : ''}${this.getCharsetString()}`,
