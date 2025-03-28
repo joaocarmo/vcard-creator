@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "A JavaScript vCard creator library for both node.js and the web",
   "main": "./dist/vcard-creator.js",
   "exports": {
@@ -91,5 +91,5 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {},
-  "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"
+  "packageManager": "pnpm@10.7.0+sha512.6b865ad4b62a1d9842b61d674a393903b871d9244954f652b8842c2b553c72176b278f64c463e52d40fff8aba385c235c8c9ecf5cc7de4fd78b8bb6d49633ab6"
 }
