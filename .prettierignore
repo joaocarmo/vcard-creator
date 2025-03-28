@@ -1,3 +1,4 @@
 # Build
 dist/
 test-functional/test-build.js
+*lock*
