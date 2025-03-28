@@ -7,14 +7,13 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@babel/plugin-transform-class-properties':
-        specifier: ^7.25.9
-        version: 7.25.9(@babel/core@7.26.10)
     devDependencies:
       '@babel/core':
         specifier: ^7.26.10
         version: 7.26.10
+      '@babel/plugin-transform-class-properties':
+        specifier: ^7.25.9
+        version: 7.25.9(@babel/core@7.26.10)
       '@babel/plugin-transform-runtime':
         specifier: ^7.26.10
         version: 7.26.10(@babel/core@7.26.10)
