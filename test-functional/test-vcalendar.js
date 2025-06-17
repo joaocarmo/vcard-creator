@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var VCard = require('../dist/vcard-creator').default
+var VCard = require('..').default
 
 // define vCard
 var vCard = new VCard('vcalendar')
