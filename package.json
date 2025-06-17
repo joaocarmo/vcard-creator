@@ -3,7 +3,6 @@
   "version": "0.7.2",
   "description": "A JavaScript vCard creator library for both node.js and the web",
   "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -22,8 +21,11 @@
     "node": ">=10"
   },
   "scripts": {
+    "build:all": "pnpm run build:esm && pnpm run build:types && pnpm run build:cjs",
+    "build:cjs": "NODE_ENV=production webpack --mode production",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "build:types": "tsc -p tsconfig.declaration.json",
-    "build": "NODE_ENV=production webpack --mode production",
+    "build": "pnpm run build:cjs",
     "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
