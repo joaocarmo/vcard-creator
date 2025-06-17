@@ -178,7 +178,7 @@ to use commands to compile and test your changes.
 
 ```sh
 # Build
-pnpm build
+pnpm build:all
 
 # Test
 pnpm test:unit

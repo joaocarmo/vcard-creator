@@ -35,7 +35,7 @@ jobs:
         run: pnpm type-check
 
       - name: Build the library
-        run: pnpm build
+        run: pnpm build:all
 
       - name: Build the typings
         run: pnpm build:types
