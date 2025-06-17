@@ -21,8 +21,8 @@ const prodConfig = {
   context: path.join(__dirname, 'lib'),
   entry: './index.ts',
   output: {
-    path: path.join(__dirname, 'dist'),
-    filename: 'vcard-creator.js',
+    path: path.join(__dirname, 'dist', 'cjs'),
+    filename: 'index.js',
     library: 'vcardcreator',
     libraryTarget: 'umd',
     globalObject: "typeof self !== 'undefined' ? self : this",

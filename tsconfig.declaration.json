@@ -5,7 +5,7 @@
     "isolatedModules": false,
     "module": "amd",
     "noEmit": false,
-    "outDir": "dist"
+    "outDir": "dist/types"
   },
   "files": ["lib/index.ts"]
 }

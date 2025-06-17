@@ -2,23 +2,27 @@
   "name": "vcard-creator",
   "version": "0.7.2",
   "description": "A JavaScript vCard creator library for both node.js and the web",
-  "main": "./dist/vcard-creator.cjs",
-  "module": "./dist/vcard-creator.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
   "exports": {
     ".": {
-      "import": "./dist/vcard-creator.js",
-      "require": "./dist/vcard-creator.cjs"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
-  "types": "./dist/vcard-creator.d.ts",
+  "types": "./dist/types/index.d.ts",
   "directories": {
     "lib": "lib"
   },
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
-    "build:types": "tsc -p tsconfig.declaration.json && mv dist/index.d.ts dist/vcard-creator.d.ts",
+    "build:types": "tsc -p tsconfig.declaration.json",
     "build": "NODE_ENV=production webpack --mode production",
     "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",
