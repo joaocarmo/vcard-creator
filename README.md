@@ -58,7 +58,7 @@ var myVCard = new VCard()
 // ...rest of the code
 ```
 
-### With a bundler / Node.js
+### With a bundler / Node.js / ESM
 
 With a bundler (e.g. webpack) or in Node.js you can just require / import it.
 
