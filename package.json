@@ -16,6 +16,7 @@
   "scripts": {
     "build:types": "tsc -p tsconfig.declaration.json && mv dist/index.d.ts dist/vcard-creator.d.ts",
     "build": "NODE_ENV=production webpack --mode production",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
