@@ -30,9 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: |
-          pnpm build:all
-          pnpm build:types
+        run: pnpm build:all
 
       - name: Publish to NPM
         run: pnpm publish

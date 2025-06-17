@@ -34,8 +34,11 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
-      - name: Build the library
-        run: pnpm build:all
+      - name: Build the library for CJS
+        run: pnpm build:cjs
+
+      - name: Build the library for ESM
+        run: pnpm build:esm
 
       - name: Build the typings
         run: pnpm build:types
