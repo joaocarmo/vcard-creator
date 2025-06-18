@@ -31,6 +31,7 @@
     "prepare": "husky",
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
+    "test:esm": "./test-functional/test-vcard.mjs",
     "test:functional": "(./test-functional/test-vcard.js | tee vcard.vcf) && (./test-functional/test-vcalendar.js 2>/dev/null | tee vcard.ics)",
     "test:unit": "jest",
     "test:web-build": "NODE_ENV=development webpack --mode development && open ./test-functional/test-build.html",
