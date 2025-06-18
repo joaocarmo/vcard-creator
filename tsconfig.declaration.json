@@ -1,11 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "emitDeclarationOnly": true,
     "isolatedModules": false,
     "module": "esnext",
     "noEmit": false,
-    "declaration": true,
+    "emitDeclarationOnly": true,
     "outDir": "dist/types"
   },
   "files": ["lib/index.ts"]
