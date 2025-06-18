@@ -58,11 +58,12 @@ var myVCard = new VCard()
 // ...rest of the code
 ```
 
-### With a bundler / Node.js / ESM
+### With a bundler / Node / ESM
 
-With a bundler (e.g. webpack) or in Node.js you can just require / import it.
+With a bundler (e.g. webpack) or in Node you can just require / import it.
 
 ```js
+// Node
 const VCard = require('vcard-creator').default
 
 // Define a new vCard
@@ -72,7 +73,20 @@ const myVCard = new VCard()
 Or...
 
 ```js
+// Bundler
 import VCard from 'vcard-creator'
+
+// Define a new vCard
+const myVCard = new VCard()
+```
+
+Or...
+
+```js
+// ESM
+import VCardModule from 'vcard-creator'
+
+const VCard = VCardModule.default
 
 // Define a new vCard
 const myVCard = new VCard()
