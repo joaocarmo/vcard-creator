@@ -3,7 +3,7 @@
   "compilerOptions": {
     "emitDeclarationOnly": true,
     "isolatedModules": false,
-    "module": "amd",
+    "module": "esnext",
     "noEmit": false,
     "declaration": true,
     "outDir": "dist/types"
