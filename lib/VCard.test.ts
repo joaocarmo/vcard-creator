@@ -40,9 +40,9 @@ describe('Test vCard', () => {
         'workpostcode',
         'Belgium',
       )
-      .addURL('http://www.jeroendesloovere.be')
-      .addPhotoURL(photoURL)
-      .addUID('19950401-080045-40000F192713-0052')
+      .addUrl('http://www.jeroendesloovere.be')
+      .addPhotoUrl(photoURL)
+      .addUid('19950401-080045-40000F192713-0052')
 
     const vCardOutput = vCard.toString()
     const expectedOutput = `\
@@ -107,8 +107,8 @@ END:VCARD\r\n\
         'workpostcode',
         'Belgium',
       )
-      .addURL('http://www.jeroendesloovere.be')
-      .addPhotoURL(photoURL)
+      .addUrl('http://www.jeroendesloovere.be')
+      .addPhotoUrl(photoURL)
 
     const vCalendarOutput = vCard.toString()
 

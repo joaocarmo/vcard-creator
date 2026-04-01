@@ -28,8 +28,8 @@ vcard
     'workpostcode',
     'Belgium',
   )
-  .addURL('http://www.jeroendesloovere.be')
-  .addPhotoURL(
+  .addUrl('http://www.jeroendesloovere.be')
+  .addPhotoUrl(
     'https://cdn.jsdelivr.net/gh/joaocarmo/vcard-creator@main/lib/assets/sample.jpg',
   )
 

@@ -47,7 +47,7 @@ vCard
     'linkedinuser',
   )
   .addSocial('http://www.custom.social/customuser', 'Custom', 'customuser')
-  .addURL('http://www.jeroendesloovere.be')
+  .addUrl('http://www.jeroendesloovere.be')
   .addPhoto(image, 'JPEG')
 
 console.log(vCard.toString())
