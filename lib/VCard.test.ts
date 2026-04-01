@@ -23,7 +23,7 @@ describe('Test vCard', () => {
       // Add personal data
       .addName(lastname, firstname, additional, prefix, suffix)
       .addNickname(['Jero', 'Jerox'])
-      .addSocial('https://twitter.com/desloovere_j', 'Twitter', 'desloovere_j')
+      .addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
       // Add work data
       .addCompany('Siesqo')
       .addJobtitle('Web Developer')
@@ -52,8 +52,8 @@ REV:${new Date().toISOString()}\r\n\
 N;CHARSET=utf-8:Desloovere;Jeroen;;;\r\n\
 FN;CHARSET=utf-8:Jeroen Desloovere\r\n\
 NICKNAME:Jero,Jerox\r\n\
-X-SOCIALPROFILE;type=Twitter;x-user=desloovere_j:https://twitter.com/desl\r\n\
- oovere_j\r\n\
+X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j\r\n\
+IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j\r\n\
 ORG;CHARSET=utf-8:Siesqo\r\n\
 TITLE;CHARSET=utf-8:Web Developer\r\n\
 ROLE;CHARSET=utf-8:Data Protection Officer\r\n\
@@ -157,6 +157,60 @@ END:VCALENDAR
     expect(() => {
       vCard.addPhoto('MIICajCCAdOgAwIBAgICBEUwDQYJKoZIhvcN...', 'foobar')
     }).toThrow(VCardException)
+  })
+
+  it('should output both X-SOCIALPROFILE and IMPP for social profiles', () => {
+    advanceTo(new Date())
+
+    const vCard = new VCard()
+    vCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+
+    const output = vCard.toString()
+
+    expect(output).toContain(
+      'X-SOCIALPROFILE;type=LinkedIn:https://linkedin.com/in/jdoe',
+    )
+    expect(output).toContain(
+      'IMPP;X-SERVICE-TYPE=LinkedIn:https://linkedin.com/in/jdoe',
+    )
+
+    clear()
+  })
+
+  it('should handle social profiles without type or user', () => {
+    advanceTo(new Date())
+
+    const vCard = new VCard()
+    vCard.addSocial('https://example.com/profile', '')
+
+    const output = vCard.toString()
+
+    expect(output).toContain('X-SOCIALPROFILE:https://example.com/profile')
+    expect(output).toContain('IMPP:https://example.com/profile')
+    expect(output).not.toContain('X-SERVICE-TYPE')
+    expect(output).not.toContain('x-user')
+
+    clear()
+  })
+
+  it('should support multiple social profiles', () => {
+    advanceTo(new Date())
+
+    const vCard = new VCard()
+    vCard
+      .addSocial('https://x.com/jdoe', 'X', 'jdoe')
+      .addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+
+    const output = vCard.toString()
+
+    expect(output).toContain('X-SOCIALPROFILE;type=X;x-user=jdoe')
+    expect(output).toContain('IMPP;X-SERVICE-TYPE=X:https://x.com/jdoe')
+    expect(output).toContain('X-SOCIALPROFILE;type=LinkedIn')
+    expect(output).toContain(
+      'IMPP;X-SERVICE-TYPE=LinkedIn:https://linkedin.com/in/jdoe',
+    )
+
+    clear()
   })
 
   it('shoud parse phone numbers correctly', () => {
