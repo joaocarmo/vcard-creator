@@ -1,6 +1,7 @@
 export type MultipleElements =
   | 'address'
   | 'email'
+  | 'impp'
   | 'phoneNumber'
   | 'social'
   | 'url'
@@ -14,6 +15,7 @@ export type Element =
   | 'company'
   | 'email'
   | 'fullname'
+  | 'impp'
   | 'jobtitle'
   | 'logo'
   | 'name'

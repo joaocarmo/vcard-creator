@@ -442,6 +442,10 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       url,
     )
 
+    const serviceType = type !== '' ? `;X-SERVICE-TYPE=${type}` : ''
+
+    this.setProperty('impp', `IMPP${serviceType}`, url)
+
     return this
   }
 
