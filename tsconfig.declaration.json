@@ -3,9 +3,10 @@
   "compilerOptions": {
     "emitDeclarationOnly": true,
     "isolatedModules": false,
-    "module": "amd",
+    "module": "esnext",
     "noEmit": false,
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "lib"
   },
   "files": ["lib/index.ts"]
 }
