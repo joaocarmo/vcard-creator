@@ -442,9 +442,21 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       url,
     )
 
-    const serviceType = type !== '' ? `;X-SERVICE-TYPE=${type}` : ''
+    this.addImpp(url, type)
 
-    this.setProperty('impp', `IMPP${serviceType}`, url)
+    return this
+  }
+
+  /**
+   * Add IMPP (Instant Messaging and Presence Protocol) entry.
+   *
+   * @param {string} uri         The URI for the IM service (e.g., xmpp:user@example.com)
+   * @param {string} serviceType The service type (e.g., XMPP, SIP, Skype)
+   */
+  public addImpp(uri: string, serviceType: string = ''): this {
+    const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
+
+    this.setProperty('impp', `IMPP${type}`, uri)
 
     return this
   }

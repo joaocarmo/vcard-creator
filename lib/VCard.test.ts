@@ -213,6 +213,50 @@ END:VCALENDAR
     clear()
   })
 
+  it('should add standalone IMPP with service type', () => {
+    advanceTo(new Date())
+
+    const vCard = new VCard()
+    vCard.addImpp('xmpp:user@example.com', 'XMPP')
+
+    const output = vCard.toString()
+
+    expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
+    expect(output).not.toContain('X-SOCIALPROFILE')
+
+    clear()
+  })
+
+  it('should add standalone IMPP without service type', () => {
+    advanceTo(new Date())
+
+    const vCard = new VCard()
+    vCard.addImpp('sip:user@example.com')
+
+    const output = vCard.toString()
+
+    expect(output).toContain('IMPP:sip:user@example.com')
+    expect(output).not.toContain('X-SERVICE-TYPE')
+
+    clear()
+  })
+
+  it('should support multiple IMPP entries', () => {
+    advanceTo(new Date())
+
+    const vCard = new VCard()
+    vCard
+      .addImpp('xmpp:user@example.com', 'XMPP')
+      .addImpp('sip:user@example.com', 'SIP')
+
+    const output = vCard.toString()
+
+    expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
+    expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
+
+    clear()
+  })
+
   it('shoud parse phone numbers correctly', () => {
     // Setup a fixed date
     advanceTo(new Date())

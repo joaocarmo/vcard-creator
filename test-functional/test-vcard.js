@@ -38,7 +38,7 @@ vCard
     'workpostcode',
     'Belgium',
   )
-  .addSocial('https://twitter.com/twitteruser', 'Twitter', 'twitteruser')
+  .addSocial('https://x.com/xuser', 'X', 'xuser')
   .addSocial('http://www.facebook.com/facebookuser', 'Facebook', 'facebookuser')
   .addSocial('http://www.flickr.com/photos/flickruser', 'Flickr', 'flickruser')
   .addSocial(
