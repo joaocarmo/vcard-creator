@@ -38,7 +38,7 @@ vCard
     'workpostcode',
     'Belgium',
   )
-  .addSocial('https://twitter.com/twitteruser', 'Twitter', 'twitteruser')
+  .addSocial('https://x.com/xuser', 'X', 'xuser')
   .addSocial('http://www.facebook.com/facebookuser', 'Facebook', 'facebookuser')
   .addSocial('http://www.flickr.com/photos/flickruser', 'Flickr', 'flickruser')
   .addSocial(
@@ -47,7 +47,7 @@ vCard
     'linkedinuser',
   )
   .addSocial('http://www.custom.social/customuser', 'Custom', 'customuser')
-  .addURL('http://www.jeroendesloovere.be')
+  .addUrl('http://www.jeroendesloovere.be')
   .addPhoto(image, 'JPEG')
 
 console.log(vCard.toString())

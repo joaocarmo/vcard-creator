@@ -216,7 +216,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @param  {Element} element  The name of the element to set
    * @return {this}
    */
-  private addMediaURL(property: string, url: string, element: Element): this {
+  private addMediaUrl(property: string, url: string, element: Element): this {
     this.setProperty(element, `${property};VALUE=uri`, url)
 
     return this
@@ -359,10 +359,17 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} url Image url or filename
    * @return {this}
    */
-  public addLogoURL(url: string): this {
-    this.addMediaURL('LOGO', url, 'logo')
+  public addLogoUrl(url: string): this {
+    this.addMediaUrl('LOGO', url, 'logo')
 
     return this
+  }
+
+  /**
+   * @deprecated Use `addLogoUrl` instead.
+   */
+  public addLogoURL(url: string): this {
+    return this.addLogoUrl(url)
   }
 
   /**
@@ -389,10 +396,17 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} url Image url or filename
    * @return {this}
    */
-  public addPhotoURL(url: string): this {
-    this.addMediaURL('PHOTO', url, 'photo')
+  public addPhotoUrl(url: string): this {
+    this.addMediaUrl('PHOTO', url, 'photo')
 
     return this
+  }
+
+  /**
+   * @deprecated Use `addPhotoUrl` instead.
+   */
+  public addPhotoURL(url: string): this {
+    return this.addPhotoUrl(url)
   }
 
   /**
@@ -419,10 +433,17 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} [type=''] Type may be WORK | HOME
    * @return {this}
    */
-  public addURL(url: string, type: string = ''): this {
+  public addUrl(url: string, type: string = ''): this {
     this.setProperty('url', `URL${type !== '' ? `;${type}` : ''}`, url)
 
     return this
+  }
+
+  /**
+   * @deprecated Use `addUrl` instead.
+   */
+  public addURL(url: string, type: string = ''): this {
+    return this.addUrl(url, type)
   }
 
   /**
@@ -442,6 +463,24 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
       url,
     )
 
+    this.addImpp(url, type)
+
+    return this
+  }
+
+  /**
+   * Add IMPP (Instant Messaging and Presence Protocol) entry.
+   *
+   * @link   https://tools.ietf.org/html/rfc4770#section-1
+   * @param {string} uri         The URI for the IM service (e.g., xmpp:user@example.com)
+   * @param {string} serviceType The service type (e.g., XMPP, SIP, Skype)
+   * @return {this}
+   */
+  public addImpp(uri: string, serviceType: string = ''): this {
+    const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
+
+    this.setProperty('impp', `IMPP${type}`, uri)
+
     return this
   }
 
@@ -451,10 +490,17 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * @param  {string} uid
    * @return {this}
    */
-  public addUID(uid: string): this {
+  public addUid(uid: string): this {
     this.setProperty('uid', 'UID', uid)
 
     return this
+  }
+
+  /**
+   * @deprecated Use `addUid` instead.
+   */
+  public addUID(uid: string): this {
+    return this.addUid(uid)
   }
 
   /**

@@ -15,6 +15,7 @@ export enum Formats {
 export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'address',
   'email',
+  'impp',
   'phoneNumber',
   'social',
   'url',
