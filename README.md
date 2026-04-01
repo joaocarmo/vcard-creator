@@ -143,8 +143,8 @@ myVCard
   .addPhoneNumber(1234121212, 'PREF;WORK')
   .addPhoneNumber(123456789, 'WORK')
   .addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
-  .addSocial('https://twitter.com/desloovere_j', 'Twitter', 'desloovere_j')
-  .addURL('http://www.jeroendesloovere.be')
+  .addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
+  .addUrl('http://www.jeroendesloovere.be')
 
 console.log(myVCard.toString())
 ```
@@ -165,11 +165,40 @@ TEL;PREF;WORK:1234121212
 TEL;WORK:123456789
 ADR;WORK;POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;workpos
  tcode;Belgium
-X-SOCIALPROFILE;type=Twitter;x-user=desloovere_j:https://twitter.com/desl
-oovere_j
+X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
+IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
 URL:http://www.jeroendesloovere.be
 END:VCARD
 ```
+
+### Social profiles
+
+`addSocial()` emits both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]) for cross-platform compatibility. Android devices only recognize the `IMPP` property.
+
+```js
+myVCard.addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
+myVCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+```
+
+### Instant messaging (IMPP)
+
+Use `addImpp()` directly for non-social IM protocols such as XMPP or SIP.
+
+```js
+myVCard.addImpp('xmpp:user@example.com', 'XMPP')
+myVCard.addImpp('sip:user@example.com', 'SIP')
+```
+
+### Deprecated method names
+
+The following methods have been renamed to follow the [Google JavaScript Style Guide][google-js] for camelCase acronyms. The old names still work but are deprecated.
+
+| Deprecated      | Use instead     |
+| --------------- | --------------- |
+| `addURL()`      | `addUrl()`      |
+| `addUID()`      | `addUid()`      |
+| `addLogoURL()`  | `addLogoUrl()`  |
+| `addPhotoURL()` | `addPhotoUrl()` |
 
 ## Forking / Contributing
 
@@ -193,6 +222,8 @@ pnpm test:web-export
 <!-- References -->
 
 [codepen]: https://codepen.io/joaocarmo/pen/PozdprL
+[google-js]: https://google.github.io/styleguide/jsguide.html#naming-method-names
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[rfc4770]: https://tools.ietf.org/html/rfc4770
 [skypack]: https://skypack.dev
