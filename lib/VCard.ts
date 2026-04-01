@@ -471,8 +471,10 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   /**
    * Add IMPP (Instant Messaging and Presence Protocol) entry.
    *
+   * @link   https://tools.ietf.org/html/rfc4770#section-1
    * @param {string} uri         The URI for the IM service (e.g., xmpp:user@example.com)
    * @param {string} serviceType The service type (e.g., XMPP, SIP, Skype)
+   * @return {this}
    */
   public addImpp(uri: string, serviceType: string = ''): this {
     const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
