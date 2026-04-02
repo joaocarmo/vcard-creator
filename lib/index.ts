@@ -1,3 +1,4 @@
-import VCard from './VCard'
+import VCard from './VCard.js'
 
+export { VCard }
 export default VCard

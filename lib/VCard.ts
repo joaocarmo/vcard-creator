@@ -1,19 +1,19 @@
-import VCardException from './VCardException'
+import VCardException from './VCardException.js'
 import {
   ContentType,
   DefinedElements,
   Element,
   Format,
   Property,
-} from './types/VCard'
+} from './types/VCard.js'
 import {
   b64encode,
   chunkSplit,
   escape,
   fold,
   isValidMimeType,
-} from './utils/functions'
-import * as constants from './utils/constants'
+} from './utils/functions.js'
+import * as constants from './utils/constants.js'
 
 export default class VCard {
   /**

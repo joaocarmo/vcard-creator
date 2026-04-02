@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var fs = require('fs')
-var VCard = require('../dist/vcard-creator').default
+var VCard = require('../dist/cjs/index').default
 
 // sample image
 var imagePath = './lib/assets/sample.jpg'
