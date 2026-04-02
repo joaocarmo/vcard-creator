@@ -37,9 +37,6 @@ jobs:
       - name: Build the library
         run: pnpm build
 
-      - name: Build the typings
-        run: pnpm build:types
-
       - name: Execute the tests
         run: |
           pnpm test:unit

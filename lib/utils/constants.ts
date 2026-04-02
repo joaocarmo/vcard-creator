@@ -1,4 +1,4 @@
-import { Element } from '../types/VCard'
+import { Element } from '../types/VCard.js'
 
 export enum ContentTypes {
   /** @deprecated */

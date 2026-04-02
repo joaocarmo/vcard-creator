@@ -29,6 +29,9 @@ const prodConfig = {
   },
   resolve: {
     extensions: ['.js', '.ts'],
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
   },
   module: {
     rules: [

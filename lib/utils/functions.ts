@@ -1,4 +1,4 @@
-import { MIME_TYPES } from './constants'
+import { MIME_TYPES } from './constants.js'
 
 /**
  * Encodes data with MIME base64.

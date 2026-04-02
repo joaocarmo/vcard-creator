@@ -23,9 +23,44 @@ npm install vcard-creator
 
 ## Usage
 
-### As an ESM module (web)
+### ESM (recommended)
 
-Load **vcard-creator** directly from [skypack][skypack] (CDN).
+```js
+import VCard from 'vcard-creator'
+
+// or as a named import
+import { VCard } from 'vcard-creator'
+
+const myVCard = new VCard()
+```
+
+Works with Node.js, bundlers (webpack, esbuild, Vite), and `<script type="module">`.
+
+### CommonJS
+
+```js
+const VCard = require('vcard-creator').default
+
+const myVCard = new VCard()
+```
+
+### Browser (UMD)
+
+For direct `<script>` tag usage without a bundler:
+
+```html
+<head>
+  <script type="text/javascript" src="./js/vcard-creator.js"></script>
+  <script type="text/javascript" src="./js/main.js"></script>
+</head>
+```
+
+```js
+var VCard = window.vcardcreator.default
+var myVCard = new VCard()
+```
+
+The UMD bundle is also available via CDN:
 
 ```html
 <script type="module">
@@ -35,49 +70,6 @@ Load **vcard-creator** directly from [skypack][skypack] (CDN).
 
 Demo available in [codepen][codepen].
 
-### On the web (self-hosted)
-
-It's exposed through the _window_ global object as explained below.
-
-`index.html`
-
-```html
-<head>
-  <script type="text/javascript" src="./js/vcard-creator.js"></script>
-  <script type="text/javascript" src="./js/main.js"></script>
-</head>
-```
-
-`main.js`
-
-```js
-// Define a new vCard
-var VCard = window.vcardcreator.default
-var myVCard = new VCard()
-
-// ...rest of the code
-```
-
-### With a bundler / Node.js
-
-With a bundler (e.g. webpack) or in Node.js you can just require / import it.
-
-```js
-const VCard = require('vcard-creator').default
-
-// Define a new vCard
-const myVCard = new VCard()
-```
-
-Or...
-
-```js
-import VCard from 'vcard-creator'
-
-// Define a new vCard
-const myVCard = new VCard()
-```
-
 ### Including an image
 
 You need to provide the image already properly encoded (base64). Note that most
@@ -85,16 +77,12 @@ applications will probably ignore a photo URL, even if it adheres to the
 specification.
 
 ```js
-// Example in Node.js
+import { readFileSync } from 'fs'
+import VCard from 'vcard-creator'
 
-const fs = require('fs')
-const VCard = require('vcard-creator').default
-
-const imagePath = './path/to/my/assets/sample.jpg'
-const image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
+const image = readFileSync('./path/to/sample.jpg', { encoding: 'base64' })
 
 const vCard = new VCard()
-
 vCard.addPhoto(image, 'JPEG')
 ```
 

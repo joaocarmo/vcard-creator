@@ -1,12 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "declarationMap": true,
     "emitDeclarationOnly": true,
     "isolatedModules": false,
     "module": "esnext",
     "noEmit": false,
-    "outDir": "dist",
+    "outDir": "dist/types",
     "rootDir": "lib"
   },
-  "files": ["lib/index.ts"]
+  "include": ["lib/**/*.ts"],
+  "exclude": ["lib/**/*.test.ts"]
 }
