@@ -7,7 +7,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'test-functional/test-pre-build.js'),
       formats: ['iife'],
       name: 'testBuild',
-      fileName: () => 'test-build',
+      fileName: () => 'test-build.js',
     },
     outDir: 'test-functional',
     emptyOutDir: false,
