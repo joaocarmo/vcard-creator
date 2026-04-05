@@ -7,12 +7,10 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     ignores: [
-      'babel.config.js',
       'dist/',
-      'jest.config.js',
       'node_modules',
       'test-functional/',
-      'webpack.config.js',
+      'vite.config.test.ts',
     ],
   },
 )
