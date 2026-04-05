@@ -175,11 +175,7 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
    * @return {this}
    */
   public addEmail(address: string, type: string = ''): this {
-    this.setProperty(
-      'email',
-      `EMAIL;INTERNET${type !== '' ? `;${type}` : ''}`,
-      address,
-    )
+    this.setProperty('email', `EMAIL${type !== '' ? `;${type}` : ''}`, address)
 
     return this
   }
@@ -504,6 +500,105 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
   }
 
   /**
+   * Add geographic position.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.4.2
+   * @param  {number} latitude  Latitude in decimal degrees (-90 to 90)
+   * @param  {number} longitude Longitude in decimal degrees (-180 to 180)
+   * @throws {VCardException}
+   * @return {this}
+   */
+  public addGeo(latitude: number, longitude: number): this {
+    if (latitude < -90 || latitude > 90) {
+      throw new VCardException(
+        `Invalid latitude: ${latitude}. Must be between -90 and 90.`,
+      )
+    }
+
+    if (longitude < -180 || longitude > 180) {
+      throw new VCardException(
+        `Invalid longitude: ${longitude}. Must be between -180 and 180.`,
+      )
+    }
+
+    this.setProperty('geo', 'GEO', `${latitude};${longitude}`)
+
+    return this
+  }
+
+  /**
+   * Add timezone.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.4.1
+   * @param  {string} timezone UTC offset (e.g., '-05:00') or IANA name (e.g., 'America/New_York')
+   * @return {this}
+   */
+  public addTimezone(timezone: string): this {
+    this.setProperty('timezone', 'TZ', timezone)
+
+    return this
+  }
+
+  /**
+   * Add sort string for name ordering (useful for CJK names).
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.6.5
+   * @param  {string} sortString The string to use for sorting
+   * @return {this}
+   */
+  public addSortString(sortString: string): this {
+    this.setProperty('sortString', 'SORT-STRING', sortString)
+
+    return this
+  }
+
+  /**
+   * Add formatted address label.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
+   * @param  {string} label The formatted address text
+   * @param  {string} [type='WORK;POSTAL'] Address type
+   * @return {this}
+   */
+  public addLabel(label: string, type: string = 'WORK;POSTAL'): this {
+    this.setProperty(
+      'label',
+      `LABEL${type !== '' ? `;${type}` : ''}${this.getCharsetString()}`,
+      label,
+    )
+
+    return this
+  }
+
+  /**
+   * Add a custom property. Use this for non-standard X- properties
+   * or any property not covered by the built-in methods.
+   *
+   * @example
+   * vCard.addCustomProperty('X-PHONETIC-FIRST-NAME', 'Jon')
+   * vCard.addCustomProperty('X-ANNIVERSARY', '2010-06-15')
+   * vCard.addCustomProperty('X-CUSTOM', 'value', 'TYPE=work')
+   *
+   * @param  {string} name   Property name (automatically uppercased)
+   * @param  {string} value  Property value
+   * @param  {string} [params=''] Optional parameters (e.g., 'TYPE=work')
+   * @return {this}
+   */
+  public addCustomProperty(
+    name: string,
+    value: string,
+    params: string = '',
+  ): this {
+    this.setProperty(
+      'custom',
+      `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
+      value,
+    )
+
+    return this
+  }
+
+  /**
    * Build vCard (.vcf).
    *
    * @return {string}
@@ -514,6 +609,7 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
     let string = ''
     string += 'BEGIN:VCARD\r\n'
     string += 'VERSION:3.0\r\n'
+    string += `PRODID:-//vcard-creator//vcard-creator ${constants.LIB_VERSION}//EN\r\n`
     string += `REV:${now.toISOString()}\r\n`
 
     // Loop all properties

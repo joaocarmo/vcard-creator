@@ -19,6 +19,10 @@ export function b64encode(data: string): string {
 /**
  * Split a string into smaller chunks e.g., to match RFC 2045 semantics.
  *
+ * Note: This function counts characters, not octets. This is safe because it is
+ * only used for base64-encoded data, which is strictly ASCII (A-Z, a-z, 0-9,
+ * +, /, =) — every character is exactly 1 octet.
+ *
  * @link   https://tools.ietf.org/html/rfc2045
  * @param  {string} body text
  * @return {string}
@@ -57,20 +61,53 @@ export function escape(text: string): string {
 /**
  * Fold a line according to RFC2425 section 5.8.1.
  *
+ * Lines MUST be no longer than 75 octets, excluding the line break. Multi-byte
+ * UTF-8 sequences are never split across a fold boundary.
+ *
  * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
  * @param  {string} text
  * @return {string}
  */
 export function fold(text: string): string {
-  if (text.length <= 75) {
+  // Strip trailing CRLF before measuring — the line break is not counted
+  // toward the 75-octet limit per RFC 2425
+  const hasCrlf = text.endsWith('\r\n')
+  const content = hasCrlf ? text.slice(0, -2) : text
+
+  const encoder = new TextEncoder()
+  const bytes = encoder.encode(content)
+
+  if (bytes.length <= 75) {
     return text
   }
 
-  // Split, wrap and trim trailing separator
-  const chunks = text.match(/.{1,73}/g) || []
-  const wrapped = chunks.join('\r\n ').trim()
+  const lines: string[] = []
+  let offset = 0
+  let isFirstLine = true
 
-  return `${wrapped}\r\n`
+  while (offset < bytes.length) {
+    // First line gets 75 octets; continuation lines get 74 (leading space counts)
+    const maxOctets = isFirstLine ? 75 : 74
+
+    if (bytes.length - offset <= maxOctets) {
+      lines.push(new TextDecoder().decode(bytes.subarray(offset)))
+      break
+    }
+
+    // Find the last complete character boundary within maxOctets
+    let end = offset + maxOctets
+
+    // Walk back to a UTF-8 character boundary: continuation bytes start with 10xxxxxx
+    while (end > offset && (bytes[end] & 0xc0) === 0x80) {
+      end--
+    }
+
+    lines.push(new TextDecoder().decode(bytes.subarray(offset, end)))
+    offset = end
+    isFirstLine = false
+  }
+
+  return lines.join('\r\n ') + '\r\n'
 }
 
 /**

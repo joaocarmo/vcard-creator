@@ -27,10 +27,11 @@ describe("testing the 'chunkSplit' function", () => {
     expect(chunkSplit(bigString)).toBe(splitString)
   })
 
-  it("should match 'fold' given the right arguments", () => {
+  it('should not match fold — chunkSplit counts characters, fold counts octets', () => {
     const bigString =
       'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'
-    expect(chunkSplit(bigString, 73, '\r\n ').trim()).toBe(
+    // chunkSplit at 73 chars differs from fold at 75 octets for ASCII
+    expect(chunkSplit(bigString, 73, '\r\n ').trim()).not.toBe(
       fold(bigString).trim(),
     )
   })
@@ -60,8 +61,9 @@ describe("testing the 'fold' function", () => {
   it('should fold a line according to RFC2425 section 5.8.1.', () => {
     const bigString =
       'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'
+    // First line: 75 octets, continuation: remaining
     const splitString =
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod t\r\n empor incididunt ut labore et dolore magna aliqua\r\n'
+      'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tem\r\n por incididunt ut labore et dolore magna aliqua\r\n'
     expect(fold(bigString)).toEqual(splitString)
   })
 })

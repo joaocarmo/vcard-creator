@@ -14,12 +14,16 @@ export enum Formats {
 
 export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'address',
+  'custom',
   'email',
   'impp',
+  'label',
   'phoneNumber',
   'social',
   'url',
 ]
+
+export const LIB_VERSION = '0.10.0'
 export const DEFAULT_CHARACTER_SET = 'utf-8'
 export const DEFAULT_CONTENT_TYPE = ContentTypes.VCARD
 export const DEFAULT_EXTENSION = 'vcf'
