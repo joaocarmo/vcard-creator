@@ -17,7 +17,9 @@ describe('Test vCard', () => {
     vi.setSystemTime(new Date())
   })
 
-  afterEach(() => {})
+  afterEach(() => {
+    vi.useRealTimers()
+  })
 
   it("should create and output the proper 'vcard' format", () => {
     // Define vCard
@@ -235,8 +237,6 @@ END:VCALENDAR
   })
 
   it('shoud parse phone numbers correctly', () => {
-    // Setup a fixed date
-
     // Define vCard
     const vCard = new VCard()
 
