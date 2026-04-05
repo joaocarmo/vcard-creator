@@ -6,6 +6,7 @@
     "isolatedModules": false,
     "module": "esnext",
     "noEmit": false,
+    "types": ["node"],
     "outDir": "dist/types",
     "rootDir": "lib"
   },

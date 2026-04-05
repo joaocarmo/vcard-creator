@@ -6,6 +6,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmit": false,
+    "types": ["node"],
     "outDir": "dist/cjs",
     "rootDir": "lib"
   },

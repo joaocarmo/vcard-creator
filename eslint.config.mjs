@@ -6,13 +6,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: [
-      'babel.config.js',
-      'dist/',
-      'jest.config.js',
-      'node_modules',
-      'test-functional/',
-      'webpack.config.js',
-    ],
+    ignores: ['dist/', 'node_modules', 'test-functional/'],
   },
 )

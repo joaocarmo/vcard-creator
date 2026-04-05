@@ -5,6 +5,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": false,
+    "types": ["node"],
     "outDir": "dist/esm",
     "rootDir": "lib"
   },
