@@ -10,7 +10,6 @@ export default tseslint.config(
       'dist/',
       'node_modules',
       'test-functional/',
-      'vite.config.test.ts',
     ],
   },
 )
