@@ -6,10 +6,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: [
-      'dist/',
-      'node_modules',
-      'test-functional/',
-    ],
+    ignores: ['dist/', 'node_modules', 'test-functional/'],
   },
 )
