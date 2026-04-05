@@ -76,13 +76,9 @@ END:VCARD\r\n\
 
     // Compare the results
     expect(vCardOutput).toBe(expectedOutput)
-
-    // Clear the fixed date
   })
 
   it("should create and output the proper 'vcalendar' format", () => {
-    // Setup a fixed date
-
     // Init dates
     const nowISO = new Date().toISOString()
     const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
@@ -136,8 +132,6 @@ END:VCALENDAR
 
     // Compare the results
     expect(vCalendarOutput).toBe(expectedOutput)
-
-    // Clear the fixed date
   })
 
   it('should throw on attempting to add the same property', () => {
