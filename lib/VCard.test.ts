@@ -12,11 +12,14 @@ describe('Test vCard', () => {
   const suffix = ''
   const photoURL = 'https://example.com/img/photo.jpg'
 
-  it("should create and output the proper 'vcard' format", () => {
-    // Setup a fixed date
+  beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date())
+  })
 
+  afterEach(() => {})
+
+  it("should create and output the proper 'vcard' format", () => {
     // Define vCard
     const vCard = new VCard()
 
@@ -73,13 +76,10 @@ END:VCARD\r\n\
     expect(vCardOutput).toBe(expectedOutput)
 
     // Clear the fixed date
-    vi.useRealTimers()
   })
 
   it("should create and output the proper 'vcalendar' format", () => {
     // Setup a fixed date
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
 
     // Init dates
     const nowISO = new Date().toISOString()
@@ -136,7 +136,6 @@ END:VCALENDAR
     expect(vCalendarOutput).toBe(expectedOutput)
 
     // Clear the fixed date
-    vi.useRealTimers()
   })
 
   it('should throw on attempting to add the same property', () => {
@@ -162,9 +161,6 @@ END:VCALENDAR
   })
 
   it('should output both X-SOCIALPROFILE and IMPP for social profiles', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-
     const vCard = new VCard()
     vCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
 
@@ -176,14 +172,9 @@ END:VCALENDAR
     expect(output).toContain(
       'IMPP;X-SERVICE-TYPE=LinkedIn:https://linkedin.com/in/jdoe',
     )
-
-    vi.useRealTimers()
   })
 
   it('should handle social profiles without type or user', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-
     const vCard = new VCard()
     vCard.addSocial('https://example.com/profile', '')
 
@@ -193,14 +184,9 @@ END:VCALENDAR
     expect(output).toContain('IMPP:https://example.com/profile')
     expect(output).not.toContain('X-SERVICE-TYPE')
     expect(output).not.toContain('x-user')
-
-    vi.useRealTimers()
   })
 
   it('should support multiple social profiles', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-
     const vCard = new VCard()
     vCard
       .addSocial('https://x.com/jdoe', 'X', 'jdoe')
@@ -214,14 +200,9 @@ END:VCALENDAR
     expect(output).toContain(
       'IMPP;X-SERVICE-TYPE=LinkedIn:https://linkedin.com/in/jdoe',
     )
-
-    vi.useRealTimers()
   })
 
   it('should add standalone IMPP with service type', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-
     const vCard = new VCard()
     vCard.addImpp('xmpp:user@example.com', 'XMPP')
 
@@ -229,14 +210,9 @@ END:VCALENDAR
 
     expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
     expect(output).not.toContain('X-SOCIALPROFILE')
-
-    vi.useRealTimers()
   })
 
   it('should add standalone IMPP without service type', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-
     const vCard = new VCard()
     vCard.addImpp('sip:user@example.com')
 
@@ -244,14 +220,9 @@ END:VCALENDAR
 
     expect(output).toContain('IMPP:sip:user@example.com')
     expect(output).not.toContain('X-SERVICE-TYPE')
-
-    vi.useRealTimers()
   })
 
   it('should support multiple IMPP entries', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-
     const vCard = new VCard()
     vCard
       .addImpp('xmpp:user@example.com', 'XMPP')
@@ -261,14 +232,10 @@ END:VCALENDAR
 
     expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
-
-    vi.useRealTimers()
   })
 
   it('shoud parse phone numbers correctly', () => {
     // Setup a fixed date
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
 
     // Define vCard
     const vCard = new VCard()
