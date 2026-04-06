@@ -121,7 +121,7 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
    */
   public addAddress(options: AddressOptions): this
-  /** @deprecated Use object form instead: `addAddress({ street, city, type: ['work'] })` */
+  /** @deprecated Use object form instead: `addAddress({ street: '...', locality: '...', type: ['work'] })` */
   public addAddress(
     name?: string,
     extended?: string,
@@ -142,32 +142,35 @@ export default class VCard {
     _country: string = '',
     _type: AddressType[] | string = 'WORK;POSTAL',
   ): this {
-    let name: string, extended: string, street: string, city: string
-    let region: string, zip: string, country: string
+    let postOfficeBox: string,
+      extended: string,
+      street: string,
+      locality: string
+    let region: string, postalCode: string, country: string
     let type: AddressType[] | string
 
     if (isOptions(nameOrOptions)) {
       const o = nameOrOptions
-      name = o.name ?? ''
+      postOfficeBox = o.postOfficeBox ?? ''
       extended = o.extended ?? ''
       street = o.street ?? ''
-      city = o.city ?? ''
+      locality = o.locality ?? ''
       region = o.region ?? ''
-      zip = o.zip ?? ''
+      postalCode = o.postalCode ?? ''
       country = o.country ?? ''
       type = o.type ?? ['work', 'postal']
     } else {
-      name = nameOrOptions
+      postOfficeBox = nameOrOptions
       extended = _extended
       street = _street
-      city = _city
+      locality = _city
       region = _region
-      zip = _zip
+      postalCode = _zip
       country = _country
       type = _type
     }
 
-    const value = `${name};${extended};${street};${city};${region};${zip};${country}`
+    const value = `${postOfficeBox};${extended};${street};${locality};${region};${postalCode};${country}`
     const resolved = resolveType(type)
     this.setProperty(
       'address',
@@ -333,7 +336,7 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
    */
   public addName(options: NameOptions): this
-  /** @deprecated Use object form instead: `addName({ lastName: 'Doe', firstName: 'John' })` */
+  /** @deprecated Use object form instead: `addName({ givenName: 'John', familyName: 'Doe' })` */
   public addName(
     lastName?: string,
     firstName?: string,
@@ -353,11 +356,11 @@ export default class VCard {
 
     if (isOptions(lastNameOrOptions)) {
       const o = lastNameOrOptions
-      lastName = o.lastName ?? ''
-      firstName = o.firstName ?? ''
-      additional = o.additional ?? ''
-      prefix = o.prefix ?? ''
-      suffix = o.suffix ?? ''
+      lastName = o.familyName ?? ''
+      firstName = o.givenName ?? ''
+      additional = o.additionalNames ?? ''
+      prefix = o.honorificPrefix ?? ''
+      suffix = o.honorificSuffix ?? ''
     } else {
       lastName = lastNameOrOptions
       firstName = _firstName

@@ -508,7 +508,11 @@ describe('Test addCustomProperty()', () => {
 describe('Object params API', () => {
   it('addName with options object', () => {
     const vCard = new VCard()
-    vCard.addName({ lastName: 'Doe', firstName: 'John', prefix: 'Dr.' })
+    vCard.addName({
+      givenName: 'John',
+      familyName: 'Doe',
+      honorificPrefix: 'Dr.',
+    })
     const output = vCard.toString()
     expect(output).toContain('N;CHARSET=utf-8:Doe;John;;Dr.;')
     expect(output).toContain('FN;CHARSET=utf-8:Dr. John Doe')
@@ -518,9 +522,9 @@ describe('Object params API', () => {
     const vCard = new VCard()
     vCard.addAddress({
       street: '123 Main St',
-      city: 'Springfield',
+      locality: 'Springfield',
       region: 'IL',
-      zip: '62701',
+      postalCode: '62701',
       country: 'USA',
       type: ['home', 'postal'],
     })
@@ -669,11 +673,11 @@ describe('Full chain with object API', () => {
   it('should produce valid vCard output with all object params', () => {
     const vCard = new VCard()
     vCard
-      .addName({ lastName: 'Doe', firstName: 'John' })
+      .addName({ givenName: 'John', familyName: 'Doe' })
       .addCompany({ name: 'Acme' })
       .addEmail({ address: 'john@acme.com', type: ['work'] })
       .addPhoneNumber({ number: '+1555', type: ['cell'] })
-      .addAddress({ street: '123 Main', city: 'NYC', type: ['work'] })
+      .addAddress({ street: '123 Main', locality: 'NYC', type: ['work'] })
       .addUrl({ url: 'https://acme.com' })
 
     const output = vCard.toString()

@@ -73,20 +73,32 @@ export type EmailType = 'pref' | 'work' | 'home'
 export type UrlType = 'work' | 'home'
 
 export interface NameOptions {
-  lastName?: string
-  firstName?: string
-  additional?: string
-  prefix?: string
-  suffix?: string
+  /** Given name (e.g., "John") */
+  givenName?: string
+  /** Family name (e.g., "Doe") */
+  familyName?: string
+  /** Additional/middle names */
+  additionalNames?: string
+  /** Honorific prefix (e.g., "Dr.", "Mr.") */
+  honorificPrefix?: string
+  /** Honorific suffix (e.g., "Jr.", "PhD") */
+  honorificSuffix?: string
 }
 
 export interface AddressOptions {
-  name?: string
+  /** Post office box */
+  postOfficeBox?: string
+  /** Extended address (e.g., apartment, suite) */
   extended?: string
+  /** Street address */
   street?: string
-  city?: string
+  /** City, town, village, or other locality */
+  locality?: string
+  /** State, province, or region */
   region?: string
-  zip?: string
+  /** Postal code */
+  postalCode?: string
+  /** Country name */
   country?: string
   type?: AddressType[]
 }
