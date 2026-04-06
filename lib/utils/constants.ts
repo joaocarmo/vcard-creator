@@ -10,6 +10,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'key',
   'label',
   'logo',
+  'nickname',
   'note',
   'phoneNumber',
   'photo',

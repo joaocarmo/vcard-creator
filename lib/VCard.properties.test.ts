@@ -36,6 +36,16 @@ describe('Test addFullName()', () => {
   })
 })
 
+describe('Multiple nickname instances', () => {
+  it('should allow multiple addNickname calls', () => {
+    const vCard = new VCard()
+    vCard.addNickname('Johnny').addNickname('JD')
+    const output = vCard.toString()
+    expect(output).toContain('NICKNAME:Johnny')
+    expect(output).toContain('NICKNAME:JD')
+  })
+})
+
 describe('Test addKey()', () => {
   it('should add a base64-encoded PGP key', () => {
     const vCard = new VCard()
