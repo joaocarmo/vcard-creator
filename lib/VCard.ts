@@ -216,6 +216,24 @@ export default class VCard {
   }
 
   /**
+   * Add formatted name (FN) directly.
+   *
+   * When set, overrides the auto-generated FN from addName().
+   * Useful for mononyms, company-as-contact, or custom formatting.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.1
+   */
+  public addFullName(fullName: string): this {
+    this.setProperty({
+      element: 'fullname',
+      key: `FN${this.getCharsetString()}`,
+      value: escapeText(fullName),
+    })
+
+    return this
+  }
+
+  /**
    * Add name.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2

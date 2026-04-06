@@ -2,6 +2,40 @@ import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 
+describe('Test addFullName()', () => {
+  it('should set FN directly', () => {
+    const vCard = new VCard()
+    vCard.addFullName('Madonna')
+    expect(vCard.toString()).toContain('FN:Madonna')
+  })
+
+  it('should override auto-generated FN when called before addName', () => {
+    const vCard = new VCard()
+    vCard.addFullName('The Company').addName({ familyName: 'Inc' })
+    const output = vCard.toString()
+    expect(output).toContain('FN:The Company')
+    expect(output).not.toContain('FN:Inc')
+  })
+
+  it('should throw on duplicate addFullName', () => {
+    const vCard = new VCard()
+    vCard.addFullName('First')
+    expect(() => vCard.addFullName('Second')).toThrow(VCardException)
+  })
+
+  it('should throw when addName already set FN', () => {
+    const vCard = new VCard()
+    vCard.addName({ givenName: 'John', familyName: 'Doe' })
+    expect(() => vCard.addFullName('Custom')).toThrow(VCardException)
+  })
+
+  it('should escape special characters', () => {
+    const vCard = new VCard()
+    vCard.addFullName('Smith, John; Jr.')
+    expect(vCard.toString()).toContain('FN:Smith\\, John\\; Jr.')
+  })
+})
+
 describe('Test addGeo()', () => {
   it('should add geographic position', () => {
     const vCard = new VCard()
