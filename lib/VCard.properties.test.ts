@@ -2,37 +2,163 @@ import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 
+describe('Test addFullName()', () => {
+  it('should set FN directly', () => {
+    const vCard = new VCard()
+    vCard.addFullName('Madonna')
+    expect(vCard.toString()).toContain('FN:Madonna')
+  })
+
+  it('should override auto-generated FN when called before addName', () => {
+    const vCard = new VCard()
+    vCard.addFullName('The Company').addName({ familyName: 'Inc' })
+    const output = vCard.toString()
+    expect(output).toContain('FN:The Company')
+    expect(output).not.toContain('FN:Inc')
+  })
+
+  it('should throw on duplicate addFullName', () => {
+    const vCard = new VCard()
+    vCard.addFullName('First')
+    expect(() => vCard.addFullName('Second')).toThrow(VCardException)
+  })
+
+  it('should throw when addName already set FN', () => {
+    const vCard = new VCard()
+    vCard.addName({ givenName: 'John', familyName: 'Doe' })
+    expect(() => vCard.addFullName('Custom')).toThrow(VCardException)
+  })
+
+  it('should escape special characters', () => {
+    const vCard = new VCard()
+    vCard.addFullName('Smith, John; Jr.')
+    expect(vCard.toString()).toContain('FN:Smith\\, John\\; Jr.')
+  })
+
+  it('should prevent duplicate FN with non-default charset (addFullName first)', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addFullName('Custom Name')
+    vCard.addName({ givenName: 'John', familyName: 'Doe' })
+    const output = vCard.toString()
+    const fnMatches = output.match(/FN/g)
+    expect(fnMatches).toHaveLength(1)
+    expect(output).toContain('FN;CHARSET=iso-8859-1:Custom Name')
+  })
+
+  it('should throw on addFullName when addName already set FN with non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addName({ givenName: 'John', familyName: 'Doe' })
+    expect(() => vCard.addFullName('Custom')).toThrow(VCardException)
+  })
+})
+
+describe('Multiple nickname instances', () => {
+  it('should allow multiple addNickname calls', () => {
+    const vCard = new VCard()
+    vCard.addNickname('Johnny').addNickname('JD')
+    const output = vCard.toString()
+    expect(output).toContain('NICKNAME:Johnny')
+    expect(output).toContain('NICKNAME:JD')
+  })
+})
+
+describe('Test addKey()', () => {
+  it('should add a base64-encoded PGP key', () => {
+    const vCard = new VCard()
+    vCard.addKey({ key: 'MIICajCCAdOgAwIBAgICBEUwDQ...' })
+    expect(vCard.toString()).toContain(
+      'KEY;ENCODING=b;TYPE=PGP:MIICajCCAdOgAwIBAgICBEUwDQ...',
+    )
+  })
+
+  it('should add a key with custom MIME type', () => {
+    const vCard = new VCard()
+    vCard.addKey({ key: 'base64cert', mime: 'x509' })
+    expect(vCard.toString()).toContain('KEY;ENCODING=b;TYPE=X509:base64cert')
+  })
+
+  it('should add a key by URL', () => {
+    const vCard = new VCard()
+    vCard.addKey({ url: 'https://example.com/key.pub' })
+    expect(vCard.toString()).toContain(
+      'KEY;VALUE=uri:https://example.com/key.pub',
+    )
+  })
+
+  it('should allow both base64 and URL keys on the same card', () => {
+    const vCard = new VCard()
+    vCard
+      .addKey({ key: 'pgpdata' })
+      .addKey({ url: 'https://example.com/key.pub' })
+    const output = vCard.toString()
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
+    expect(output).toContain('KEY;VALUE=uri:https://example.com/key.pub')
+  })
+
+  it('should allow multiple keys', () => {
+    const vCard = new VCard()
+    vCard
+      .addKey({ key: 'pgpdata', mime: 'PGP' })
+      .addKey({ key: 'certdata', mime: 'x509' })
+    const output = vCard.toString()
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
+    expect(output).toContain('KEY;ENCODING=b;TYPE=X509:certdata')
+  })
+})
+
+describe('Multiple note instances', () => {
+  it('should allow multiple addNote calls', () => {
+    const vCard = new VCard()
+    vCard.addNote('Met at conference').addNote('Follows up quarterly')
+    const output = vCard.toString()
+    expect(output).toContain('NOTE:Met at conference')
+    expect(output).toContain('NOTE:Follows up quarterly')
+  })
+})
+
 describe('Test addGeo()', () => {
   it('should add geographic position', () => {
     const vCard = new VCard()
-    vCard.addGeo(37.386013, -122.082932)
+    vCard.addGeo({ latitude: 37.386013, longitude: -122.082932 })
     const output = vCard.toString()
     expect(output).toContain('GEO:37.386013;-122.082932')
   })
 
   it('should accept boundary values', () => {
     const vCard = new VCard()
-    vCard.addGeo(-90, 180)
+    vCard.addGeo({ latitude: -90, longitude: 180 })
     const output = vCard.toString()
     expect(output).toContain('GEO:-90;180')
   })
 
   it('should throw on invalid latitude', () => {
     const vCard = new VCard()
-    expect(() => vCard.addGeo(91, 0)).toThrow(VCardException)
-    expect(() => vCard.addGeo(-91, 0)).toThrow(VCardException)
+    expect(() => vCard.addGeo({ latitude: 91, longitude: 0 })).toThrow(
+      VCardException,
+    )
+    expect(() => vCard.addGeo({ latitude: -91, longitude: 0 })).toThrow(
+      VCardException,
+    )
   })
 
   it('should throw on invalid longitude', () => {
     const vCard = new VCard()
-    expect(() => vCard.addGeo(0, 181)).toThrow(VCardException)
-    expect(() => vCard.addGeo(0, -181)).toThrow(VCardException)
+    expect(() => vCard.addGeo({ latitude: 0, longitude: 181 })).toThrow(
+      VCardException,
+    )
+    expect(() => vCard.addGeo({ latitude: 0, longitude: -181 })).toThrow(
+      VCardException,
+    )
   })
 
   it('should throw on duplicate addGeo', () => {
     const vCard = new VCard()
-    vCard.addGeo(37, -122)
-    expect(() => vCard.addGeo(40, -74)).toThrow(VCardException)
+    vCard.addGeo({ latitude: 37, longitude: -122 })
+    expect(() => vCard.addGeo({ latitude: 40, longitude: -74 })).toThrow(
+      VCardException,
+    )
   })
 })
 
@@ -355,5 +481,40 @@ describe('Social & IMPP', () => {
 
     expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
+  })
+})
+
+describe('Multiple photo/logo instances', () => {
+  it('should allow both base64 and URL photo on the same card', () => {
+    const vCard = new VCard()
+    vCard
+      .addPhoto({ image: 'base64data', mime: 'jpeg' })
+      .addPhoto({ url: 'https://example.com/photo.jpg' })
+
+    const output = vCard.toString()
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data')
+    expect(output).toContain('PHOTO;VALUE=uri:https://example.com/photo.jpg')
+  })
+
+  it('should allow both base64 and URL logo on the same card', () => {
+    const vCard = new VCard()
+    vCard
+      .addLogo({ image: 'base64logo', mime: 'png' })
+      .addLogo({ url: 'https://example.com/logo.png' })
+
+    const output = vCard.toString()
+    expect(output).toContain('LOGO;ENCODING=b;TYPE=PNG:base64logo')
+    expect(output).toContain('LOGO;VALUE=uri:https://example.com/logo.png')
+  })
+
+  it('should allow multiple embedded photos', () => {
+    const vCard = new VCard()
+    vCard
+      .addPhoto({ image: 'thumb64', mime: 'jpeg' })
+      .addPhoto({ image: 'hires64', mime: 'png' })
+
+    const output = vCard.toString()
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:thumb64')
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=PNG:hires64')
   })
 })

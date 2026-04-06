@@ -169,7 +169,7 @@ describe('Text escaping', () => {
 
     it('should not escape GEO structural semicolons', () => {
       const vCard = new VCard()
-      vCard.addGeo(37.386, -122.083)
+      vCard.addGeo({ latitude: 37.386, longitude: -122.083 })
       expect(vCard.toString()).toContain('GEO:37.386;-122.083')
     })
 

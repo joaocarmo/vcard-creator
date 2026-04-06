@@ -7,12 +7,14 @@ import {
   DefinedElements,
   Element,
   EmailOptions,
+  GeoOptions,
   ImppOptions,
+  KeyOptions,
   LabelOptions,
-  MediaOptions,
-  MediaUrlOptions,
+  LogoOptions,
   NameOptions,
   PhoneOptions,
+  PhotoOptions,
   Property,
   SetPropertyOptions,
   SocialOptions,
@@ -25,6 +27,10 @@ import {
   resolveType,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
+
+interface StoredProperty extends Property {
+  element: Element
+}
 
 export default class VCard {
   /**
@@ -50,7 +56,7 @@ export default class VCard {
   /**
    * Properties.
    */
-  private properties: Property[] = []
+  private properties: StoredProperty[] = []
 
   /**
    * Defined elements.
@@ -92,7 +98,7 @@ export default class VCard {
     const resolved = resolveType(type)
     this.setProperty({
       element: 'address',
-      key: `ADR${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
+      key: `ADR${resolved !== '' ? `;${resolved}` : ''}`,
       value,
     })
 
@@ -125,7 +131,7 @@ export default class VCard {
     const escapedDept = department !== '' ? `;${escapeText(department)}` : ''
     this.setProperty({
       element: 'company',
-      key: `ORG${this.getCharsetString()}`,
+      key: `ORG`,
       value: escapedName + escapedDept,
     })
 
@@ -149,6 +155,30 @@ export default class VCard {
   }
 
   /**
+   * Add public key (base64-encoded or by URL).
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
+   */
+  public addKey(options: KeyOptions): this {
+    if ('url' in options) {
+      this.setProperty({
+        element: 'key',
+        key: 'KEY;VALUE=uri',
+        value: options.url,
+      })
+    } else {
+      const mime = options.mime ?? 'PGP'
+      this.setProperty({
+        element: 'key',
+        key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,
+        value: options.key,
+      })
+    }
+
+    return this
+  }
+
+  /**
    * Add jobtitle.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.1
@@ -156,7 +186,7 @@ export default class VCard {
   public addJobtitle(jobtitle: string): this {
     this.setProperty({
       element: 'jobtitle',
-      key: `TITLE${this.getCharsetString()}`,
+      key: `TITLE`,
       value: escapeText(jobtitle),
     })
 
@@ -171,7 +201,7 @@ export default class VCard {
   public addRole(role: string): this {
     this.setProperty({
       element: 'role',
-      key: `ROLE${this.getCharsetString()}`,
+      key: `ROLE`,
       value: escapeText(role),
     })
 
@@ -216,6 +246,24 @@ export default class VCard {
   }
 
   /**
+   * Add formatted name (FN) directly.
+   *
+   * When set, overrides the auto-generated FN from addName().
+   * Useful for mononyms, company-as-contact, or custom formatting.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.1
+   */
+  public addFullName(fullName: string): this {
+    this.setProperty({
+      element: 'fullname',
+      key: `FN`,
+      value: escapeText(fullName),
+    })
+
+    return this
+  }
+
+  /**
    * Add name.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
@@ -246,7 +294,7 @@ export default class VCard {
       .join(';')
     this.setProperty({
       element: 'name',
-      key: `N${this.getCharsetString()}`,
+      key: `N`,
       value: property,
     })
 
@@ -254,7 +302,7 @@ export default class VCard {
     if (!this.hasProperty('FN') && fnValue !== '') {
       this.setProperty({
         element: 'fullname',
-        key: `FN${this.getCharsetString()}`,
+        key: `FN`,
         value: fnValue,
       })
     }
@@ -273,7 +321,7 @@ export default class VCard {
       : escapeText(nickname)
     this.setProperty({
       element: 'nickname',
-      key: `NICKNAME${this.getCharsetString()}`,
+      key: `NICKNAME`,
       value,
     })
 
@@ -288,7 +336,7 @@ export default class VCard {
   public addNote(note: string): this {
     this.setProperty({
       element: 'note',
-      key: `NOTE${this.getCharsetString()}`,
+      key: `NOTE`,
       value: escapeText(note),
     })
 
@@ -303,7 +351,7 @@ export default class VCard {
   public addCategories(categories: string[]): this {
     this.setProperty({
       element: 'categories',
-      key: `CATEGORIES${this.getCharsetString()}`,
+      key: `CATEGORIES`,
       value: categories.map(escapeText).join(',').trim(),
     })
 
@@ -327,51 +375,43 @@ export default class VCard {
   }
 
   /**
-   * Add Logo URL.
+   * Add logo (base64-encoded or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
+   * @throws VCardException
    */
-  public addLogoUrl({ url }: MediaUrlOptions): this {
-    this.addMediaUrl('LOGO', url, 'logo')
+  public addLogo(options: LogoOptions): this {
+    if ('url' in options) {
+      this.addMediaUrl('LOGO', options.url, 'logo')
+    } else {
+      this.addMediaContent(
+        'LOGO',
+        options.image,
+        options.mime ?? constants.DEFAULT_MIME_TYPE,
+        'logo',
+      )
+    }
 
     return this
   }
 
   /**
-   * Add Logo.
-   *
-   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
-   */
-  public addLogo({
-    image,
-    mime = constants.DEFAULT_MIME_TYPE,
-  }: MediaOptions): this {
-    this.addMediaContent('LOGO', image, mime, 'logo')
-
-    return this
-  }
-
-  /**
-   * Add Photo URL.
+   * Add photo (base64-encoded or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
+   * @throws VCardException
    */
-  public addPhotoUrl({ url }: MediaUrlOptions): this {
-    this.addMediaUrl('PHOTO', url, 'photo')
-
-    return this
-  }
-
-  /**
-   * Add Photo.
-   *
-   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   */
-  public addPhoto({
-    image,
-    mime = constants.DEFAULT_MIME_TYPE,
-  }: MediaOptions): this {
-    this.addMediaContent('PHOTO', image, mime, 'photo')
+  public addPhoto(options: PhotoOptions): this {
+    if ('url' in options) {
+      this.addMediaUrl('PHOTO', options.url, 'photo')
+    } else {
+      this.addMediaContent(
+        'PHOTO',
+        options.image,
+        options.mime ?? constants.DEFAULT_MIME_TYPE,
+        'photo',
+      )
+    }
 
     return this
   }
@@ -447,7 +487,7 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.2
    * @throws VCardException
    */
-  public addGeo(latitude: number, longitude: number): this {
+  public addGeo({ latitude, longitude }: GeoOptions): this {
     if (latitude < -90 || latitude > 90) {
       throw new VCardException(
         `Invalid latitude: ${latitude}. Must be between -90 and 90.`,
@@ -488,7 +528,7 @@ export default class VCard {
   public addSortString(sortString: string): this {
     this.setProperty({
       element: 'sortString',
-      key: `SORT-STRING${this.getCharsetString()}`,
+      key: `SORT-STRING`,
       value: escapeText(sortString),
     })
 
@@ -521,7 +561,7 @@ export default class VCard {
     const resolved = resolveType(type)
     this.setProperty({
       element: 'label',
-      key: `LABEL${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
+      key: `LABEL${resolved !== '' ? `;${resolved}` : ''}`,
       value: escapeText(label),
     })
 
@@ -572,10 +612,13 @@ export default class VCard {
     }
 
     // Loop all properties
-    const properties = this.getProperties()
-    properties.forEach((property) => {
+    const charsetStr = this.getCharsetString()
+    this.properties.forEach((property) => {
       const prefix = property.group ? `${property.group}.` : ''
-      string += fold(`${prefix}${property.key}:${property.value}\r\n`)
+      const charset = constants.TEXT_ELEMENTS.includes(property.element)
+        ? charsetStr
+        : ''
+      string += fold(`${prefix}${property.key}${charset}:${property.value}\r\n`)
     })
 
     string += 'END:VCARD\r\n'
@@ -661,16 +704,18 @@ export default class VCard {
    * Get properties.
    */
   public getProperties(): Property[] {
-    return this.properties
+    return this.properties.map(({ key, value, group }) => ({
+      key,
+      value,
+      group,
+    }))
   }
 
   /**
    * Has property.
    */
   public hasProperty(key: string): boolean {
-    const properties = this.getProperties()
-
-    return properties.some((property: Property) => property.key === key)
+    return this.properties.some((property) => property.key === key)
   }
 
   /**
@@ -707,6 +752,7 @@ export default class VCard {
     this.definedElements[element] = true
 
     this.properties.push({
+      element,
       key,
       value,
       group,

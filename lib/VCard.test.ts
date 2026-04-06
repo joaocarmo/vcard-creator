@@ -42,7 +42,7 @@ describe('Test vCard', () => {
         country: 'Belgium',
       })
       .addUrl({ url: 'http://www.jeroendesloovere.be' })
-      .addPhotoUrl({ url: photoURL })
+      .addPhoto({ url: photoURL })
       .addUid('19950401-080045-40000F192713-0052')
 
     const vCardOutput = vCard.toString()
@@ -142,7 +142,7 @@ describe('Test PRODID', () => {
 describe('Metadata getters', () => {
   it('should return default content type', () => {
     const vCard = new VCard()
-    expect(vCard.getContentType()).toBe('text/x-vcard')
+    expect(vCard.getContentType()).toBe('text/vcard')
   })
 
   it('should return default filename', () => {

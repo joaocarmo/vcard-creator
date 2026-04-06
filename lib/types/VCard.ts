@@ -9,6 +9,7 @@ export type Element =
   | 'geo'
   | 'impp'
   | 'jobtitle'
+  | 'key'
   | 'label'
   | 'logo'
   | 'name'
@@ -67,7 +68,7 @@ export type PhoneType =
   | 'isdn'
   | 'video'
 
-export type EmailType = 'pref' | 'work' | 'home'
+export type EmailType = 'internet' | 'pref' | 'work' | 'home'
 
 export type UrlType = 'work' | 'home'
 
@@ -133,13 +134,30 @@ export interface ImppOptions {
   serviceType?: string
 }
 
-export interface MediaUrlOptions {
-  url: string
-}
+export type PhotoOptions =
+  | { url: string }
+  | {
+      /** Base64-encoded image data */ image: string
+      /** Image MIME type (defaults to 'JPEG') */ mime?: string
+    }
 
-export interface MediaOptions {
-  image: string
-  mime?: string
+export type LogoOptions =
+  | { url: string }
+  | {
+      /** Base64-encoded image data */ image: string
+      /** Image MIME type (defaults to 'JPEG') */ mime?: string
+    }
+
+export type KeyOptions =
+  | { url: string }
+  | {
+      /** Base64-encoded public key data */ key: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. */ mime?: string
+    }
+
+export interface GeoOptions {
+  latitude: number
+  longitude: number
 }
 
 export interface LabelOptions {

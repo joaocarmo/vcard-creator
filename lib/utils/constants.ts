@@ -7,15 +7,35 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'custom',
   'email',
   'impp',
+  'key',
   'label',
+  'logo',
+  'nickname',
+  'note',
   'phoneNumber',
+  'photo',
   'social',
   'url',
 ]
 
+export const TEXT_ELEMENTS: Element[] = [
+  'address',
+  'categories',
+  'company',
+  'fullname',
+  'jobtitle',
+  'label',
+  'name',
+  'nickname',
+  'note',
+  'role',
+  'sortString',
+]
+
+// Updated automatically during the release action
 export const LIB_VERSION = '0.11.0'
 
-export const CONTENT_TYPE = 'text/x-vcard'
+export const CONTENT_TYPE = 'text/vcard'
 export const DEFAULT_CHARACTER_SET = 'utf-8'
 export const DEFAULT_EXTENSION = 'vcf'
 export const DEFAULT_FILENAME = 'vcard'
