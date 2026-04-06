@@ -18,6 +18,20 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'url',
 ]
 
+export const TEXT_ELEMENTS: Element[] = [
+  'address',
+  'categories',
+  'company',
+  'fullname',
+  'jobtitle',
+  'label',
+  'name',
+  'nickname',
+  'note',
+  'role',
+  'sortString',
+]
+
 // Updated automatically during the release action
 export const LIB_VERSION = '0.11.0'
 
