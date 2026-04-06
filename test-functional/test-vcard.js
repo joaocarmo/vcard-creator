@@ -103,8 +103,6 @@ for (const [marker, label] of checks) {
 
 console.log(output)
 
-// --- Multi-contact file test ---
-
 const card2 = new VCard()
   .addName({ givenName: 'Alice', familyName: 'Wonderland' })
   .addEmail({ address: 'alice@wonderland.com', type: ['pref'] })
