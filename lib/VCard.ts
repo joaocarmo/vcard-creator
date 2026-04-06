@@ -154,7 +154,6 @@ export default class VCard {
    * Add public key (base64-encoded or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
-   * @throws VCardException
    */
   public addKey(options: KeyOptions): this {
     if ('url' in options) {
