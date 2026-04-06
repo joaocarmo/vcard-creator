@@ -1,16 +1,10 @@
 import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
-import { b64encode, chunkSplit, fold } from './utils/functions'
+import { fold, resolveType } from './utils/functions'
 import { LIB_VERSION } from './utils/constants'
 
 describe('Test vCard', () => {
-  // Define variables
-  const lastname = 'Desloovere'
-  const firstname = 'Jeroen'
-  const additional = ''
-  const prefix = ''
-  const suffix = ''
   const photoURL = 'https://example.com/img/photo.jpg'
 
   beforeEach(() => {
@@ -22,33 +16,34 @@ describe('Test vCard', () => {
     vi.useRealTimers()
   })
 
-  it("should create and output the proper 'vcard' format", () => {
-    // Define vCard
+  it('should create and output the proper vCard format', () => {
     const vCard = new VCard()
 
     vCard
-      // Add personal data
-      .addName(lastname, firstname, additional, prefix, suffix)
+      .addName({ familyName: 'Desloovere', givenName: 'Jeroen' })
       .addNickname(['Jero', 'Jerox'])
-      .addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
-      // Add work data
-      .addCompany('Siesqo')
+      .addSocial({
+        url: 'https://x.com/desloovere_j',
+        type: 'X',
+        user: 'desloovere_j',
+      })
+      .addCompany({ name: 'Siesqo' })
       .addJobtitle('Web Developer')
       .addRole('Data Protection Officer')
-      .addEmail('info@jeroendesloovere.be')
-      .addPhoneNumber(1234121212, 'PREF;WORK')
-      .addPhoneNumber(123456789, 'WORK')
-      .addAddress(
-        'name',
-        'extended',
-        'street',
-        'worktown',
-        'state',
-        'workpostcode',
-        'Belgium',
-      )
-      .addUrl('http://www.jeroendesloovere.be')
-      .addPhotoUrl(photoURL)
+      .addEmail({ address: 'info@jeroendesloovere.be' })
+      .addPhoneNumber({ number: 1234121212, type: ['pref', 'work'] })
+      .addPhoneNumber({ number: 123456789, type: ['work'] })
+      .addAddress({
+        postOfficeBox: 'name',
+        extended: 'extended',
+        street: 'street',
+        locality: 'worktown',
+        region: 'state',
+        postalCode: 'workpostcode',
+        country: 'Belgium',
+      })
+      .addUrl({ url: 'http://www.jeroendesloovere.be' })
+      .addPhotoUrl({ url: photoURL })
       .addUid('19950401-080045-40000F192713-0052')
 
     const vCardOutput = vCard.toString()
@@ -76,91 +71,33 @@ UID:19950401-080045-40000F192713-0052\r\n\
 END:VCARD\r\n\
 `
 
-    // Compare the results
     expect(vCardOutput).toBe(expectedOutput)
   })
 
-  it("should create and output the proper 'vcalendar' format", () => {
-    // Init dates
-    const nowISO = new Date().toISOString()
-    const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
-    const dtstart = `${nowBase}00`
-    const dtend = `${nowBase}01`
-
-    // Define vCard
-    const vCard = new VCard('vcalendar')
-
-    vCard
-      // Add personal data
-      .addName(lastname, firstname, additional, prefix, suffix)
-      // Add work data
-      .addCompany('Siesqo')
-      .addJobtitle('Web Developer')
-      .addRole('Data Protection Officer')
-      .addEmail('info@jeroendesloovere.be')
-      .addPhoneNumber(1234121212, 'PREF;WORK')
-      .addPhoneNumber(123456789, 'WORK')
-      .addAddress(
-        'name',
-        'extended',
-        'street',
-        'worktown',
-        'state',
-        'workpostcode',
-        'Belgium',
-      )
-      .addUrl('http://www.jeroendesloovere.be')
-      .addPhotoUrl(photoURL)
-
-    const vCalendarOutput = vCard.toString()
-
-    const b64vcard = b64encode(vCard.buildVCard())
-    const b64mline = chunkSplit(b64vcard, 74, '\n')
-    const b64final = b64mline.replace(/(.+)/g, ' $1')
-    const expectedOutput = `\
-BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART;TZID=Europe/London:${dtstart}
-DTEND;TZID=Europe/London:${dtend}
-SUMMARY:Click the attachment to save to your contacts
-DTSTAMP:${dtstart}Z
-ATTACH;VALUE=BINARY;ENCODING=BASE64;FMTTYPE=text/directory;
- X-APPLE-FILENAME=vcard.vcf:
-${b64final}\
-END:VEVENT
-END:VCALENDAR
-`
-
-    // Compare the results
-    expect(vCalendarOutput).toBe(expectedOutput)
-  })
-
   it('should throw on attempting to add the same property', () => {
-    // Define vCard
     const vCard = new VCard()
 
-    // Add personal data
-    vCard.addName(lastname, firstname, additional, prefix, suffix)
+    vCard.addName({ familyName: 'Desloovere', givenName: 'Jeroen' })
 
     expect(() => {
-      // Add personal data again
-      vCard.addName(lastname, firstname, additional, prefix, suffix)
+      vCard.addName({ familyName: 'Desloovere', givenName: 'Jeroen' })
     }).toThrow(VCardException)
   })
 
   it('should throw on attempting to add an invalid MIME Media Type', () => {
-    // Define vCard
     const vCard = new VCard()
 
     expect(() => {
-      vCard.addPhoto('MIICajCCAdOgAwIBAgICBEUwDQYJKoZIhvcN...', 'foobar')
+      vCard.addPhoto({
+        image: 'MIICajCCAdOgAwIBAgICBEUwDQYJKoZIhvcN...',
+        mime: 'foobar',
+      })
     }).toThrow(VCardException)
   })
 
   it('should output both X-SOCIALPROFILE and IMPP for social profiles', () => {
     const vCard = new VCard()
-    vCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+    vCard.addSocial({ url: 'https://linkedin.com/in/jdoe', type: 'LinkedIn' })
 
     const output = vCard.toString()
 
@@ -174,7 +111,7 @@ END:VCALENDAR
 
   it('should handle social profiles without type or user', () => {
     const vCard = new VCard()
-    vCard.addSocial('https://example.com/profile', '')
+    vCard.addSocial({ url: 'https://example.com/profile', type: '' })
 
     const output = vCard.toString()
 
@@ -187,8 +124,8 @@ END:VCALENDAR
   it('should support multiple social profiles', () => {
     const vCard = new VCard()
     vCard
-      .addSocial('https://x.com/jdoe', 'X', 'jdoe')
-      .addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+      .addSocial({ url: 'https://x.com/jdoe', type: 'X', user: 'jdoe' })
+      .addSocial({ url: 'https://linkedin.com/in/jdoe', type: 'LinkedIn' })
 
     const output = vCard.toString()
 
@@ -202,7 +139,7 @@ END:VCALENDAR
 
   it('should add standalone IMPP with service type', () => {
     const vCard = new VCard()
-    vCard.addImpp('xmpp:user@example.com', 'XMPP')
+    vCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })
 
     const output = vCard.toString()
 
@@ -212,7 +149,7 @@ END:VCALENDAR
 
   it('should add standalone IMPP without service type', () => {
     const vCard = new VCard()
-    vCard.addImpp('sip:user@example.com')
+    vCard.addImpp({ uri: 'sip:user@example.com' })
 
     const output = vCard.toString()
 
@@ -223,8 +160,8 @@ END:VCALENDAR
   it('should support multiple IMPP entries', () => {
     const vCard = new VCard()
     vCard
-      .addImpp('xmpp:user@example.com', 'XMPP')
-      .addImpp('sip:user@example.com', 'SIP')
+      .addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })
+      .addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 
     const output = vCard.toString()
 
@@ -232,15 +169,13 @@ END:VCALENDAR
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
   })
 
-  it('shoud parse phone numbers correctly', () => {
-    // Define vCard
+  it('should parse phone numbers correctly', () => {
     const vCard = new VCard()
 
-    // Add phone numbers
     vCard
-      .addPhoneNumber(1234121212, 'PREF;WORK')
-      .addPhoneNumber(123456789, 'WORK')
-      .addPhoneNumber('0123456789', 'HOME')
+      .addPhoneNumber({ number: 1234121212, type: ['pref', 'work'] })
+      .addPhoneNumber({ number: 123456789, type: ['work'] })
+      .addPhoneNumber({ number: '0123456789', type: ['home'] })
 
     const vCardOutput = vCard.toString()
     const expectedOutput = `\
@@ -254,7 +189,6 @@ TEL;TYPE=HOME:0123456789\r\n\
 END:VCARD\r\n\
 `
 
-    // Compare the results
     expect(vCardOutput).toBe(expectedOutput)
   })
 })
@@ -268,51 +202,41 @@ describe('Test fold()', () => {
   it('should fold ASCII lines over 75 octets', () => {
     const long = 'A'.repeat(80) + '\r\n'
     const result = fold(long)
-    // First line should be 75 octets, then continuation
     expect(result).toContain('\r\n ')
-    // No line segment should exceed 75 octets
     const lines = result.split('\r\n ')
     const encoder = new TextEncoder()
     expect(encoder.encode(lines[0]).length).toBeLessThanOrEqual(75)
   })
 
   it('should fold CJK text at octet boundaries without splitting characters', () => {
-    // Each CJK character is 3 bytes in UTF-8. 25 CJK chars = 75 bytes = exactly the limit
     const exactly75 = '漢'.repeat(25)
     expect(fold(exactly75)).toBe(exactly75)
 
-    // With trailing CRLF — still 75 bytes of content, no fold needed
     const exactly75WithCrlf = '漢'.repeat(25) + '\r\n'
     expect(fold(exactly75WithCrlf)).toBe(exactly75WithCrlf)
 
-    // 26 CJK chars = 78 bytes = over the limit, must fold
     const over75 = '漢'.repeat(26)
     const result = fold(over75)
     expect(result).toContain('\r\n ')
-    // Verify no byte sequence is broken: all 26 chars survive
     const charCount = (result.match(/漢/g) || []).length
     expect(charCount).toBe(26)
   })
 
   it('should fold emoji without splitting multi-byte sequences', () => {
-    // Each emoji is 4 bytes. 18 emoji = 72 bytes, 19 = 76 bytes
     const under = '😀'.repeat(18) + '\r\n'
     expect(fold(under)).toBe(under)
 
     const over = '😀'.repeat(19) + '\r\n'
     const result = fold(over)
     expect(result).toContain('\r\n ')
-    // Every emoji should survive intact
     const emojiCount = (result.match(/😀/g) || []).length
     expect(emojiCount).toBe(19)
   })
 
   it('should fold mixed ASCII and multi-byte text correctly', () => {
-    // 60 ASCII bytes + 6 CJK chars (18 bytes) = 78 bytes, over 75
     const mixed = 'A'.repeat(60) + '漢'.repeat(6)
     const result = fold(mixed)
     expect(result).toContain('\r\n ')
-    // All characters survive intact
     const aCount = (result.match(/A/g) || []).length
     const cjkCount = (result.match(/漢/g) || []).length
     expect(aCount).toBe(60)
@@ -408,14 +332,14 @@ describe('Test addSortString()', () => {
 describe('Test addLabel()', () => {
   it('should add label with default type', () => {
     const vCard = new VCard()
-    vCard.addLabel('123 Main St\nSpringfield, IL 62701')
+    vCard.addLabel({ label: '123 Main St\nSpringfield, IL 62701' })
     const output = vCard.toString()
     expect(output).toContain('LABEL;TYPE=WORK,POSTAL;CHARSET=utf-8:')
   })
 
   it('should add label with custom type', () => {
     const vCard = new VCard()
-    vCard.addLabel('Home address', 'HOME')
+    vCard.addLabel({ label: 'Home address', type: ['home'] })
     expect(vCard.toString()).toContain(
       'LABEL;TYPE=HOME;CHARSET=utf-8:Home address',
     )
@@ -423,14 +347,14 @@ describe('Test addLabel()', () => {
 
   it('should escape newlines in label', () => {
     const vCard = new VCard()
-    vCard.addLabel('Line 1\nLine 2')
+    vCard.addLabel({ label: 'Line 1\nLine 2' })
     expect(vCard.toString()).toContain('Line 1\\nLine 2')
   })
 
   it('should allow multiple labels', () => {
     const vCard = new VCard()
-    vCard.addLabel('Work address', 'WORK')
-    vCard.addLabel('Home address', 'HOME')
+    vCard.addLabel({ label: 'Work address', type: ['work'] })
+    vCard.addLabel({ label: 'Home address', type: ['home'] })
     const output = vCard.toString()
     expect(output).toContain('LABEL;TYPE=WORK;CHARSET=utf-8:Work address')
     expect(output).toContain('LABEL;TYPE=HOME;CHARSET=utf-8:Home address')
@@ -440,7 +364,7 @@ describe('Test addLabel()', () => {
 describe('Test PRODID', () => {
   it('should include PRODID in every vCard output', () => {
     const vCard = new VCard()
-    vCard.addName('Doe', 'John')
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
     const output = vCard.toString()
     expect(output).toContain(
       `PRODID:-//vcard-creator//vcard-creator ${LIB_VERSION}//EN`,
@@ -449,7 +373,7 @@ describe('Test PRODID', () => {
 
   it('should place PRODID after VERSION and before REV', () => {
     const vCard = new VCard()
-    vCard.addName('Doe', 'John')
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
     const output = vCard.toString()
     const versionIdx = output.indexOf('VERSION:3.0')
     const prodidIdx = output.indexOf('PRODID:')
@@ -462,22 +386,26 @@ describe('Test PRODID', () => {
 describe('Test addCustomProperty()', () => {
   it('should add a basic custom property', () => {
     const vCard = new VCard()
-    vCard.addCustomProperty('X-PHONETIC-FIRST-NAME', 'Jon')
+    vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
     expect(vCard.toString()).toContain('X-PHONETIC-FIRST-NAME:Jon')
   })
 
   it('should add custom property with params', () => {
     const vCard = new VCard()
-    vCard.addCustomProperty('X-CUSTOM', 'value', 'TYPE=work')
+    vCard.addCustomProperty({
+      name: 'X-CUSTOM',
+      value: 'value',
+      params: 'TYPE=work',
+    })
     expect(vCard.toString()).toContain('X-CUSTOM;TYPE=work:value')
   })
 
   it('should allow multiple custom properties', () => {
     const vCard = new VCard()
     vCard
-      .addCustomProperty('X-PHONETIC-FIRST-NAME', 'Jon')
-      .addCustomProperty('X-PHONETIC-LAST-NAME', 'Sumisu')
-      .addCustomProperty('X-ANNIVERSARY', '2010-06-15')
+      .addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
+      .addCustomProperty({ name: 'X-PHONETIC-LAST-NAME', value: 'Sumisu' })
+      .addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
     const output = vCard.toString()
     expect(output).toContain('X-PHONETIC-FIRST-NAME:Jon')
     expect(output).toContain('X-PHONETIC-LAST-NAME:Sumisu')
@@ -486,38 +414,22 @@ describe('Test addCustomProperty()', () => {
 
   it('should uppercase the property name', () => {
     const vCard = new VCard()
-    vCard.addCustomProperty('x-custom-field', 'test')
+    vCard.addCustomProperty({ name: 'x-custom-field', value: 'test' })
     expect(vCard.toString()).toContain('X-CUSTOM-FIELD:test')
   })
 
   it('should handle empty value', () => {
     const vCard = new VCard()
-    vCard.addCustomProperty('X-EMPTY', '')
+    vCard.addCustomProperty({ name: 'X-EMPTY', value: '' })
     expect(vCard.toString()).toContain('X-EMPTY:')
   })
 
   it('should handle empty params', () => {
     const vCard = new VCard()
-    vCard.addCustomProperty('X-TEST', 'value', '')
+    vCard.addCustomProperty({ name: 'X-TEST', value: 'value', params: '' })
     const output = vCard.toString()
     expect(output).toContain('X-TEST:value')
     expect(output).not.toContain('X-TEST;')
-  })
-
-  it('should accept options object', () => {
-    const vCard = new VCard()
-    vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
-    expect(vCard.toString()).toContain('X-PHONETIC-FIRST-NAME:Jon')
-  })
-
-  it('should accept options object with params', () => {
-    const vCard = new VCard()
-    vCard.addCustomProperty({
-      name: 'X-CUSTOM',
-      value: 'test',
-      params: 'TYPE=work',
-    })
-    expect(vCard.toString()).toContain('X-CUSTOM;TYPE=work:test')
   })
 })
 
@@ -663,12 +575,6 @@ describe('resolveType wire format', () => {
     expect(vCard.toString()).toContain('TEL;TYPE=WORK,VOICE:123')
   })
 
-  it('legacy string still works', () => {
-    const vCard = new VCard()
-    vCard.addPhoneNumber('123', 'WORK;VOICE')
-    expect(vCard.toString()).toContain('TEL;TYPE=WORK,VOICE:123')
-  })
-
   it('empty type produces no TYPE parameter', () => {
     const vCard = new VCard()
     vCard.addEmail({ address: 'test@test.com' })
@@ -682,6 +588,18 @@ describe('resolveType wire format', () => {
     vCard.addAddress({ street: 'Main St', type: [] })
     expect(vCard.toString()).toContain('ADR;CHARSET=utf-8:')
     expect(vCard.toString()).not.toContain('TYPE=')
+  })
+
+  it('resolveType with single element', () => {
+    expect(resolveType(['work'])).toBe('TYPE=WORK')
+  })
+
+  it('resolveType with multiple elements', () => {
+    expect(resolveType(['work', 'postal'])).toBe('TYPE=WORK,POSTAL')
+  })
+
+  it('resolveType with empty array', () => {
+    expect(resolveType([])).toBe('')
   })
 })
 

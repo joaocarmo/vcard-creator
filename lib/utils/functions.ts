@@ -4,79 +4,14 @@ const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
 /**
- * Check if the argument is an options object (as opposed to a positional
- * string/number).
- * When used as `isOptions<SomeOptions>(arg)`, TypeScript narrows to
- * `SomeOptions` on true and excludes it on false.
- */
-export function isOptions<T extends object>(
-  arg: T | string | number,
-): arg is T {
-  return typeof arg === 'object' && arg !== null && !Array.isArray(arg)
-}
-
-/**
- * Convert a type array or legacy string to the vCard TYPE= wire format.
+ * Convert a type array to the vCard TYPE= wire format.
  * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
- * 'WORK;POSTAL'      → 'TYPE=WORK,POSTAL' (legacy string, best-effort)
- * ''                 → ''
+ * []                 → ''
  */
-export function resolveType<T extends string>(type: T[] | string): string {
-  if (Array.isArray(type)) {
-    return type.length > 0
-      ? `TYPE=${type.map((t) => t.toUpperCase()).join(',')}`
-      : ''
-  }
-
-  if (type === '') {
-    return ''
-  }
-
-  return `TYPE=${type.replace(/;/g, ',').toUpperCase()}`
-}
-
-/**
- * Encodes data with MIME base64.
- *
- * @param  {string} data text
- * @return {string}
- */
-export function b64encode(data: string): string {
-  try {
-    // For the browser
-    return btoa(data)
-  } catch {
-    // For Node.js
-    return Buffer.from(data).toString('base64')
-  }
-}
-
-/**
- * Split a string into smaller chunks e.g., to match RFC 2045 semantics.
- *
- * Note: This function counts characters, not octets. This is safe because it is
- * only used for base64-encoded data, which is strictly ASCII (A-Z, a-z, 0-9,
- * +, /, =) — every character is exactly 1 octet.
- *
- * @link   https://tools.ietf.org/html/rfc2045
- * @param  {string} body text
- * @return {string}
- */
-export function chunkSplit(body: string, chunklen = 76, end = '\r\n'): string {
-  const chunklength = chunklen || 76
-  const ending = end || '\r\n'
-
-  if (chunklen < 1) {
-    return ''
-  }
-
-  const chunks = body.match(new RegExp(`.{0,${chunklength}}`, 'g'))
-
-  if (!chunks) {
-    return ''
-  }
-
-  return chunks.join(ending)
+export function resolveType<T extends string>(type: T[]): string {
+  return type.length > 0
+    ? `TYPE=${type.map((t) => t.toUpperCase()).join(',')}`
+    : ''
 }
 
 /**
