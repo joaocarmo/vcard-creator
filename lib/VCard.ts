@@ -445,7 +445,7 @@ export default class VCard {
    * Add geographic position.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.2
-   * @throws {VCardException}
+   * @throws VCardException
    */
   public addGeo(latitude: number, longitude: number): this {
     if (latitude < -90 || latitude > 90) {
@@ -591,6 +591,34 @@ export default class VCard {
   }
 
   /**
+   * Combine multiple vCards into a single multi-contact string.
+   *
+   * Each vCard retains its own BEGIN/END markers. The result is a valid
+   * multi-contact .vcf file.
+   *
+   * @param cards The vCards to combine
+   */
+  static concat(...cards: VCard[]): string {
+    return VCard._concat(cards)
+  }
+
+  /**
+   * Concatenate this vCard with others into a single multi-contact string.
+   *
+   * This card appears first, followed by the others in order.
+   * Follows the same pattern as `Array.prototype.concat`.
+   *
+   * @param others Additional vCards to append
+   */
+  public concat(...others: VCard[]): string {
+    return VCard._concat([this, ...others])
+  }
+
+  private static _concat(cards: VCard[]): string {
+    return cards.map((card) => card.buildVCard()).join('')
+  }
+
+  /**
    * Get charset.
    */
   public getCharset(): string {
@@ -664,37 +692,9 @@ export default class VCard {
   }
 
   /**
-   * Combine multiple vCards into a single multi-contact string.
-   *
-   * Each vCard retains its own BEGIN/END markers. The result is a valid
-   * multi-contact .vcf file.
-   *
-   * @param cards The vCards to combine
-   */
-  static concat(...cards: VCard[]): string {
-    return VCard._concat(cards)
-  }
-
-  /**
-   * Concatenate this vCard with others into a single multi-contact string.
-   *
-   * This card appears first, followed by the others in order.
-   * Follows the same pattern as `Array.prototype.concat`.
-   *
-   * @param others Additional vCards to append
-   */
-  public concat(...others: VCard[]): string {
-    return VCard._concat([this, ...others])
-  }
-
-  private static _concat(cards: VCard[]): string {
-    return cards.map((card) => card.buildVCard()).join('')
-  }
-
-  /**
    * Set property.
    *
-   * @throws {VCardException}
+   * @throws VCardException
    */
   public setProperty({ element, key, value, group }: SetPropertyOptions): void {
     if (
