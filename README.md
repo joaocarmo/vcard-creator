@@ -95,7 +95,7 @@ END:VCARD
 
 ## API
 
-All methods return `this` for chaining.
+All `add*` methods return `this` for chaining.
 
 ### Personal
 
@@ -264,6 +264,30 @@ try {
 }
 ```
 
+### Multi-Contact Files
+
+Combine multiple vCards into a single `.vcf` file for address book exports. Follows the `Array.prototype.concat` pattern:
+
+```js
+import VCard from 'vcard-creator'
+
+const card1 = new VCard()
+  .addName({ givenName: 'Alice', familyName: 'Smith' })
+  .addEmail({ address: 'alice@example.com' })
+
+const card2 = new VCard()
+  .addName({ givenName: 'Bob', familyName: 'Jones' })
+  .addEmail({ address: 'bob@example.com' })
+
+// Instance — "this" card appears first
+const vcf = card1.concat(card2)
+
+// Static — pure combination
+const vcf = VCard.concat(card1, card2, card3)
+```
+
+Each card retains its own `BEGIN:VCARD` / `END:VCARD` markers.
+
 ## Migration from v0.x
 
 For the previous API documentation, see the [v0.11.0 README][readme-v0.11].
@@ -278,6 +302,7 @@ Key changes in v1.0:
 - **Text escaping** — special characters are now properly escaped per RFC 2426
 - **`addBirthday`** — accepts `Date` or `'YYYY-MM-DD'` string (was `string` only)
 - **`getProperties()`** — returns pre-escaped wire-format values
+- **`concat()`** — new method for multi-contact `.vcf` files (static and instance)
 
 ## Forking / Contributing
 
