@@ -8,6 +8,7 @@ import {
   Element,
   EmailOptions,
   ImppOptions,
+  KeyOptions,
   LabelOptions,
   MediaOptions,
   MediaUrlOptions,
@@ -154,7 +155,7 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
    * @throws VCardException
    */
-  public addKey({ key, mime = 'PGP' }: { key: string; mime?: string }): this {
+  public addKey({ key, mime = 'PGP' }: KeyOptions): this {
     this.setProperty({
       element: 'key',
       key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,

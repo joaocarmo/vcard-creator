@@ -148,6 +148,13 @@ export interface LabelOptions {
   type?: AddressType[]
 }
 
+export interface KeyOptions {
+  /** Base64-encoded public key data */
+  key: string
+  /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. */
+  mime?: string
+}
+
 export interface CustomPropertyOptions {
   /** Property name (automatically uppercased) */
   name: string

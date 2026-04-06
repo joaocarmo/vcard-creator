@@ -14,6 +14,7 @@ export type {
   EmailOptions,
   EmailType,
   ImppOptions,
+  KeyOptions,
   LabelOptions,
   MediaOptions,
   MediaUrlOptions,
