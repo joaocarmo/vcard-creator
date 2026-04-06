@@ -23,7 +23,6 @@ export type {
   PhoneType,
   PhotoOptions,
   Property,
-  SetPropertyOptions,
   SocialOptions,
   UrlOptions,
   UrlType,

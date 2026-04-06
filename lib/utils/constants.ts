@@ -2,7 +2,7 @@ import { Element } from '../types/VCard.js'
 
 export { MIME_TYPES } from './mime-types.js'
 
-export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
+export const ALLOWED_MULTIPLE_PROPERTIES: readonly Element[] = [
   'address',
   'custom',
   'email',
@@ -18,7 +18,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'url',
 ]
 
-export const TEXT_ELEMENTS: Element[] = [
+export const TEXT_ELEMENTS: readonly Element[] = [
   'address',
   'categories',
   'company',

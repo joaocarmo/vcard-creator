@@ -213,7 +213,7 @@ describe('Test addLabel()', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: '123 Main St\nSpringfield, IL 62701' })
     const output = vCard.toString()
-    expect(output).toContain('LABEL;TYPE=WORK,POSTAL:')
+    expect(output).toContain('LABEL;TYPE=INTL,POSTAL,PARCEL,WORK:')
   })
 
   it('should add label with custom type', () => {

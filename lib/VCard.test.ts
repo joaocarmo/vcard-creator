@@ -62,7 +62,7 @@ ROLE:Data Protection Officer\r\n\
 EMAIL:info@jeroendesloovere.be\r\n\
 TEL;TYPE=PREF,WORK:1234121212\r\n\
 TEL;TYPE=WORK:123456789\r\n\
-ADR;TYPE=WORK,POSTAL:name;extended;street;worktown;state;workpostcode;Belgi\r\n um\r\n\
+ADR;TYPE=INTL,POSTAL,PARCEL,WORK:name;extended;street;worktown;state;workpo\r\n stcode;Belgium\r\n\
 URL:http://www.jeroendesloovere.be\r\n\
 PHOTO;VALUE=uri:https://example.com/img/photo.jpg\r\n\
 UID:19950401-080045-40000F192713-0052\r\n\
@@ -232,8 +232,12 @@ describe('CHARSET handling', () => {
     expect(output).toContain('NOTE;CHARSET=iso-8859-1:A note')
     expect(output).toContain('CATEGORIES;CHARSET=iso-8859-1:Work')
     expect(output).toContain('SORT-STRING;CHARSET=iso-8859-1:Doe')
-    expect(output).toContain('ADR;TYPE=WORK,POSTAL;CHARSET=iso-8859-1:')
-    expect(output).toContain('LABEL;TYPE=WORK,POSTAL;CHARSET=iso-8859-1:Home')
+    expect(output).toContain(
+      'ADR;TYPE=INTL,POSTAL,PARCEL,WORK;CHARSET=iso-8859-1:',
+    )
+    expect(output).toContain(
+      'LABEL;TYPE=INTL,POSTAL,PARCEL,WORK;CHARSET=iso-8859-1:Home',
+    )
   })
 })
 

@@ -33,7 +33,7 @@ describe('Object params API', () => {
   it('addAddress with default type', () => {
     const vCard = new VCard()
     vCard.addAddress({ street: '123 Main St' })
-    expect(vCard.toString()).toContain('ADR;TYPE=WORK,POSTAL:')
+    expect(vCard.toString()).toContain('ADR;TYPE=INTL,POSTAL,PARCEL,WORK:')
   })
 
   it('addEmail with options and typed array', () => {
@@ -129,7 +129,9 @@ describe('Object params API', () => {
   it('addLabel with options, default type', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: 'Work address' })
-    expect(vCard.toString()).toContain('LABEL;TYPE=WORK,POSTAL:Work address')
+    expect(vCard.toString()).toContain(
+      'LABEL;TYPE=INTL,POSTAL,PARCEL,WORK:Work address',
+    )
   })
 })
 

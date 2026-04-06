@@ -18,6 +18,7 @@ import {
   Property,
   SetPropertyOptions,
   SocialOptions,
+  StoredProperty,
   UrlOptions,
 } from './types/VCard.js'
 import {
@@ -27,10 +28,6 @@ import {
   resolveType,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
-
-interface StoredProperty extends Property {
-  element: Element
-}
 
 export default class VCard {
   /**
@@ -66,7 +63,7 @@ export default class VCard {
   /**
    * Multiple properties for element allowed.
    */
-  private multiplePropertiesForElementAllowed: Element[] =
+  private multiplePropertiesForElementAllowed: readonly Element[] =
     constants.ALLOWED_MULTIPLE_PROPERTIES
 
   /**
@@ -82,7 +79,7 @@ export default class VCard {
     region = '',
     postalCode = '',
     country = '',
-    type = ['work', 'postal'],
+    type = ['intl', 'postal', 'parcel', 'work'],
   }: AddressOptions = {}): this {
     const value = [
       postOfficeBox,
@@ -557,7 +554,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
    */
-  public addLabel({ label, type = ['work', 'postal'] }: LabelOptions): this {
+  public addLabel({
+    label,
+    type = ['intl', 'postal', 'parcel', 'work'],
+  }: LabelOptions): this {
     const resolved = resolveType(type)
     this.setProperty({
       element: 'label',
@@ -741,7 +741,12 @@ export default class VCard {
    *
    * @throws VCardException
    */
-  public setProperty({ element, key, value, group }: SetPropertyOptions): void {
+  private setProperty({
+    element,
+    key,
+    value,
+    group,
+  }: SetPropertyOptions): void {
     if (
       !this.multiplePropertiesForElementAllowed.includes(element) &&
       this.definedElements[element]
