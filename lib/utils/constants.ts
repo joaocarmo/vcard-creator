@@ -22,7 +22,9 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'social',
   'url',
 ]
+
 export const LIB_VERSION = '0.9.0'
+
 export const DEFAULT_CHARACTER_SET = 'utf-8'
 export const DEFAULT_CONTENT_TYPE = ContentTypes.VCARD
 export const DEFAULT_EXTENSION = 'vcf'

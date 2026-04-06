@@ -307,6 +307,18 @@ describe('Test fold()', () => {
     expect(emojiCount).toBe(19)
   })
 
+  it('should fold mixed ASCII and multi-byte text correctly', () => {
+    // 60 ASCII bytes + 6 CJK chars (18 bytes) = 78 bytes, over 75
+    const mixed = 'A'.repeat(60) + '漢'.repeat(6)
+    const result = fold(mixed)
+    expect(result).toContain('\r\n ')
+    // All characters survive intact
+    const aCount = (result.match(/A/g) || []).length
+    const cjkCount = (result.match(/漢/g) || []).length
+    expect(aCount).toBe(60)
+    expect(cjkCount).toBe(6)
+  })
+
   it('should handle exactly 75 octets without folding', () => {
     const exact = 'X'.repeat(75)
     expect(fold(exact)).toBe(exact)
@@ -474,5 +486,19 @@ describe('Test addCustomProperty()', () => {
     const vCard = new VCard()
     vCard.addCustomProperty('x-custom-field', 'test')
     expect(vCard.toString()).toContain('X-CUSTOM-FIELD:test')
+  })
+
+  it('should handle empty value', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty('X-EMPTY', '')
+    expect(vCard.toString()).toContain('X-EMPTY:')
+  })
+
+  it('should handle empty params', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty('X-TEST', 'value', '')
+    const output = vCard.toString()
+    expect(output).toContain('X-TEST:value')
+    expect(output).not.toContain('X-TEST;')
   })
 })

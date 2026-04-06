@@ -102,6 +102,12 @@ export function fold(text: string): string {
       end--
     }
 
+    // Safety: if a single character exceeds the line limit, include it to avoid infinite loop
+    // (can't happen with UTF-8 max 4 bytes vs 74 byte limit, but guard defensively)
+    if (end === offset) {
+      end = offset + maxOctets
+    }
+
     lines.push(new TextDecoder().decode(bytes.subarray(offset, end)))
     offset = end
     isFirstLine = false
