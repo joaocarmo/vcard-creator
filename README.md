@@ -1,7 +1,6 @@
 # vcard-creator
 
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
-[![jest](https://jestjs.io/img/jest-badge.svg)](https://github.com/facebook/jest)
 ![tests](https://github.com/joaocarmo/vcard-creator/workflows/Tests/badge.svg)
 
 A JavaScript vCard 3.0 creator library for both node.js and the web.
@@ -70,11 +69,123 @@ The UMD bundle is also available via CDN:
 
 Demo available in [codepen][codepen].
 
-### Including an image
+## Example
 
-You need to provide the image already properly encoded (base64). Note that most
-applications will probably ignore a photo URL, even if it adheres to the
-specification.
+```js
+import VCard from 'vcard-creator'
+
+const myVCard = new VCard()
+
+myVCard
+  .addName('Desloovere', 'Jeroen')
+  .addCompany('Siesqo')
+  .addJobtitle('Web Developer')
+  .addRole('Data Protection Officer')
+  .addEmail('info@jeroendesloovere.be')
+  .addPhoneNumber(1234121212, 'PREF;WORK')
+  .addPhoneNumber(123456789, 'WORK')
+  .addAddress('', '', 'street', 'worktown', '', 'workpostcode', 'Belgium')
+  .addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
+  .addUrl('http://www.jeroendesloovere.be')
+  .addGeo(51.0543, 3.7174)
+  .addTimezone('Europe/Brussels')
+
+console.log(myVCard.toString())
+```
+
+Output
+
+```txt
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//vcard-creator//vcard-creator 0.9.0//EN
+REV:2026-04-06T00:00:00.000Z
+N;CHARSET=utf-8:Desloovere;Jeroen;;;
+FN;CHARSET=utf-8:Jeroen Desloovere
+ORG;CHARSET=utf-8:Siesqo
+TITLE;CHARSET=utf-8:Web Developer
+ROLE;CHARSET=utf-8:Data Protection Officer
+EMAIL:info@jeroendesloovere.be
+TEL;PREF;WORK:1234121212
+TEL;WORK:123456789
+ADR;WORK;POSTAL;CHARSET=utf-8:;;street;worktown;;workpostcode;Belgium
+X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
+IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
+URL:http://www.jeroendesloovere.be
+GEO:51.0543;3.7174
+TZ:Europe/Brussels
+END:VCARD
+```
+
+## API
+
+All methods return `this` for chaining.
+
+### Personal
+
+| Method                                                | Description                                    |
+| ----------------------------------------------------- | ---------------------------------------------- |
+| `addName(last, first, additional?, prefix?, suffix?)` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
+| `addNickname(nickname)`                               | Nickname(s) — accepts `string` or `string[]`   |
+| `addBirthday(date)`                                   | Birthday in `YYYY-MM-DD` format                |
+
+### Organization
+
+| Method                             | Description                          |
+| ---------------------------------- | ------------------------------------ |
+| `addCompany(company, department?)` | Organization and optional department |
+| `addJobtitle(title)`               | Job title                            |
+| `addRole(role)`                    | Role or occupation                   |
+
+### Contact
+
+| Method                          | Description                                                              |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `addEmail(address, type?)`      | Email address. Type: `PREF`, `WORK`, `HOME`                              |
+| `addPhoneNumber(number, type?)` | Phone number. Type: `PREF`, `WORK`, `HOME`, `VOICE`, `FAX`, `CELL`, etc. |
+| `addUrl(url, type?)`            | URL. Type: `WORK`, `HOME`                                                |
+
+### Address
+
+| Method                                                                         | Description                                                                                |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `addAddress(name?, extended?, street?, city?, region?, zip?, country?, type?)` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `WORK;POSTAL`        |
+| `addLabel(label, type?)`                                                       | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `WORK;POSTAL` |
+
+### Social & Messaging
+
+| Method                        | Description                                                                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `addSocial(url, type, user?)` | Social profile — emits both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]) for cross-platform compatibility |
+| `addImpp(uri, serviceType?)`  | Instant messaging ([RFC 4770][rfc4770]) — for protocols like XMPP, SIP                                                      |
+
+```js
+// Social profiles (dual output for iOS + Android)
+myVCard.addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
+myVCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+
+// Standalone IM protocols
+myVCard.addImpp('xmpp:user@example.com', 'XMPP')
+myVCard.addImpp('sip:user@example.com', 'SIP')
+```
+
+### Geographic
+
+| Method                        | Description                                                                             |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| `addGeo(latitude, longitude)` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Validates ranges.              |
+| `addTimezone(timezone)`       | UTC offset (`-05:00`) or IANA name (`America/New_York`) ([RFC 2426 §3.4.1][rfc2426-tz]) |
+
+### Media
+
+| Method                   | Description                                      |
+| ------------------------ | ------------------------------------------------ |
+| `addPhotoUrl(url)`       | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])  |
+| `addPhoto(image, mime?)` | Photo as base64 content. MIME defaults to `JPEG` |
+| `addLogoUrl(url)`        | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
+| `addLogo(image, mime?)`  | Logo as base64 content. MIME defaults to `JPEG`  |
+
+Images must be provided already base64-encoded. Include the proper [MIME type][mime-types].
 
 ```js
 import { readFileSync } from 'fs'
@@ -86,98 +197,31 @@ const vCard = new VCard()
 vCard.addPhoto(image, 'JPEG')
 ```
 
-Include the proper [MIME type][mime-types] (defaults to `JPEG`).
+### Other
 
-### [DEPRECATED] iCalendar format
+| Method                      | Description                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `addUid(uid)`               | Unique identifier                                                                   |
+| `addCategories(categories)` | Categories/tags — accepts `string[]`                                                |
+| `addNote(note)`             | Free-text note                                                                      |
+| `addSortString(sortString)` | Sort key for name ordering ([RFC 2426 §3.6.5][rfc2426-sort]) — useful for CJK names |
 
-For Apple devices that don't support the `vcf` file format, there is a
-workaround. Specify the format of the output as `vcalendar` and then save it
-with a `ics` file extension instead.
+### Custom Properties
 
-The trick is to create an iCalendar file with a vCard attached.
-
-```js
-// Define a new vCard as 'vcalendar'
-const myVCalendar = new VCard('vcalendar')
-
-// ...or set it afterwards
-const myOtherVCalendar = new VCard()
-myOtherVCalendar.setFormat('vcalendar')
-```
-
-## Example
+For any property not covered by the built-in methods, use `addCustomProperty()`:
 
 ```js
-import VCard from 'vcard-creator'
-
-// Define a new vCard
-const myVCard = new VCard()
-
-// Some variables
-const lastname = 'Desloovere'
-const firstname = 'Jeroen'
-const additional = ''
-const prefix = ''
-const suffix = ''
-
-myVCard
-  // Add personal data
-  .addName(lastname, firstname, additional, prefix, suffix)
-  // Add work data
-  .addCompany('Siesqo')
-  .addJobtitle('Web Developer')
-  .addRole('Data Protection Officer')
-  .addEmail('info@jeroendesloovere.be')
-  .addPhoneNumber(1234121212, 'PREF;WORK')
-  .addPhoneNumber(123456789, 'WORK')
-  .addAddress(null, null, 'street', 'worktown', null, 'workpostcode', 'Belgium')
-  .addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
-  .addUrl('http://www.jeroendesloovere.be')
-
-console.log(myVCard.toString())
+myVCard.addCustomProperty('X-PHONETIC-FIRST-NAME', 'Jon')
+myVCard.addCustomProperty('X-PHONETIC-LAST-NAME', 'Sumisu')
+myVCard.addCustomProperty('X-ANNIVERSARY', '2010-06-15')
+myVCard.addCustomProperty('X-CUSTOM', 'value', 'TYPE=work')
 ```
 
-Output
+The property name is uppercased automatically. The optional third argument adds parameters.
 
-```txt
-BEGIN:VCARD
-VERSION:3.0
-REV:2017-08-31T17:00:15.850Z
-N;CHARSET=utf-8:Desloovere;Jeroen;;;
-FN;CHARSET=utf-8:Jeroen Desloovere
-ORG;CHARSET=utf-8:Siesqo
-TITLE;CHARSET=utf-8:Web Developer
-ROLE;CHARSET=utf-8:Data Protection Officer
-EMAIL;INTERNET:info@jeroendesloovere.be
-TEL;PREF;WORK:1234121212
-TEL;WORK:123456789
-ADR;WORK;POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;workpos
- tcode;Belgium
-X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
-IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
-URL:http://www.jeroendesloovere.be
-END:VCARD
-```
+## Deprecated
 
-### Social profiles
-
-`addSocial()` emits both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]) for cross-platform compatibility. Android devices only recognize the `IMPP` property.
-
-```js
-myVCard.addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
-myVCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
-```
-
-### Instant messaging (IMPP)
-
-Use `addImpp()` directly for non-social IM protocols such as XMPP or SIP.
-
-```js
-myVCard.addImpp('xmpp:user@example.com', 'XMPP')
-myVCard.addImpp('sip:user@example.com', 'SIP')
-```
-
-### Deprecated method names
+### Method names
 
 The following methods have been renamed to follow the [Google JavaScript Style Guide][google-js] for camelCase acronyms. The old names still work but are deprecated.
 
@@ -187,6 +231,17 @@ The following methods have been renamed to follow the [Google JavaScript Style G
 | `addUID()`      | `addUid()`      |
 | `addLogoURL()`  | `addLogoUrl()`  |
 | `addPhotoURL()` | `addPhotoUrl()` |
+
+### iCalendar format
+
+For Apple devices that don't support the `vcf` file format, there is a
+workaround. Specify the format of the output as `vcalendar` and then save it
+with a `ics` file extension instead. This format is deprecated and will be
+removed in a future release.
+
+```js
+const myVCalendar = new VCard('vcalendar')
+```
 
 ## Forking / Contributing
 
@@ -213,5 +268,13 @@ pnpm test:web-export
 [google-js]: https://google.github.io/styleguide/jsguide.html#naming-method-names
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[rfc2426-adr]: https://tools.ietf.org/html/rfc2426#section-3.2.1
+[rfc2426-geo]: https://tools.ietf.org/html/rfc2426#section-3.4.2
+[rfc2426-label]: https://tools.ietf.org/html/rfc2426#section-3.2.2
+[rfc2426-logo]: https://tools.ietf.org/html/rfc2426#section-3.5.3
+[rfc2426-n]: https://tools.ietf.org/html/rfc2426#section-3.1.2
+[rfc2426-photo]: https://tools.ietf.org/html/rfc2426#section-3.1.4
+[rfc2426-sort]: https://tools.ietf.org/html/rfc2426#section-3.6.5
+[rfc2426-tz]: https://tools.ietf.org/html/rfc2426#section-3.4.1
 [rfc4770]: https://tools.ietf.org/html/rfc4770
 [skypack]: https://skypack.dev
