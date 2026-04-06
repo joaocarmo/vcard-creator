@@ -262,6 +262,8 @@ try {
 
 ## Deprecated
 
+For the previous API documentation (positional arguments only), see the [v0.10.0 README][readme-v0.10].
+
 ### Positional arguments
 
 Multi-argument methods now accept options objects. The old positional form still works but is deprecated and will be removed in v1.0:
@@ -331,5 +333,6 @@ pnpm test:web-export
 [rfc2426-photo]: https://tools.ietf.org/html/rfc2426#section-3.1.4
 [rfc2426-sort]: https://tools.ietf.org/html/rfc2426#section-3.6.5
 [rfc2426-tz]: https://tools.ietf.org/html/rfc2426#section-3.4.1
+[readme-v0.10]: https://github.com/joaocarmo/vcard-creator/blob/v0.10.0/README.md
 [rfc4770]: https://tools.ietf.org/html/rfc4770
 [skypack]: https://skypack.dev
