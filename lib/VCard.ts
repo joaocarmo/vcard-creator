@@ -278,7 +278,7 @@ export default class VCard {
       : escapeText(nickname)
     this.setProperty({
       element: 'nickname',
-      key: 'NICKNAME',
+      key: `NICKNAME${this.getCharsetString()}`,
       value,
     })
 
@@ -506,7 +506,7 @@ export default class VCard {
   public addSortString(sortString: string): this {
     this.setProperty({
       element: 'sortString',
-      key: 'SORT-STRING',
+      key: `SORT-STRING${this.getCharsetString()}`,
       value: escapeText(sortString),
     })
 
@@ -681,9 +681,7 @@ export default class VCard {
   public hasProperty(key: string): boolean {
     const properties = this.getProperties()
 
-    return properties.some(
-      (property: Property) => property.key === key && property.value !== '',
-    )
+    return properties.some((property: Property) => property.key === key)
   }
 
   /**

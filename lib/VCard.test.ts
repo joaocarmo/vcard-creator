@@ -648,6 +648,25 @@ describe('Metadata getters', () => {
   })
 })
 
+describe('hasProperty()', () => {
+  it('should return true for a property with a value', () => {
+    const vCard = new VCard()
+    vCard.addEmail({ address: 'test@test.com' })
+    expect(vCard.hasProperty('EMAIL')).toBe(true)
+  })
+
+  it('should return true for a property with an empty value', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'X-EMPTY', value: '' })
+    expect(vCard.hasProperty('X-EMPTY')).toBe(true)
+  })
+
+  it('should return false for a non-existent property', () => {
+    const vCard = new VCard()
+    expect(vCard.hasProperty('EMAIL')).toBe(false)
+  })
+})
+
 describe('CHARSET handling', () => {
   it('should not add CHARSET for default utf-8', () => {
     const vCard = new VCard()
@@ -663,6 +682,16 @@ describe('CHARSET handling', () => {
     vCard.addName({ familyName: 'Doe', givenName: 'John' })
     const output = vCard.toString()
     expect(output).toContain('N;CHARSET=iso-8859-1:Doe;John;;;')
+  })
+
+  it('should add CHARSET to all text properties for non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addNickname('JD')
+    vCard.addSortString('Doe')
+    const output = vCard.toString()
+    expect(output).toContain('NICKNAME;CHARSET=iso-8859-1:JD')
+    expect(output).toContain('SORT-STRING;CHARSET=iso-8859-1:Doe')
   })
 })
 
