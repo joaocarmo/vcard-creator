@@ -1,5 +1,5 @@
 class VCardException extends Error {
-  constructor(params: string | undefined) {
+  constructor(params: string) {
     // Pass remaining arguments to the parent constructor
     super(params)
 

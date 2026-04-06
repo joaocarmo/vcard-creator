@@ -84,7 +84,7 @@ ROLE:Data Protection Officer
 EMAIL:info@jeroendesloovere.be
 TEL;TYPE=PREF,WORK:1234121212
 TEL;TYPE=WORK:123456789
-ADR;TYPE=WORK,POSTAL:;;street;worktown;;workpostcode;Belgium
+ADR;TYPE=INTL,POSTAL,PARCEL,WORK:;;street;worktown;;workpostcode;Belgium
 X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
 IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
 URL:http://www.jeroendesloovere.be
@@ -133,10 +133,10 @@ myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 
 ### Address
 
-| Method                                                                                                 | Description                                                                                       |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| `addAddress({ street?, locality?, region?, postalCode?, country?, postOfficeBox?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['work', 'postal']`        |
-| `addLabel({ label, type? })`                                                                           | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['work', 'postal']` |
+| Method                                                                                                 | Description                                                                                                         |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `addAddress({ street?, locality?, region?, postalCode?, country?, postOfficeBox?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['intl', 'postal', 'parcel', 'work']`        |
+| `addLabel({ label, type? })`                                                                           | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['intl', 'postal', 'parcel', 'work']` |
 
 ### Social & Messaging
 

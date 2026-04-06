@@ -165,6 +165,10 @@ export interface LabelOptions {
   type?: AddressType[]
 }
 
+export interface StoredProperty extends Property {
+  element: Element
+}
+
 export interface CustomPropertyOptions {
   /** Property name (automatically uppercased) */
   name: string
