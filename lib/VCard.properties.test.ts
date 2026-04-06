@@ -2,8 +2,6 @@ import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 
-// ── Personal (RFC 2426 §3.1) ──
-
 describe('addFullName()', () => {
   it('should set FN directly', () => {
     const vCard = new VCard()
@@ -134,8 +132,6 @@ describe('addBirthday()', () => {
   })
 })
 
-// ── Organization (RFC 2426 §3.5) ──
-
 describe('addCompany()', () => {
   it('should set organization with department', () => {
     const vCard = new VCard()
@@ -165,8 +161,6 @@ describe('addRole()', () => {
     expect(() => vCard.addRole('Architect')).toThrow(VCardException)
   })
 })
-
-// ── Contact (RFC 2426 §3.3) ──
 
 describe('addEmail()', () => {
   it('should set email with typed array', () => {
@@ -236,8 +230,6 @@ describe('addUrl()', () => {
     expect(output).toContain('URL;TYPE=HOME:https://home.example.com')
   })
 })
-
-// ── Address (RFC 2426 §3.2) ──
 
 describe('addAddress()', () => {
   it('should set address with options and typed array', () => {
@@ -315,8 +307,6 @@ describe('addLabel()', () => {
     expect(output).toContain('LABEL;TYPE=HOME:Home address')
   })
 })
-
-// ── Social & Messaging (RFC 4770) ──
 
 describe('addSocial()', () => {
   it('should output both X-SOCIALPROFILE and IMPP', () => {
@@ -400,8 +390,6 @@ describe('addImpp()', () => {
   })
 })
 
-// ── Geographic (RFC 2426 §3.4) ──
-
 describe('addGeo()', () => {
   it('should add geographic position', () => {
     const vCard = new VCard()
@@ -463,8 +451,6 @@ describe('addTimezone()', () => {
     expect(() => vCard.addTimezone('+09:00')).toThrow(VCardException)
   })
 })
-
-// ── Media (RFC 2426 §3.1.4, §3.5.3) ──
 
 describe('addPhoto()', () => {
   it('should add photo by URL', () => {
@@ -538,8 +524,6 @@ describe('addLogo()', () => {
   })
 })
 
-// ── Security (RFC 2426 §3.7) ──
-
 describe('addKey()', () => {
   it('should add a base64-encoded PGP key', () => {
     const vCard = new VCard()
@@ -583,8 +567,6 @@ describe('addKey()', () => {
     expect(output).toContain('KEY;ENCODING=b;TYPE=X509:certdata')
   })
 })
-
-// ── Other (RFC 2426 §3.6) ──
 
 describe('addUid()', () => {
   it('should throw on duplicate addUid', () => {
@@ -671,8 +653,6 @@ describe('addRevision()', () => {
     )
   })
 })
-
-// ── Custom Properties ──
 
 describe('addCustomProperty()', () => {
   it('should add a basic custom property', () => {
