@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import VCard from '../dist/index.js'
@@ -102,3 +102,44 @@ for (const [marker, label] of checks) {
 }
 
 console.log(output)
+
+// --- Multi-contact file test ---
+
+const card2 = new VCard()
+  .addName({ givenName: 'Alice', familyName: 'Wonderland' })
+  .addEmail({ address: 'alice@wonderland.com', type: ['pref'] })
+  .addPhoneNumber({ number: '+1 555 000 111', type: ['cell'] })
+  .addCompany({ name: 'Looking Glass Inc.' })
+  .addUrl({ url: 'https://alice.wonderland.com' })
+
+const multiOutput = vCard.concat(card2)
+
+const multiChecks = [
+  [multiOutput.startsWith('BEGIN:VCARD'), 'starts with BEGIN:VCARD'],
+  [multiOutput.endsWith('END:VCARD\r\n'), 'ends with END:VCARD'],
+  [
+    (multiOutput.match(/BEGIN:VCARD/g) || []).length === 2,
+    'contains 2 BEGIN:VCARD markers',
+  ],
+  [
+    (multiOutput.match(/END:VCARD/g) || []).length === 2,
+    'contains 2 END:VCARD markers',
+  ],
+  [multiOutput.includes('FN:Mr. Jeroen Desloovere'), 'card1 FN present'],
+  [multiOutput.includes('FN:Alice Wonderland'), 'card2 FN present'],
+  [
+    multiOutput.indexOf('FN:Mr. Jeroen Desloovere') <
+      multiOutput.indexOf('FN:Alice Wonderland'),
+    'card1 appears before card2',
+  ],
+]
+
+for (const [passed, label] of multiChecks) {
+  if (!passed) {
+    console.error(`Multi-contact test FAILED: ${label}`)
+    process.exit(1)
+  }
+}
+
+writeFileSync(join(__dirname, '../vcard-multi.vcf'), multiOutput)
+console.error('Multi-contact test PASSED → vcard-multi.vcf')
