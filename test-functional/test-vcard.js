@@ -101,7 +101,8 @@ for (const [marker, label] of checks) {
   }
 }
 
-console.log(output)
+writeFileSync(join(__dirname, '../vcard.vcf'), output)
+console.log('Single-contact test PASSED → vcard.vcf')
 
 const card2 = new VCard()
   .addName({ givenName: 'Alice', familyName: 'Wonderland' })
@@ -140,4 +141,4 @@ for (const [passed, label] of multiChecks) {
 }
 
 writeFileSync(join(__dirname, '../vcard-multi.vcf'), multiOutput)
-console.error('Multi-contact test PASSED → vcard-multi.vcf')
+console.log('Multi-contact test PASSED → vcard-multi.vcf')

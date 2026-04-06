@@ -29,7 +29,7 @@
     "prepare": "husky",
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
-    "test:functional": "node ./test-functional/test-vcard.js | tee vcard.vcf",
+    "test:functional": "node ./test-functional/test-vcard.js",
     "test:unit": "vitest run",
     "type-check:watch": "pnpm type-check --watch",
     "type-check": "tsc --noEmit"
