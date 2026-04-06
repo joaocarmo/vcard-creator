@@ -105,11 +105,13 @@ writeFileSync(join(__dirname, '../vcard.vcf'), output)
 console.log('Single-contact test PASSED → vcard.vcf')
 
 const card2 = new VCard()
+  .addFullName('Alice from Wonderland')
   .addName({ givenName: 'Alice', familyName: 'Wonderland' })
   .addEmail({ address: 'alice@wonderland.com', type: ['pref'] })
   .addPhoneNumber({ number: '+1 555 000 111', type: ['cell'] })
   .addCompany({ name: 'Looking Glass Inc.' })
   .addUrl({ url: 'https://alice.wonderland.com' })
+  .addKey({ url: 'https://alice.wonderland.com/pgp.pub' })
 
 const multiOutput = vCard.concat(card2)
 
@@ -125,10 +127,18 @@ const multiChecks = [
     'contains 2 END:VCARD markers',
   ],
   [multiOutput.includes('FN:Mr. Jeroen Desloovere'), 'card1 FN present'],
-  [multiOutput.includes('FN:Alice Wonderland'), 'card2 FN present'],
+  [
+    multiOutput.includes('FN:Alice from Wonderland'),
+    'card2 custom FN present (addFullName overrides auto-gen)',
+  ],
+  [!multiOutput.includes('FN:Alice Wonderland'), 'card2 auto-gen FN absent'],
+  [
+    multiOutput.includes('KEY;VALUE=uri:https://alice.wonderland.com/pgp.pub'),
+    'card2 KEY present',
+  ],
   [
     multiOutput.indexOf('FN:Mr. Jeroen Desloovere') <
-      multiOutput.indexOf('FN:Alice Wonderland'),
+      multiOutput.indexOf('FN:Alice from Wonderland'),
     'card1 appears before card2',
   ],
 ]

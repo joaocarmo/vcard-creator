@@ -608,8 +608,7 @@ export default class VCard {
     }
 
     // Loop all properties
-    const properties = this.getProperties()
-    properties.forEach((property) => {
+    this.properties.forEach((property) => {
       const prefix = property.group ? `${property.group}.` : ''
       string += fold(`${prefix}${property.key}:${property.value}\r\n`)
     })
@@ -697,16 +696,17 @@ export default class VCard {
    * Get properties.
    */
   public getProperties(): Property[] {
-    return this.properties
+    return [...this.properties]
   }
 
   /**
    * Has property.
    */
   public hasProperty(key: string): boolean {
-    const properties = this.getProperties()
-
-    return properties.some((property: Property) => property.key === key)
+    return this.properties.some(
+      (property: Property) =>
+        property.key === key || property.key.startsWith(`${key};`),
+    )
   }
 
   /**

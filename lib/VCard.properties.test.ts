@@ -34,6 +34,17 @@ describe('Test addFullName()', () => {
     vCard.addFullName('Smith, John; Jr.')
     expect(vCard.toString()).toContain('FN:Smith\\, John\\; Jr.')
   })
+
+  it('should prevent duplicate FN with non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addFullName('Custom Name')
+    vCard.addName({ givenName: 'John', familyName: 'Doe' })
+    const output = vCard.toString()
+    const fnMatches = output.match(/FN/g)
+    expect(fnMatches).toHaveLength(1)
+    expect(output).toContain('FN;CHARSET=iso-8859-1:Custom Name')
+  })
 })
 
 describe('Multiple nickname instances', () => {

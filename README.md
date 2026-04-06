@@ -175,7 +175,7 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 | `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
 | `addLogo({ image, mime? })`  | Logo as base64 content. MIME defaults to `JPEG`  |
 
-Each method accepts either a `{ url }` or `{ image, mime? }` object. Multiple photos/logos are allowed (e.g., a base64 thumbnail and a URL fallback).
+Each method accepts either a `{ url }` or `{ image, mime? }` object. Multiple photos/logos are allowed (e.g., a base64 thumbnail and a URL fallback). See [IANA image MIME types][mime-types] for valid values.
 
 ```js
 import { readFileSync } from 'fs'
@@ -299,10 +299,10 @@ const card2 = new VCard()
   .addEmail({ address: 'bob@example.com' })
 
 // Instance — "this" card appears first
-const vcf = card1.concat(card2)
+const output = card1.concat(card2)
 
 // Static — pure combination
-const vcf = VCard.concat(card1, card2, card3)
+const combined = VCard.concat(card1, card2)
 ```
 
 Each card retains its own `BEGIN:VCARD` / `END:VCARD` markers.
