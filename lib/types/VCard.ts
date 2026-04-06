@@ -147,3 +147,12 @@ export interface LabelOptions {
   label: string
   type?: AddressType[]
 }
+
+export interface CustomPropertyOptions {
+  /** Property name (automatically uppercased) */
+  name: string
+  /** Property value */
+  value: string
+  /** Optional parameters (e.g., 'TYPE=work') */
+  params?: string
+}

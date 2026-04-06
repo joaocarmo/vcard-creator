@@ -231,13 +231,17 @@ vCard.addPhoto({ image, mime: 'JPEG' })
 For any property not covered by the built-in methods, use `addCustomProperty()`:
 
 ```js
-myVCard.addCustomProperty('X-PHONETIC-FIRST-NAME', 'Jon')
-myVCard.addCustomProperty('X-PHONETIC-LAST-NAME', 'Sumisu')
-myVCard.addCustomProperty('X-ANNIVERSARY', '2010-06-15')
-myVCard.addCustomProperty('X-CUSTOM', 'value', 'TYPE=work')
+myVCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
+myVCard.addCustomProperty({ name: 'X-PHONETIC-LAST-NAME', value: 'Sumisu' })
+myVCard.addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
+myVCard.addCustomProperty({
+  name: 'X-CUSTOM',
+  value: 'value',
+  params: 'TYPE=work',
+})
 ```
 
-The property name is uppercased automatically. The optional third argument adds parameters.
+The property name is uppercased automatically.
 
 ### Error Handling
 

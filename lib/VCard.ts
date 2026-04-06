@@ -4,6 +4,7 @@ import {
   AddressType,
   CompanyOptions,
   ContentType,
+  CustomPropertyOptions,
   DefinedElements,
   Element,
   EmailOptions,
@@ -791,20 +792,33 @@ export default class VCard {
    * or any property not covered by the built-in methods.
    *
    * @example
-   * vCard.addCustomProperty('X-PHONETIC-FIRST-NAME', 'Jon')
-   * vCard.addCustomProperty('X-ANNIVERSARY', '2010-06-15')
-   * vCard.addCustomProperty('X-CUSTOM', 'value', 'TYPE=work')
-   *
-   * @param  {string} name   Property name (automatically uppercased)
-   * @param  {string} value  Property value
-   * @param  {string} [params=''] Optional parameters (e.g., 'TYPE=work')
-   * @return {this}
+   * vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
+   * vCard.addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
+   * vCard.addCustomProperty({ name: 'X-CUSTOM', value: 'val', params: 'TYPE=work' })
    */
+  public addCustomProperty(options: CustomPropertyOptions): this
+  /** @deprecated Use object form instead: `addCustomProperty({ name: '...', value: '...' })` */
+  public addCustomProperty(name: string, value: string, params?: string): this
   public addCustomProperty(
-    name: string,
-    value: string,
-    params: string = '',
+    nameOrOptions: string | CustomPropertyOptions,
+    _value: string = '',
+    _params: string = '',
   ): this {
+    let name: string
+    let value: string
+    let params: string
+
+    if (isOptions(nameOrOptions)) {
+      const o = nameOrOptions
+      name = o.name
+      value = o.value
+      params = o.params ?? ''
+    } else {
+      name = nameOrOptions
+      value = _value
+      params = _params
+    }
+
     this.setProperty(
       'custom',
       `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
