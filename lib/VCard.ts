@@ -1,17 +1,34 @@
 import VCardException from './VCardException.js'
 import {
+  AddressOptions,
+  AddressType,
+  CompanyOptions,
   ContentType,
   DefinedElements,
   Element,
+  EmailOptions,
+  EmailType,
   Format,
+  ImppOptions,
+  LabelOptions,
+  MediaOptions,
+  MediaUrlOptions,
+  NameOptions,
+  PhoneOptions,
+  PhoneType,
   Property,
+  SocialOptions,
+  UrlOptions,
+  UrlType,
 } from './types/VCard.js'
 import {
   b64encode,
   chunkSplit,
   escape,
   fold,
+  isOptions,
   isValidMimeType,
+  resolveType,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
 
@@ -100,35 +117,59 @@ export default class VCard {
 
   /**
    * Add address.
-   *
-   * @param  {string} [name='']
-   * @param  {string} [extended='']
-   * @param  {string} [street='']
-   * @param  {string} [city='']
-   * @param  {string} [region='']
-   * @param  {string} [zip='']
-   * @param  {string} [country='']
-   * @param  {string} [type='']
-   * 'type' may be DOM | INTL | POSTAL | PARCEL | HOME | WORK
-   * or any combination of these: e.g. 'WORK;PARCEL;POSTAL'
-   * @return {this}
    */
+  public addAddress(options: AddressOptions): this
+  /** @deprecated Use object form instead: `addAddress({ street, city, type: ['work'] })` */
   public addAddress(
-    name: string = '',
-    extended: string = '',
-    street: string = '',
-    city: string = '',
-    region: string = '',
-    zip: string = '',
-    country: string = '',
-    type: string = 'WORK;POSTAL',
+    name?: string,
+    extended?: string,
+    street?: string,
+    city?: string,
+    region?: string,
+    zip?: string,
+    country?: string,
+    type?: string,
+  ): this
+  public addAddress(
+    nameOrOptions: string | AddressOptions = '',
+    _extended: string = '',
+    _street: string = '',
+    _city: string = '',
+    _region: string = '',
+    _zip: string = '',
+    _country: string = '',
+    _type: AddressType[] | string = 'WORK;POSTAL',
   ): this {
-    const value = `\
-${name};${extended};${street};${city};${region};${zip};${country}\
-`
+    let name: string, extended: string, street: string, city: string
+    let region: string, zip: string, country: string
+    let type: AddressType[] | string
+
+    if (isOptions(nameOrOptions)) {
+      const o = nameOrOptions
+      name = o.name ?? ''
+      extended = o.extended ?? ''
+      street = o.street ?? ''
+      city = o.city ?? ''
+      region = o.region ?? ''
+      zip = o.zip ?? ''
+      country = o.country ?? ''
+      type = o.type ?? ['work', 'postal']
+    } else {
+      name = nameOrOptions
+      extended = _extended
+      street = _street
+      city = _city
+      region = _region
+      zip = _zip
+      country = _country
+      type = _type
+    }
+
+    const value = `${name};${extended};${street};${city};${region};${zip};${country}`
+    const resolved = resolveType(type)
     this.setProperty(
       'address',
-      `ADR${type !== '' ? `;${type}` : ''}${this.getCharsetString()}`,
+      `ADR${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
       value,
     )
 
@@ -149,12 +190,26 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
 
   /**
    * Add company.
-   *
-   * @param  {string} company
-   * @param  {string} department
-   * @return {this}
    */
-  public addCompany(company: string, department: string = ''): this {
+  public addCompany(options: CompanyOptions): this
+  /** @deprecated Use object form instead: `addCompany({ name: 'Acme', department: 'Eng' })` */
+  public addCompany(company: string, department?: string): this
+  public addCompany(
+    companyOrOptions: string | CompanyOptions,
+    _department: string = '',
+  ): this {
+    let company: string
+    let department: string
+
+    if (isOptions(companyOrOptions)) {
+      const o = companyOrOptions
+      company = o.name
+      department = o.department ?? ''
+    } else {
+      company = companyOrOptions
+      department = _department
+    }
+
     this.setProperty(
       'company',
       `ORG${this.getCharsetString()}`,
@@ -166,16 +221,32 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
 
   /**
    * Add email.
-   *
-   * @param  {string} address The e-mail address
-   * @param  {string} [type='']
-   * The 'type' of the email address
-   * type may be  PREF | WORK | HOME
-   * or any combination of these: e.g. 'PREF;WORK'
-   * @return {this}
    */
-  public addEmail(address: string, type: string = ''): this {
-    this.setProperty('email', `EMAIL${type !== '' ? `;${type}` : ''}`, address)
+  public addEmail(options: EmailOptions): this
+  /** @deprecated Use object form instead: `addEmail({ address: 'j@x.com', type: ['work'] })` */
+  public addEmail(address: string, type?: string): this
+  public addEmail(
+    addressOrOptions: string | EmailOptions,
+    _type: EmailType[] | string = '',
+  ): this {
+    let address: string
+    let type: EmailType[] | string
+
+    if (isOptions(addressOrOptions)) {
+      const o = addressOrOptions
+      address = o.address
+      type = o.type ?? ''
+    } else {
+      address = addressOrOptions
+      type = _type
+    }
+
+    const resolved = resolveType(type)
+    this.setProperty(
+      'email',
+      `EMAIL${resolved !== '' ? `;${resolved}` : ''}`,
+      address,
+    )
 
     return this
   }
@@ -249,31 +320,47 @@ ${name};${extended};${street};${city};${region};${zip};${country}\
 
   /**
    * Add name.
-   *
-   * @param  {string} [lastName='']
-   * @param  {string} [firstName='']
-   * @param  {string} [additional='']
-   * @param  {string} [prefix='']
-   * @param  {string} [suffix='']
-   * @return {this}
    */
+  public addName(options: NameOptions): this
+  /** @deprecated Use object form instead: `addName({ lastName: 'Doe', firstName: 'John' })` */
   public addName(
-    lastName: string = '',
-    firstName: string = '',
-    additional: string = '',
-    prefix: string = '',
-    suffix: string = '',
+    lastName?: string,
+    firstName?: string,
+    additional?: string,
+    prefix?: string,
+    suffix?: string,
+  ): this
+  public addName(
+    lastNameOrOptions: string | NameOptions = '',
+    _firstName: string = '',
+    _additional: string = '',
+    _prefix: string = '',
+    _suffix: string = '',
   ): this {
-    // Define values with non-empty values
+    let lastName: string, firstName: string, additional: string
+    let prefix: string, suffix: string
+
+    if (isOptions(lastNameOrOptions)) {
+      const o = lastNameOrOptions
+      lastName = o.lastName ?? ''
+      firstName = o.firstName ?? ''
+      additional = o.additional ?? ''
+      prefix = o.prefix ?? ''
+      suffix = o.suffix ?? ''
+    } else {
+      lastName = lastNameOrOptions
+      firstName = _firstName
+      additional = _additional
+      prefix = _prefix
+      suffix = _suffix
+    }
+
     const values = [prefix, firstName, additional, lastName, suffix].filter(
       (m) => !!m,
     )
 
-    const property = `\
-${lastName};${firstName};${additional};${prefix};${suffix}\
-`
+    const property = `${lastName};${firstName};${additional};${prefix};${suffix}`
     this.setProperty('name', `N${this.getCharsetString()}`, property)
-    // Is property FN set?
     if (!this.hasProperty('FN')) {
       this.setProperty(
         'fullname',
@@ -330,32 +417,46 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
 
   /**
    * Add phone number.
-   *
-   * @param  {number | string} number
-   * @param  {string} [type='']
-   * 'type' may be PREF | WORK | HOME | VOICE | FAX | MSG |
-   * CELL | PAGER | BBS | CAR | MODEM | ISDN | VIDEO
-   * or any senseful combination, e.g. 'PREF;WORK;VOICE'
-   * @return {this}
    */
-  public addPhoneNumber(number: number | string, type: string = ''): this {
+  public addPhoneNumber(options: PhoneOptions): this
+  /** @deprecated Use object form instead: `addPhoneNumber({ number: '+1555', type: ['cell'] })` */
+  public addPhoneNumber(number: number | string, type?: string): this
+  public addPhoneNumber(
+    numberOrOptions: number | string | PhoneOptions,
+    _type: PhoneType[] | string = '',
+  ): this {
+    let num: number | string
+    let type: PhoneType[] | string
+
+    if (isOptions(numberOrOptions)) {
+      const o = numberOrOptions
+      num = o.number
+      type = o.type ?? ''
+    } else {
+      num = numberOrOptions
+      type = _type
+    }
+
+    const resolved = resolveType(type)
     this.setProperty(
       'phoneNumber',
-      `TEL${type !== '' ? `;${type}` : ''}`,
-      `${number}`,
+      `TEL${resolved !== '' ? `;${resolved}` : ''}`,
+      `${num}`,
     )
 
     return this
   }
 
   /**
-   * Add Logo.
+   * Add Logo URL.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
-   * @param  {string} url Image url or filename
-   * @return {this}
    */
-  public addLogoUrl(url: string): this {
+  public addLogoUrl(options: MediaUrlOptions): this
+  /** @deprecated Use object form instead: `addLogoUrl({ url: '...' })` */
+  public addLogoUrl(url: string): this
+  public addLogoUrl(urlOrOptions: string | MediaUrlOptions): this {
+    const url = isOptions(urlOrOptions) ? urlOrOptions.url : urlOrOptions
     this.addMediaUrl('LOGO', url, 'logo')
 
     return this
@@ -372,14 +473,26 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Logo.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
-   * @param  {string} image     Base64 encoded image content
-   * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
-   * @return {this}
    */
+  public addLogo(options: MediaOptions): this
+  /** @deprecated Use object form instead: `addLogo({ image: '...', mime: 'JPEG' })` */
+  public addLogo(image: string, mime?: string): this
   public addLogo(
-    image: string,
-    mime: string = constants.DEFAULT_MIME_TYPE,
+    imageOrOptions: string | MediaOptions,
+    _mime: string = constants.DEFAULT_MIME_TYPE,
   ): this {
+    let image: string
+    let mime: string
+
+    if (isOptions(imageOrOptions)) {
+      const o = imageOrOptions
+      image = o.image
+      mime = o.mime ?? constants.DEFAULT_MIME_TYPE
+    } else {
+      image = imageOrOptions
+      mime = _mime
+    }
+
     this.addMediaContent('LOGO', image, mime, 'logo')
 
     return this
@@ -389,10 +502,12 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Photo URL.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   * @param  {string} url Image url or filename
-   * @return {this}
    */
-  public addPhotoUrl(url: string): this {
+  public addPhotoUrl(options: MediaUrlOptions): this
+  /** @deprecated Use object form instead: `addPhotoUrl({ url: '...' })` */
+  public addPhotoUrl(url: string): this
+  public addPhotoUrl(urlOrOptions: string | MediaUrlOptions): this {
+    const url = isOptions(urlOrOptions) ? urlOrOptions.url : urlOrOptions
     this.addMediaUrl('PHOTO', url, 'photo')
 
     return this
@@ -409,14 +524,26 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add Photo.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   * @param  {string} image     Base64 encoded image content
-   * @param  {string} [mime=''] Image content MIME type (defaults to 'JPEG')
-   * @return {this}
    */
+  public addPhoto(options: MediaOptions): this
+  /** @deprecated Use object form instead: `addPhoto({ image: '...', mime: 'JPEG' })` */
+  public addPhoto(image: string, mime?: string): this
   public addPhoto(
-    image: string,
-    mime: string = constants.DEFAULT_MIME_TYPE,
+    imageOrOptions: string | MediaOptions,
+    _mime: string = constants.DEFAULT_MIME_TYPE,
   ): this {
+    let image: string
+    let mime: string
+
+    if (isOptions(imageOrOptions)) {
+      const o = imageOrOptions
+      image = o.image
+      mime = o.mime ?? constants.DEFAULT_MIME_TYPE
+    } else {
+      image = imageOrOptions
+      mime = _mime
+    }
+
     this.addMediaContent('PHOTO', image, mime, 'photo')
 
     return this
@@ -424,13 +551,28 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
 
   /**
    * Add URL.
-   *
-   * @param  {string} url
-   * @param  {string} [type=''] Type may be WORK | HOME
-   * @return {this}
    */
-  public addUrl(url: string, type: string = ''): this {
-    this.setProperty('url', `URL${type !== '' ? `;${type}` : ''}`, url)
+  public addUrl(options: UrlOptions): this
+  /** @deprecated Use object form instead: `addUrl({ url: '...', type: ['work'] })` */
+  public addUrl(url: string, type?: string): this
+  public addUrl(
+    urlOrOptions: string | UrlOptions,
+    _type: UrlType[] | string = '',
+  ): this {
+    let url: string
+    let type: UrlType[] | string
+
+    if (isOptions(urlOrOptions)) {
+      const o = urlOrOptions
+      url = o.url
+      type = o.type ?? ''
+    } else {
+      url = urlOrOptions
+      type = _type
+    }
+
+    const resolved = resolveType(type)
+    this.setProperty('url', `URL${resolved !== '' ? `;${resolved}` : ''}`, url)
 
     return this
   }
@@ -444,12 +586,31 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
 
   /**
    * Add social profile.
-   *
-   * @param {string} url  The URL to the user's profile.
-   * @param {string} type The social media type (e.g., Twitter, LinkedIn, etc.)
-   * @param {string} user The user's social media handle/username
+   * Emits both X-SOCIALPROFILE (iOS/macOS) and IMPP (RFC 4770) for cross-platform compatibility.
    */
-  public addSocial(url: string, type: string, user: string = ''): this {
+  public addSocial(options: SocialOptions): this
+  /** @deprecated Use object form instead: `addSocial({ url: '...', type: 'X', user: 'handle' })` */
+  public addSocial(url: string, type: string, user?: string): this
+  public addSocial(
+    urlOrOptions: string | SocialOptions,
+    _type: string = '',
+    _user: string = '',
+  ): this {
+    let url: string
+    let type: string
+    let user: string
+
+    if (isOptions(urlOrOptions)) {
+      const o = urlOrOptions
+      url = o.url
+      type = o.type
+      user = o.user ?? ''
+    } else {
+      url = urlOrOptions
+      type = _type
+      user = _user
+    }
+
     const socialUser = user !== '' ? `;x-user=${user}` : ''
     const socialProfile = type !== '' ? `;type=${type}` : ''
 
@@ -468,11 +629,26 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add IMPP (Instant Messaging and Presence Protocol) entry.
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
-   * @param {string} uri         The URI for the IM service (e.g., xmpp:user@example.com)
-   * @param {string} serviceType The service type (e.g., XMPP, SIP, Skype)
-   * @return {this}
    */
-  public addImpp(uri: string, serviceType: string = ''): this {
+  public addImpp(options: ImppOptions): this
+  /** @deprecated Use object form instead: `addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })` */
+  public addImpp(uri: string, serviceType?: string): this
+  public addImpp(
+    uriOrOptions: string | ImppOptions,
+    _serviceType: string = '',
+  ): this {
+    let uri: string
+    let serviceType: string
+
+    if (isOptions(uriOrOptions)) {
+      const o = uriOrOptions
+      uri = o.uri
+      serviceType = o.serviceType ?? ''
+    } else {
+      uri = uriOrOptions
+      serviceType = _serviceType
+    }
+
     const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
 
     this.setProperty('impp', `IMPP${type}`, uri)
@@ -556,14 +732,30 @@ ${lastName};${firstName};${additional};${prefix};${suffix}\
    * Add formatted address label.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
-   * @param  {string} label The formatted address text
-   * @param  {string} [type='WORK;POSTAL'] Address type
-   * @return {this}
    */
-  public addLabel(label: string, type: string = 'WORK;POSTAL'): this {
+  public addLabel(options: LabelOptions): this
+  /** @deprecated Use object form instead: `addLabel({ label: '...', type: ['work', 'postal'] })` */
+  public addLabel(label: string, type?: string): this
+  public addLabel(
+    labelOrOptions: string | LabelOptions,
+    _type: AddressType[] | string = 'WORK;POSTAL',
+  ): this {
+    let label: string
+    let type: AddressType[] | string
+
+    if (isOptions(labelOrOptions)) {
+      const o = labelOrOptions
+      label = o.label
+      type = o.type ?? ['work', 'postal']
+    } else {
+      label = labelOrOptions
+      type = _type
+    }
+
+    const resolved = resolveType(type)
     this.setProperty(
       'label',
-      `LABEL${type !== '' ? `;${type}` : ''}${this.getCharsetString()}`,
+      `LABEL${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
       label,
     )
 
@@ -674,7 +866,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get output as string.
+   * Get output.
    *
    * @return {string}
    */
@@ -734,7 +926,7 @@ END:VCALENDAR
   }
 
   /**
-   * Get output as string.
+   * Get output.
    *
    * iOS devices (and safari < iOS 8 in particular)can not read .vcf (= vcard)
    * files. So there is a workaround to build a .ics (= vcalender) file.
