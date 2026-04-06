@@ -1,12 +1,40 @@
-import { escape, fold, isValidMimeType, resolveType } from './functions'
+import { escapeText, fold, isValidMimeType, resolveType } from './functions'
 
-describe("testing the 'escape' function", () => {
-  it('should convert CRLF to LF', () => {
-    expect(escape('\r\n')).toEqual('\\n')
+describe("testing the 'escapeText' function", () => {
+  it('should escape backslashes first', () => {
+    expect(escapeText('C:\\Users')).toEqual('C:\\\\Users')
   })
 
-  it('should escape newline characters', () => {
-    expect(escape('\n')).toEqual('\\n')
+  it('should escape semicolons', () => {
+    expect(escapeText('a;b')).toEqual('a\\;b')
+  })
+
+  it('should escape commas', () => {
+    expect(escapeText('a,b')).toEqual('a\\,b')
+  })
+
+  it('should escape CRLF newlines', () => {
+    expect(escapeText('\r\n')).toEqual('\\n')
+  })
+
+  it('should escape LF newlines', () => {
+    expect(escapeText('\n')).toEqual('\\n')
+  })
+
+  it('should handle combined special characters', () => {
+    expect(escapeText('a;b,c\\d\ne')).toEqual('a\\;b\\,c\\\\d\\ne')
+  })
+
+  it('should escape backslash before semicolon to avoid double-escaping', () => {
+    expect(escapeText('a\\;b')).toEqual('a\\\\\\;b')
+  })
+
+  it('should pass through strings with no special characters', () => {
+    expect(escapeText('hello world')).toEqual('hello world')
+  })
+
+  it('should pass through empty string', () => {
+    expect(escapeText('')).toEqual('')
   })
 })
 

@@ -16,6 +16,7 @@ export type Element =
   | 'note'
   | 'phoneNumber'
   | 'photo'
+  | 'revision'
   | 'role'
   | 'social'
   | 'sortString'
@@ -30,7 +31,17 @@ export type DefinedElements = {
 export interface Property {
   key: string
   value: string
+  group?: string
 }
+
+export interface SetPropertyOptions {
+  element: Element
+  key: string
+  value: string
+  group?: string
+}
+
+export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =
   | 'dom'
@@ -139,8 +150,10 @@ export interface LabelOptions {
 export interface CustomPropertyOptions {
   /** Property name (automatically uppercased) */
   name: string
-  /** Property value */
+  /** Property value (NOT automatically escaped — caller is responsible for escaping) */
   value: string
   /** Optional parameters (e.g., 'TYPE=work') */
   params?: string
+  /** Optional group prefix for property grouping (e.g., 'item1') */
+  group?: string
 }

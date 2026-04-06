@@ -15,17 +15,21 @@ export function resolveType<T extends string>(type: T[]): string {
 }
 
 /**
- * Escape newline characters according to RFC2425 section 5.8.4.
+ * Escape special characters in text values per RFC 2426.
  *
- * @link   http://tools.ietf.org/html/rfc2425#section-5.8.4
+ * Backslashes are replaced first to avoid double-escaping.
+ *
+ * @link   http://tools.ietf.org/html/rfc2426
  * @param  {string} text
  * @return {string}
  */
-export function escape(text: string): string {
-  let escapedText = `${text}`.replace(/\r\n/g, '\\n')
-  escapedText = escapedText.replace(/\n/g, '\\n')
-
-  return escapedText
+export function escapeText(text: string): string {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r\n/g, '\\n')
+    .replace(/\n/g, '\\n')
 }
 
 /**

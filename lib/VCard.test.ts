@@ -52,19 +52,18 @@ BEGIN:VCARD\r\n\
 VERSION:3.0\r\n\
 PRODID:-//vcard-creator//vcard-creator ${LIB_VERSION}//EN\r\n\
 REV:${new Date().toISOString()}\r\n\
-N;CHARSET=utf-8:Desloovere;Jeroen;;;\r\n\
-FN;CHARSET=utf-8:Jeroen Desloovere\r\n\
+N:Desloovere;Jeroen;;;\r\n\
+FN:Jeroen Desloovere\r\n\
 NICKNAME:Jero,Jerox\r\n\
 X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j\r\n\
 IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j\r\n\
-ORG;CHARSET=utf-8:Siesqo\r\n\
-TITLE;CHARSET=utf-8:Web Developer\r\n\
-ROLE;CHARSET=utf-8:Data Protection Officer\r\n\
+ORG:Siesqo\r\n\
+TITLE:Web Developer\r\n\
+ROLE:Data Protection Officer\r\n\
 EMAIL:info@jeroendesloovere.be\r\n\
 TEL;TYPE=PREF,WORK:1234121212\r\n\
 TEL;TYPE=WORK:123456789\r\n\
-ADR;TYPE=WORK,POSTAL;CHARSET=utf-8:name;extended;street;worktown;state;work\r\n\
- postcode;Belgium\r\n\
+ADR;TYPE=WORK,POSTAL:name;extended;street;worktown;state;workpostcode;Belgi\r\n um\r\n\
 URL:http://www.jeroendesloovere.be\r\n\
 PHOTO;VALUE=uri:https://example.com/img/photo.jpg\r\n\
 UID:19950401-080045-40000F192713-0052\r\n\
@@ -327,6 +326,12 @@ describe('Test addSortString()', () => {
     vCard.addSortString('Doe')
     expect(() => vCard.addSortString('Smith')).toThrow(VCardException)
   })
+
+  it('should escape special characters in sort string', () => {
+    const vCard = new VCard()
+    vCard.addSortString('Doe, Jr.')
+    expect(vCard.toString()).toContain('SORT-STRING:Doe\\, Jr.')
+  })
 })
 
 describe('Test addLabel()', () => {
@@ -334,15 +339,13 @@ describe('Test addLabel()', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: '123 Main St\nSpringfield, IL 62701' })
     const output = vCard.toString()
-    expect(output).toContain('LABEL;TYPE=WORK,POSTAL;CHARSET=utf-8:')
+    expect(output).toContain('LABEL;TYPE=WORK,POSTAL:')
   })
 
   it('should add label with custom type', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: 'Home address', type: ['home'] })
-    expect(vCard.toString()).toContain(
-      'LABEL;TYPE=HOME;CHARSET=utf-8:Home address',
-    )
+    expect(vCard.toString()).toContain('LABEL;TYPE=HOME:Home address')
   })
 
   it('should escape newlines in label', () => {
@@ -356,8 +359,14 @@ describe('Test addLabel()', () => {
     vCard.addLabel({ label: 'Work address', type: ['work'] })
     vCard.addLabel({ label: 'Home address', type: ['home'] })
     const output = vCard.toString()
-    expect(output).toContain('LABEL;TYPE=WORK;CHARSET=utf-8:Work address')
-    expect(output).toContain('LABEL;TYPE=HOME;CHARSET=utf-8:Home address')
+    expect(output).toContain('LABEL;TYPE=WORK:Work address')
+    expect(output).toContain('LABEL;TYPE=HOME:Home address')
+  })
+
+  it('should escape semicolons and commas in label', () => {
+    const vCard = new VCard()
+    vCard.addLabel({ label: 'Floor 2; Suite 5, Room A' })
+    expect(vCard.toString()).toContain('Floor 2\\; Suite 5\\, Room A')
   })
 })
 
@@ -431,6 +440,12 @@ describe('Test addCustomProperty()', () => {
     expect(output).toContain('X-TEST:value')
     expect(output).not.toContain('X-TEST;')
   })
+
+  it('should NOT escape values (escape hatch)', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'X-TEST', value: 'a;b,c\\d' })
+    expect(vCard.toString()).toContain('X-TEST:a;b,c\\d')
+  })
 })
 
 describe('Object params API', () => {
@@ -442,8 +457,8 @@ describe('Object params API', () => {
       honorificPrefix: 'Dr.',
     })
     const output = vCard.toString()
-    expect(output).toContain('N;CHARSET=utf-8:Doe;John;;Dr.;')
-    expect(output).toContain('FN;CHARSET=utf-8:Dr. John Doe')
+    expect(output).toContain('N:Doe;John;;Dr.;')
+    expect(output).toContain('FN:Dr. John Doe')
   })
 
   it('addAddress with options and typed array', () => {
@@ -457,14 +472,14 @@ describe('Object params API', () => {
       type: ['home', 'postal'],
     })
     const output = vCard.toString()
-    expect(output).toContain('ADR;TYPE=HOME,POSTAL;CHARSET=utf-8:')
+    expect(output).toContain('ADR;TYPE=HOME,POSTAL:')
     expect(output).toContain('123 Main St;Springfield;IL;62701;USA')
   })
 
   it('addAddress with default type', () => {
     const vCard = new VCard()
     vCard.addAddress({ street: '123 Main St' })
-    expect(vCard.toString()).toContain('ADR;TYPE=WORK,POSTAL;CHARSET=utf-8:')
+    expect(vCard.toString()).toContain('ADR;TYPE=WORK,POSTAL:')
   })
 
   it('addEmail with options and typed array', () => {
@@ -494,9 +509,7 @@ describe('Object params API', () => {
   it('addCompany with options', () => {
     const vCard = new VCard()
     vCard.addCompany({ name: 'Acme Corp', department: 'Engineering' })
-    expect(vCard.toString()).toContain(
-      'ORG;CHARSET=utf-8:Acme Corp;Engineering',
-    )
+    expect(vCard.toString()).toContain('ORG:Acme Corp;Engineering')
   })
 
   it('addUrl with options and typed array', () => {
@@ -555,16 +568,14 @@ describe('Object params API', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: '123 Main St\nSpringfield', type: ['home'] })
     expect(vCard.toString()).toContain(
-      'LABEL;TYPE=HOME;CHARSET=utf-8:123 Main St\\nSpringfield',
+      'LABEL;TYPE=HOME:123 Main St\\nSpringfield',
     )
   })
 
   it('addLabel with options, default type', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: 'Work address' })
-    expect(vCard.toString()).toContain(
-      'LABEL;TYPE=WORK,POSTAL;CHARSET=utf-8:Work address',
-    )
+    expect(vCard.toString()).toContain('LABEL;TYPE=WORK,POSTAL:Work address')
   })
 })
 
@@ -586,7 +597,7 @@ describe('resolveType wire format', () => {
   it('empty array produces no TYPE parameter', () => {
     const vCard = new VCard()
     vCard.addAddress({ street: 'Main St', type: [] })
-    expect(vCard.toString()).toContain('ADR;CHARSET=utf-8:')
+    expect(vCard.toString()).toContain('ADR:')
     expect(vCard.toString()).not.toContain('TYPE=')
   })
 
@@ -637,6 +648,276 @@ describe('Metadata getters', () => {
   })
 })
 
+describe('CHARSET handling', () => {
+  it('should not add CHARSET for default utf-8', () => {
+    const vCard = new VCard()
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
+    const output = vCard.toString()
+    expect(output).toContain('N:Doe;John;;;')
+    expect(output).not.toContain('CHARSET')
+  })
+
+  it('should add CHARSET for non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
+    const output = vCard.toString()
+    expect(output).toContain('N;CHARSET=iso-8859-1:Doe;John;;;')
+  })
+})
+
+describe('Text escaping', () => {
+  describe('structured values', () => {
+    it('should escape semicolons in address components', () => {
+      const vCard = new VCard()
+      vCard.addAddress({ street: '123 Main; Suite 5' })
+      expect(vCard.toString()).toContain('123 Main\\; Suite 5')
+    })
+
+    it('should escape commas in address components', () => {
+      const vCard = new VCard()
+      vCard.addAddress({ locality: 'Springfield, IL' })
+      expect(vCard.toString()).toContain('Springfield\\, IL')
+    })
+
+    it('should escape commas in family name', () => {
+      const vCard = new VCard()
+      vCard.addName({ familyName: 'Smith, Jr.', givenName: 'John' })
+      const output = vCard.toString()
+      expect(output).toContain('N:Smith\\, Jr.;John;;;')
+      expect(output).toContain('FN:John Smith\\, Jr.')
+    })
+
+    it('should escape backslashes in name components', () => {
+      const vCard = new VCard()
+      vCard.addName({ familyName: 'O\\Brien' })
+      expect(vCard.toString()).toContain('N:O\\\\Brien;;;;')
+    })
+
+    it('should escape semicolons in company name', () => {
+      const vCard = new VCard()
+      vCard.addCompany({ name: 'Foo; Bar Inc' })
+      expect(vCard.toString()).toContain('ORG:Foo\\; Bar Inc')
+    })
+
+    it('should escape semicolons in company department', () => {
+      const vCard = new VCard()
+      vCard.addCompany({ name: 'Acme', department: 'R;D' })
+      expect(vCard.toString()).toContain('ORG:Acme;R\\;D')
+    })
+  })
+
+  describe('list values', () => {
+    it('should escape commas in nickname array elements', () => {
+      const vCard = new VCard()
+      vCard.addNickname(['Nick,name', 'Other'])
+      expect(vCard.toString()).toContain('NICKNAME:Nick\\,name,Other')
+    })
+
+    it('should escape commas in single nickname string', () => {
+      const vCard = new VCard()
+      vCard.addNickname('Nick,name')
+      expect(vCard.toString()).toContain('NICKNAME:Nick\\,name')
+    })
+
+    it('should escape commas in categories', () => {
+      const vCard = new VCard()
+      vCard.addCategories(['Rock, Pop', 'Jazz'])
+      expect(vCard.toString()).toContain('CATEGORIES:Rock\\, Pop,Jazz')
+    })
+  })
+
+  describe('simple text values', () => {
+    it('should escape special characters in note', () => {
+      const vCard = new VCard()
+      vCard.addNote('Call me; available, Mon\\Fri\nLeave message')
+      expect(vCard.toString()).toContain(
+        'NOTE:Call me\\; available\\, Mon\\\\Fri\\nLeave message',
+      )
+    })
+
+    it('should escape special characters in jobtitle', () => {
+      const vCard = new VCard()
+      vCard.addJobtitle('VP; Sales, Marketing')
+      expect(vCard.toString()).toContain('TITLE:VP\\; Sales\\, Marketing')
+    })
+
+    it('should escape special characters in role', () => {
+      const vCard = new VCard()
+      vCard.addRole('Manager; Team Lead')
+      expect(vCard.toString()).toContain('ROLE:Manager\\; Team Lead')
+    })
+  })
+
+  describe('non-escaped values', () => {
+    it('should not escape URL values', () => {
+      const vCard = new VCard()
+      vCard.addUrl({ url: 'https://example.com/path;param?a=1,2' })
+      expect(vCard.toString()).toContain(
+        'URL:https://example.com/path;param?a=1,2',
+      )
+    })
+
+    it('should not escape email values', () => {
+      const vCard = new VCard()
+      vCard.addEmail({ address: 'user@example.com' })
+      expect(vCard.toString()).toContain('EMAIL:user@example.com')
+    })
+
+    it('should not escape phone number values', () => {
+      const vCard = new VCard()
+      vCard.addPhoneNumber({ number: '+1-555-0100' })
+      expect(vCard.toString()).toContain('TEL:+1-555-0100')
+    })
+
+    it('should not escape GEO structural semicolons', () => {
+      const vCard = new VCard()
+      vCard.addGeo(37.386, -122.083)
+      expect(vCard.toString()).toContain('GEO:37.386;-122.083')
+    })
+
+    it('should not escape custom property values', () => {
+      const vCard = new VCard()
+      vCard.addCustomProperty({ name: 'X-TEST', value: 'a;b,c\\d' })
+      expect(vCard.toString()).toContain('X-TEST:a;b,c\\d')
+    })
+  })
+})
+
+describe('Empty FN guard', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date())
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should not generate FN when all name components are empty', () => {
+    const vCard = new VCard()
+    vCard.addName({})
+    const output = vCard.toString()
+    expect(output).toContain('N:;;;;')
+    expect(output).not.toContain('FN:')
+  })
+
+  it('should still generate FN when name has components', () => {
+    const vCard = new VCard()
+    vCard.addName({ givenName: 'John' })
+    const output = vCard.toString()
+    expect(output).toContain('FN:John')
+  })
+})
+
+describe('Test addBirthday()', () => {
+  it('should accept a Date object', () => {
+    const vCard = new VCard()
+    vCard.addBirthday(new Date('1990-05-15T00:00:00Z'))
+    expect(vCard.toString()).toContain('BDAY:1990-05-15')
+  })
+
+  it('should accept a DateString', () => {
+    const vCard = new VCard()
+    vCard.addBirthday('1990-05-15')
+    expect(vCard.toString()).toContain('BDAY:1990-05-15')
+  })
+
+  it('should produce identical output for Date and DateString', () => {
+    const vCard1 = new VCard()
+    vCard1.addBirthday(new Date('1990-05-15T00:00:00Z'))
+
+    const vCard2 = new VCard()
+    vCard2.addBirthday('1990-05-15')
+
+    const props1 = vCard1.getProperties()
+    const props2 = vCard2.getProperties()
+    const bday1 = props1.find((p) => p.key === 'BDAY')
+    const bday2 = props2.find((p) => p.key === 'BDAY')
+    expect(bday1?.value).toBe(bday2?.value)
+  })
+
+  it('should throw on duplicate addBirthday', () => {
+    const vCard = new VCard()
+    vCard.addBirthday('1990-05-15')
+    expect(() => vCard.addBirthday('1991-06-20')).toThrow(VCardException)
+  })
+})
+
+describe('Test addRevision()', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should use custom revision when set', () => {
+    const vCard = new VCard()
+    vCard.addRevision(new Date('2024-01-15T10:30:00Z'))
+    const output = vCard.toString()
+    expect(output).toContain('REV:2024-01-15T10:30:00.000Z')
+    // Should NOT have auto-generated REV
+    const revMatches = output.match(/REV:/g)
+    expect(revMatches).toHaveLength(1)
+  })
+
+  it('should auto-generate REV when addRevision not called', () => {
+    const vCard = new VCard()
+    vCard.addName({ givenName: 'John' })
+    const output = vCard.toString()
+    expect(output).toContain('REV:2026-01-01T00:00:00.000Z')
+  })
+
+  it('should throw on duplicate addRevision', () => {
+    const vCard = new VCard()
+    vCard.addRevision(new Date('2024-01-15T10:30:00Z'))
+    expect(() => vCard.addRevision(new Date('2024-02-01T00:00:00Z'))).toThrow(
+      VCardException,
+    )
+  })
+})
+
+describe('Property grouping', () => {
+  it('should prefix grouped custom properties', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({
+      name: 'TEL',
+      value: '+1-555-1234',
+      group: 'item1',
+    })
+    expect(vCard.toString()).toContain('item1.TEL:+1-555-1234')
+  })
+
+  it('should support multiple grouped properties with same prefix', () => {
+    const vCard = new VCard()
+    vCard
+      .addCustomProperty({
+        name: 'TEL',
+        value: '+1-555-1234',
+        group: 'item1',
+      })
+      .addCustomProperty({
+        name: 'X-ABLabel',
+        value: 'Work Phone',
+        group: 'item1',
+      })
+    const output = vCard.toString()
+    expect(output).toContain('item1.TEL:+1-555-1234')
+    expect(output).toContain('item1.X-ABLABEL:Work Phone')
+  })
+
+  it('should not prefix ungrouped properties', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'X-TEST', value: 'value' })
+    const output = vCard.toString()
+    expect(output).toContain('X-TEST:value')
+    expect(output).not.toContain('.X-TEST')
+  })
+})
+
 describe('Full chain with object API', () => {
   it('should produce valid vCard output with all object params', () => {
     const vCard = new VCard()
@@ -650,10 +931,10 @@ describe('Full chain with object API', () => {
 
     const output = vCard.toString()
     expect(output).toContain('BEGIN:VCARD')
-    expect(output).toContain('N;CHARSET=utf-8:Doe;John;;;')
+    expect(output).toContain('N:Doe;John;;;')
     expect(output).toContain('EMAIL;TYPE=WORK:john@acme.com')
     expect(output).toContain('TEL;TYPE=CELL:+1555')
-    expect(output).toContain('ADR;TYPE=WORK;CHARSET=utf-8:')
+    expect(output).toContain('ADR;TYPE=WORK:')
     expect(output).toContain('URL:https://acme.com')
     expect(output).toContain('END:VCARD')
   })
