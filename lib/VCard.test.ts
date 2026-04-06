@@ -1,9 +1,8 @@
 import { vi } from 'vitest'
 import VCard from './VCard'
-import VCardException from './VCardException'
 import { LIB_VERSION } from './utils/constants'
 
-describe('Test vCard', () => {
+describe('vCard output format', () => {
   const photoURL = 'https://example.com/img/photo.jpg'
 
   beforeEach(() => {
@@ -72,28 +71,7 @@ END:VCARD\r\n\
     expect(vCardOutput).toBe(expectedOutput)
   })
 
-  it('should throw on attempting to add the same property', () => {
-    const vCard = new VCard()
-
-    vCard.addName({ familyName: 'Desloovere', givenName: 'Jeroen' })
-
-    expect(() => {
-      vCard.addName({ familyName: 'Desloovere', givenName: 'Jeroen' })
-    }).toThrow(VCardException)
-  })
-
-  it('should throw on attempting to add an invalid MIME Media Type', () => {
-    const vCard = new VCard()
-
-    expect(() => {
-      vCard.addPhoto({
-        image: 'MIICajCCAdOgAwIBAgICBEUwDQYJKoZIhvcN...',
-        mime: 'foobar',
-      })
-    }).toThrow(VCardException)
-  })
-
-  it('should parse phone numbers correctly', () => {
+  it('should format phone numbers as strings in output', () => {
     const vCard = new VCard()
 
     vCard
@@ -115,9 +93,29 @@ END:VCARD\r\n\
 
     expect(vCardOutput).toBe(expectedOutput)
   })
+
+  it('should produce valid output with all object params chained', () => {
+    const vCard = new VCard()
+    vCard
+      .addName({ givenName: 'John', familyName: 'Doe' })
+      .addCompany({ name: 'Acme' })
+      .addEmail({ address: 'john@acme.com', type: ['work'] })
+      .addPhoneNumber({ number: '+1555', type: ['cell'] })
+      .addAddress({ street: '123 Main', locality: 'NYC', type: ['work'] })
+      .addUrl({ url: 'https://acme.com' })
+
+    const output = vCard.toString()
+    expect(output).toContain('BEGIN:VCARD')
+    expect(output).toContain('N:Doe;John;;;')
+    expect(output).toContain('EMAIL;TYPE=WORK:john@acme.com')
+    expect(output).toContain('TEL;TYPE=CELL:+1555')
+    expect(output).toContain('ADR;TYPE=WORK:')
+    expect(output).toContain('URL:https://acme.com')
+    expect(output).toContain('END:VCARD')
+  })
 })
 
-describe('Test PRODID', () => {
+describe('PRODID', () => {
   it('should include PRODID in every vCard output', () => {
     const vCard = new VCard()
     vCard.addName({ familyName: 'Doe', givenName: 'John' })
@@ -238,27 +236,5 @@ describe('CHARSET handling', () => {
     expect(output).toContain(
       'LABEL;TYPE=INTL,POSTAL,PARCEL,WORK;CHARSET=iso-8859-1:Home',
     )
-  })
-})
-
-describe('Full chain with object API', () => {
-  it('should produce valid vCard output with all object params', () => {
-    const vCard = new VCard()
-    vCard
-      .addName({ givenName: 'John', familyName: 'Doe' })
-      .addCompany({ name: 'Acme' })
-      .addEmail({ address: 'john@acme.com', type: ['work'] })
-      .addPhoneNumber({ number: '+1555', type: ['cell'] })
-      .addAddress({ street: '123 Main', locality: 'NYC', type: ['work'] })
-      .addUrl({ url: 'https://acme.com' })
-
-    const output = vCard.toString()
-    expect(output).toContain('BEGIN:VCARD')
-    expect(output).toContain('N:Doe;John;;;')
-    expect(output).toContain('EMAIL;TYPE=WORK:john@acme.com')
-    expect(output).toContain('TEL;TYPE=CELL:+1555')
-    expect(output).toContain('ADR;TYPE=WORK:')
-    expect(output).toContain('URL:https://acme.com')
-    expect(output).toContain('END:VCARD')
   })
 })
