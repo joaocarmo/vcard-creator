@@ -108,6 +108,46 @@ describe('Test addKey()', () => {
   })
 })
 
+describe('Test addCategories()', () => {
+  it('should throw on duplicate addCategories', () => {
+    const vCard = new VCard()
+    vCard.addCategories(['Work'])
+    expect(() => vCard.addCategories(['Personal'])).toThrow(VCardException)
+  })
+})
+
+describe('Test addCompany()', () => {
+  it('should throw on duplicate addCompany', () => {
+    const vCard = new VCard()
+    vCard.addCompany({ name: 'Acme' })
+    expect(() => vCard.addCompany({ name: 'Other' })).toThrow(VCardException)
+  })
+})
+
+describe('Test addJobtitle()', () => {
+  it('should throw on duplicate addJobtitle', () => {
+    const vCard = new VCard()
+    vCard.addJobtitle('Developer')
+    expect(() => vCard.addJobtitle('Manager')).toThrow(VCardException)
+  })
+})
+
+describe('Test addRole()', () => {
+  it('should throw on duplicate addRole', () => {
+    const vCard = new VCard()
+    vCard.addRole('Engineer')
+    expect(() => vCard.addRole('Architect')).toThrow(VCardException)
+  })
+})
+
+describe('Test addUid()', () => {
+  it('should throw on duplicate addUid', () => {
+    const vCard = new VCard()
+    vCard.addUid('uid-001')
+    expect(() => vCard.addUid('uid-002')).toThrow(VCardException)
+  })
+})
+
 describe('Multiple note instances', () => {
   it('should allow multiple addNote calls', () => {
     const vCard = new VCard()
@@ -481,6 +521,58 @@ describe('Social & IMPP', () => {
 
     expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
+  })
+})
+
+describe('Multiple address instances', () => {
+  it('should allow multiple addAddress calls', () => {
+    const vCard = new VCard()
+    vCard
+      .addAddress({ street: '123 Work St', type: ['work'] })
+      .addAddress({ street: '456 Home Ave', type: ['home'] })
+
+    const output = vCard.toString()
+    expect(output).toContain('ADR;TYPE=WORK:;;123 Work St;;;;')
+    expect(output).toContain('ADR;TYPE=HOME:;;456 Home Ave;;;;')
+  })
+})
+
+describe('Multiple email instances', () => {
+  it('should allow multiple addEmail calls', () => {
+    const vCard = new VCard()
+    vCard
+      .addEmail({ address: 'work@example.com', type: ['work'] })
+      .addEmail({ address: 'home@example.com', type: ['home'] })
+
+    const output = vCard.toString()
+    expect(output).toContain('EMAIL;TYPE=WORK:work@example.com')
+    expect(output).toContain('EMAIL;TYPE=HOME:home@example.com')
+  })
+})
+
+describe('Multiple phoneNumber instances', () => {
+  it('should allow multiple addPhoneNumber calls', () => {
+    const vCard = new VCard()
+    vCard
+      .addPhoneNumber({ number: '+1-555-0001', type: ['work'] })
+      .addPhoneNumber({ number: '+1-555-0002', type: ['cell'] })
+
+    const output = vCard.toString()
+    expect(output).toContain('TEL;TYPE=WORK:+1-555-0001')
+    expect(output).toContain('TEL;TYPE=CELL:+1-555-0002')
+  })
+})
+
+describe('Multiple url instances', () => {
+  it('should allow multiple addUrl calls', () => {
+    const vCard = new VCard()
+    vCard
+      .addUrl({ url: 'https://work.example.com', type: ['work'] })
+      .addUrl({ url: 'https://home.example.com', type: ['home'] })
+
+    const output = vCard.toString()
+    expect(output).toContain('URL;TYPE=WORK:https://work.example.com')
+    expect(output).toContain('URL;TYPE=HOME:https://home.example.com')
   })
 })
 
