@@ -208,7 +208,7 @@ export default class VCard {
       additionalNames,
       familyName,
       honorificSuffix,
-    ].filter((m) => !!m)
+    ].filter(Boolean)
 
     const property = `${familyName};${givenName};${additionalNames};${honorificPrefix};${honorificSuffix}`
     this.setProperty('name', `N${this.getCharsetString()}`, property)
