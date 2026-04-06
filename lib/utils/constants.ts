@@ -9,6 +9,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'impp',
   'label',
   'logo',
+  'note',
   'phoneNumber',
   'photo',
   'social',

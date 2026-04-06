@@ -36,6 +36,16 @@ describe('Test addFullName()', () => {
   })
 })
 
+describe('Multiple note instances', () => {
+  it('should allow multiple addNote calls', () => {
+    const vCard = new VCard()
+    vCard.addNote('Met at conference').addNote('Follows up quarterly')
+    const output = vCard.toString()
+    expect(output).toContain('NOTE:Met at conference')
+    expect(output).toContain('NOTE:Follows up quarterly')
+  })
+})
+
 describe('Test addGeo()', () => {
   it('should add geographic position', () => {
     const vCard = new VCard()
