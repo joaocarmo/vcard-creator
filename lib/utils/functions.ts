@@ -1,5 +1,8 @@
 import { MIME_TYPES } from './constants.js'
 
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+
 /**
  * Encodes data with MIME base64.
  *
@@ -74,7 +77,6 @@ export function fold(text: string): string {
   const hasCrlf = text.endsWith('\r\n')
   const content = hasCrlf ? text.slice(0, -2) : text
 
-  const encoder = new TextEncoder()
   const bytes = encoder.encode(content)
 
   if (bytes.length <= 75) {
@@ -90,7 +92,7 @@ export function fold(text: string): string {
     const maxOctets = isFirstLine ? 75 : 74
 
     if (bytes.length - offset <= maxOctets) {
-      lines.push(new TextDecoder().decode(bytes.subarray(offset)))
+      lines.push(decoder.decode(bytes.subarray(offset)))
       break
     }
 
@@ -108,7 +110,7 @@ export function fold(text: string): string {
       end = offset + maxOctets
     }
 
-    lines.push(new TextDecoder().decode(bytes.subarray(offset, end)))
+    lines.push(decoder.decode(bytes.subarray(offset, end)))
     offset = end
     isFirstLine = false
   }
