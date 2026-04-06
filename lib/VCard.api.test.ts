@@ -90,17 +90,17 @@ describe('Object params API', () => {
     )
   })
 
-  it('addPhotoUrl with options', () => {
+  it('addPhoto with url option', () => {
     const vCard = new VCard()
-    vCard.addPhotoUrl({ url: 'https://example.com/photo.jpg' })
+    vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
     expect(vCard.toString()).toContain(
       'PHOTO;VALUE=uri:https://example.com/photo.jpg',
     )
   })
 
-  it('addLogoUrl with options', () => {
+  it('addLogo with url option', () => {
     const vCard = new VCard()
-    vCard.addLogoUrl({ url: 'https://example.com/logo.png' })
+    vCard.addLogo({ url: 'https://example.com/logo.png' })
     expect(vCard.toString()).toContain(
       'LOGO;VALUE=uri:https://example.com/logo.png',
     )

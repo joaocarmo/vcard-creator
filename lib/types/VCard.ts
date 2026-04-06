@@ -134,25 +134,35 @@ export interface ImppOptions {
   serviceType?: string
 }
 
-export interface MediaUrlOptions {
-  url: string
-}
+export type PhotoOptions =
+  | { url: string }
+  | {
+      /** Base64-encoded image data */ image: string
+      /** Image MIME type (defaults to 'JPEG') */ mime?: string
+    }
 
-export interface MediaOptions {
-  image: string
-  mime?: string
+export type LogoOptions =
+  | { url: string }
+  | {
+      /** Base64-encoded image data */ image: string
+      /** Image MIME type (defaults to 'JPEG') */ mime?: string
+    }
+
+export type KeyOptions =
+  | { url: string }
+  | {
+      /** Base64-encoded public key data */ key: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. */ mime?: string
+    }
+
+export interface GeoOptions {
+  latitude: number
+  longitude: number
 }
 
 export interface LabelOptions {
   label: string
   type?: AddressType[]
-}
-
-export interface KeyOptions {
-  /** Base64-encoded public key data */
-  key: string
-  /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. */
-  mime?: string
 }
 
 export interface CustomPropertyOptions {

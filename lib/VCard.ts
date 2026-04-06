@@ -7,13 +7,14 @@ import {
   DefinedElements,
   Element,
   EmailOptions,
+  GeoOptions,
   ImppOptions,
   KeyOptions,
   LabelOptions,
-  MediaOptions,
-  MediaUrlOptions,
+  LogoOptions,
   NameOptions,
   PhoneOptions,
+  PhotoOptions,
   Property,
   SetPropertyOptions,
   SocialOptions,
@@ -150,32 +151,26 @@ export default class VCard {
   }
 
   /**
-   * Add public key (base64-encoded).
+   * Add public key (base64-encoded or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
    * @throws VCardException
    */
-  public addKey({ key, mime = 'PGP' }: KeyOptions): this {
-    this.setProperty({
-      element: 'key',
-      key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,
-      value: key,
-    })
-
-    return this
-  }
-
-  /**
-   * Add public key by URL.
-   *
-   * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
-   */
-  public addKeyUrl({ url }: MediaUrlOptions): this {
-    this.setProperty({
-      element: 'key',
-      key: 'KEY;VALUE=uri',
-      value: url,
-    })
+  public addKey(options: KeyOptions): this {
+    if ('url' in options) {
+      this.setProperty({
+        element: 'key',
+        key: 'KEY;VALUE=uri',
+        value: options.url,
+      })
+    } else {
+      const mime = options.mime ?? 'PGP'
+      this.setProperty({
+        element: 'key',
+        key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,
+        value: options.key,
+      })
+    }
 
     return this
   }
@@ -377,51 +372,43 @@ export default class VCard {
   }
 
   /**
-   * Add Logo URL.
+   * Add logo (base64-encoded or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
+   * @throws VCardException
    */
-  public addLogoUrl({ url }: MediaUrlOptions): this {
-    this.addMediaUrl('LOGO', url, 'logo')
+  public addLogo(options: LogoOptions): this {
+    if ('url' in options) {
+      this.addMediaUrl('LOGO', options.url, 'logo')
+    } else {
+      this.addMediaContent(
+        'LOGO',
+        options.image,
+        options.mime ?? constants.DEFAULT_MIME_TYPE,
+        'logo',
+      )
+    }
 
     return this
   }
 
   /**
-   * Add Logo.
-   *
-   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
-   */
-  public addLogo({
-    image,
-    mime = constants.DEFAULT_MIME_TYPE,
-  }: MediaOptions): this {
-    this.addMediaContent('LOGO', image, mime, 'logo')
-
-    return this
-  }
-
-  /**
-   * Add Photo URL.
+   * Add photo (base64-encoded or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
+   * @throws VCardException
    */
-  public addPhotoUrl({ url }: MediaUrlOptions): this {
-    this.addMediaUrl('PHOTO', url, 'photo')
-
-    return this
-  }
-
-  /**
-   * Add Photo.
-   *
-   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
-   */
-  public addPhoto({
-    image,
-    mime = constants.DEFAULT_MIME_TYPE,
-  }: MediaOptions): this {
-    this.addMediaContent('PHOTO', image, mime, 'photo')
+  public addPhoto(options: PhotoOptions): this {
+    if ('url' in options) {
+      this.addMediaUrl('PHOTO', options.url, 'photo')
+    } else {
+      this.addMediaContent(
+        'PHOTO',
+        options.image,
+        options.mime ?? constants.DEFAULT_MIME_TYPE,
+        'photo',
+      )
+    }
 
     return this
   }
@@ -497,7 +484,7 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.2
    * @throws VCardException
    */
-  public addGeo(latitude: number, longitude: number): this {
+  public addGeo({ latitude, longitude }: GeoOptions): this {
     if (latitude < -90 || latitude > 90) {
       throw new VCardException(
         `Invalid latitude: ${latitude}. Must be between -90 and 90.`,

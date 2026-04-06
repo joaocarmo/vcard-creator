@@ -52,13 +52,13 @@ vCard
     url: 'https://linkedin.com/in/desloovere',
     type: 'LinkedIn',
   })
-  .addGeo(51.0543, 3.7174)
+  .addGeo({ latitude: 51.0543, longitude: 3.7174 })
   .addTimezone('Europe/Brussels')
   .addNote('Met at vCard conference; loves open-source, Belgian waffles')
   .addCategories(['Developer', 'Open Source'])
   .addSortString('Desloovere')
   .addPhoto({ image: photo, mime: 'jpeg' })
-  .addLogoUrl({ url: 'https://example.com/siesqo-logo.png' })
+  .addLogo({ url: 'https://example.com/siesqo-logo.png' })
   .addCustomProperty({
     name: 'X-PHONETIC-FIRST-NAME',
     value: 'Yeroon',

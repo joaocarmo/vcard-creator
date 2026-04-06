@@ -63,7 +63,7 @@ describe('Test addKey()', () => {
 
   it('should add a key by URL', () => {
     const vCard = new VCard()
-    vCard.addKeyUrl({ url: 'https://example.com/key.pub' })
+    vCard.addKey({ url: 'https://example.com/key.pub' })
     expect(vCard.toString()).toContain(
       'KEY;VALUE=uri:https://example.com/key.pub',
     )
@@ -73,7 +73,7 @@ describe('Test addKey()', () => {
     const vCard = new VCard()
     vCard
       .addKey({ key: 'pgpdata' })
-      .addKeyUrl({ url: 'https://example.com/key.pub' })
+      .addKey({ url: 'https://example.com/key.pub' })
     const output = vCard.toString()
     expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
     expect(output).toContain('KEY;VALUE=uri:https://example.com/key.pub')
@@ -103,34 +103,44 @@ describe('Multiple note instances', () => {
 describe('Test addGeo()', () => {
   it('should add geographic position', () => {
     const vCard = new VCard()
-    vCard.addGeo(37.386013, -122.082932)
+    vCard.addGeo({ latitude: 37.386013, longitude: -122.082932 })
     const output = vCard.toString()
     expect(output).toContain('GEO:37.386013;-122.082932')
   })
 
   it('should accept boundary values', () => {
     const vCard = new VCard()
-    vCard.addGeo(-90, 180)
+    vCard.addGeo({ latitude: -90, longitude: 180 })
     const output = vCard.toString()
     expect(output).toContain('GEO:-90;180')
   })
 
   it('should throw on invalid latitude', () => {
     const vCard = new VCard()
-    expect(() => vCard.addGeo(91, 0)).toThrow(VCardException)
-    expect(() => vCard.addGeo(-91, 0)).toThrow(VCardException)
+    expect(() => vCard.addGeo({ latitude: 91, longitude: 0 })).toThrow(
+      VCardException,
+    )
+    expect(() => vCard.addGeo({ latitude: -91, longitude: 0 })).toThrow(
+      VCardException,
+    )
   })
 
   it('should throw on invalid longitude', () => {
     const vCard = new VCard()
-    expect(() => vCard.addGeo(0, 181)).toThrow(VCardException)
-    expect(() => vCard.addGeo(0, -181)).toThrow(VCardException)
+    expect(() => vCard.addGeo({ latitude: 0, longitude: 181 })).toThrow(
+      VCardException,
+    )
+    expect(() => vCard.addGeo({ latitude: 0, longitude: -181 })).toThrow(
+      VCardException,
+    )
   })
 
   it('should throw on duplicate addGeo', () => {
     const vCard = new VCard()
-    vCard.addGeo(37, -122)
-    expect(() => vCard.addGeo(40, -74)).toThrow(VCardException)
+    vCard.addGeo({ latitude: 37, longitude: -122 })
+    expect(() => vCard.addGeo({ latitude: 40, longitude: -74 })).toThrow(
+      VCardException,
+    )
   })
 })
 
@@ -457,22 +467,22 @@ describe('Social & IMPP', () => {
 })
 
 describe('Multiple photo/logo instances', () => {
-  it('should allow both addPhoto and addPhotoUrl on the same card', () => {
+  it('should allow both base64 and URL photo on the same card', () => {
     const vCard = new VCard()
     vCard
       .addPhoto({ image: 'base64data', mime: 'jpeg' })
-      .addPhotoUrl({ url: 'https://example.com/photo.jpg' })
+      .addPhoto({ url: 'https://example.com/photo.jpg' })
 
     const output = vCard.toString()
     expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data')
     expect(output).toContain('PHOTO;VALUE=uri:https://example.com/photo.jpg')
   })
 
-  it('should allow both addLogo and addLogoUrl on the same card', () => {
+  it('should allow both base64 and URL logo on the same card', () => {
     const vCard = new VCard()
     vCard
       .addLogo({ image: 'base64logo', mime: 'png' })
-      .addLogoUrl({ url: 'https://example.com/logo.png' })
+      .addLogo({ url: 'https://example.com/logo.png' })
 
     const output = vCard.toString()
     expect(output).toContain('LOGO;ENCODING=b;TYPE=PNG:base64logo')
