@@ -152,8 +152,6 @@ export default class VCard {
    * Add jobtitle.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.1
-   * @param  {string} jobtitle The jobtitle for the person
-   * @return {this}
    */
   public addJobtitle(jobtitle: string): this {
     this.setProperty({
@@ -169,8 +167,6 @@ export default class VCard {
    * Add role.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.2
-   * @param  {string} role The role for the person
-   * @return {this}
    */
   public addRole(role: string): this {
     this.setProperty({
@@ -270,7 +266,6 @@ export default class VCard {
    * Add nickname.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.3
-   * @param  {string|string[]} nickname
    */
   public addNickname(nickname: string | string[]): this {
     const value = Array.isArray(nickname)
@@ -289,8 +284,6 @@ export default class VCard {
    * Add note.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.2
-   * @param  {string} note
-   * @return {this}
    */
   public addNote(note: string): this {
     this.setProperty({
@@ -306,8 +299,6 @@ export default class VCard {
    * Add categories.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.1
-   * @param  {Array<string>} categories
-   * @return {this}
    */
   public addCategories(categories: string[]): this {
     this.setProperty({
@@ -443,8 +434,6 @@ export default class VCard {
    * Add UID.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.7
-   * @param  {string} uid
-   * @return {this}
    */
   public addUid(uid: string): this {
     this.setProperty({ element: 'uid', key: 'UID', value: uid })
@@ -456,10 +445,7 @@ export default class VCard {
    * Add geographic position.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.2
-   * @param  {number} latitude  Latitude in decimal degrees (-90 to 90)
-   * @param  {number} longitude Longitude in decimal degrees (-180 to 180)
    * @throws {VCardException}
-   * @return {this}
    */
   public addGeo(latitude: number, longitude: number): this {
     if (latitude < -90 || latitude > 90) {
@@ -487,8 +473,6 @@ export default class VCard {
    * Add timezone.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.1
-   * @param  {string} timezone UTC offset (e.g., '-05:00') or IANA name (e.g., 'America/New_York')
-   * @return {this}
    */
   public addTimezone(timezone: string): this {
     this.setProperty({ element: 'timezone', key: 'TZ', value: timezone })
@@ -500,8 +484,6 @@ export default class VCard {
    * Add sort string for name ordering (useful for CJK names).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.5
-   * @param  {string} sortString The string to use for sorting
-   * @return {this}
    */
   public addSortString(sortString: string): this {
     this.setProperty({
@@ -519,8 +501,6 @@ export default class VCard {
    * When set, overrides the auto-generated REV timestamp.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.4
-   * @param  {Date} date The revision date
-   * @return {this}
    */
   public addRevision(date: Date): this {
     this.setProperty({
@@ -580,8 +560,6 @@ export default class VCard {
 
   /**
    * Build vCard (.vcf).
-   *
-   * @return {string}
    */
   public buildVCard(): string {
     let string = ''
@@ -607,8 +585,6 @@ export default class VCard {
 
   /**
    * Get output as string.
-   *
-   * @return {string}
    */
   public toString(): string {
     return this.buildVCard()
@@ -616,8 +592,6 @@ export default class VCard {
 
   /**
    * Get charset.
-   *
-   * @return {string}
    */
   public getCharset(): string {
     return this.charset
@@ -625,8 +599,6 @@ export default class VCard {
 
   /**
    * Get charset string.
-   *
-   * @return {string}
    */
   public getCharsetString(): string {
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
@@ -638,8 +610,6 @@ export default class VCard {
 
   /**
    * Get content type.
-   *
-   * @return {string}
    */
   public getContentType(): string {
     return this.contentType
@@ -647,8 +617,6 @@ export default class VCard {
 
   /**
    * Get filename.
-   *
-   * @return {string}
    */
   public getFilename(): string {
     return this.filename
@@ -656,8 +624,6 @@ export default class VCard {
 
   /**
    * Get file extension.
-   *
-   * @return {string}
    */
   public getFileExtension(): string {
     return this.fileExtension
@@ -665,8 +631,6 @@ export default class VCard {
 
   /**
    * Get properties.
-   *
-   * @return {Property[]}
    */
   public getProperties(): Property[] {
     return this.properties
@@ -674,9 +638,6 @@ export default class VCard {
 
   /**
    * Has property.
-   *
-   * @param  {string} key
-   * @return {boolean}
    */
   public hasProperty(key: string): boolean {
     const properties = this.getProperties()
@@ -686,9 +647,6 @@ export default class VCard {
 
   /**
    * Set charset.
-   *
-   * @param  {string} charset
-   * @return {void}
    */
   public setCharset(charset: string): void {
     this.charset = charset
@@ -696,9 +654,6 @@ export default class VCard {
 
   /**
    * Set filename.
-   *
-   * @param  {string} value
-   * @return {void}
    */
   public setFilename(value: string): void {
     if (!value) {
@@ -714,8 +669,7 @@ export default class VCard {
    * Each vCard retains its own BEGIN/END markers. The result is a valid
    * multi-contact .vcf file.
    *
-   * @param  {...VCard} cards The vCards to combine
-   * @return {string}
+   * @param cards The vCards to combine
    */
   static concat(...cards: VCard[]): string {
     return VCard._concat(cards)
@@ -727,8 +681,7 @@ export default class VCard {
    * This card appears first, followed by the others in order.
    * Follows the same pattern as `Array.prototype.concat`.
    *
-   * @param  {...VCard} others Additional vCards to append
-   * @return {string}
+   * @param others Additional vCards to append
    */
   public concat(...others: VCard[]): string {
     return VCard._concat([this, ...others])

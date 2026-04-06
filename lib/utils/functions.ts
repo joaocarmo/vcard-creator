@@ -20,8 +20,6 @@ export function resolveType<T extends string>(type: T[]): string {
  * Backslashes are replaced first to avoid double-escaping.
  *
  * @link   http://tools.ietf.org/html/rfc2426
- * @param  {string} text
- * @return {string}
  */
 export function escapeText(text: string): string {
   return text
@@ -39,8 +37,6 @@ export function escapeText(text: string): string {
  * UTF-8 sequences are never split across a fold boundary.
  *
  * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
- * @param  {string} text
- * @return {string}
  */
 export function fold(text: string): string {
   // Strip trailing CRLF before measuring — the line break is not counted
@@ -94,8 +90,6 @@ export function fold(text: string): string {
  * image formats.
  *
  * @link    https://www.iana.org/assignments/media-types/media-types.xhtml#image
- * @param   {string} mime A string describing the MIME Media Type
- * @returns {boolean}
  */
 export function isValidMimeType(mime: string): boolean {
   if (mime && MIME_TYPES.includes(mime.toLowerCase())) {
