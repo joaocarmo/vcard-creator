@@ -18,6 +18,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'url',
 ]
 
+// Updated automatically during the release action
 export const LIB_VERSION = '0.11.0'
 
 export const CONTENT_TYPE = 'text/vcard'
