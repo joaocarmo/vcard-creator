@@ -7,6 +7,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'custom',
   'email',
   'impp',
+  'key',
   'label',
   'logo',
   'note',

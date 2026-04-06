@@ -36,6 +36,50 @@ describe('Test addFullName()', () => {
   })
 })
 
+describe('Test addKey()', () => {
+  it('should add a base64-encoded PGP key', () => {
+    const vCard = new VCard()
+    vCard.addKey({ key: 'MIICajCCAdOgAwIBAgICBEUwDQ...' })
+    expect(vCard.toString()).toContain(
+      'KEY;ENCODING=b;TYPE=PGP:MIICajCCAdOgAwIBAgICBEUwDQ...',
+    )
+  })
+
+  it('should add a key with custom MIME type', () => {
+    const vCard = new VCard()
+    vCard.addKey({ key: 'base64cert', mime: 'x509' })
+    expect(vCard.toString()).toContain('KEY;ENCODING=b;TYPE=X509:base64cert')
+  })
+
+  it('should add a key by URL', () => {
+    const vCard = new VCard()
+    vCard.addKeyUrl({ url: 'https://example.com/key.pub' })
+    expect(vCard.toString()).toContain(
+      'KEY;VALUE=uri:https://example.com/key.pub',
+    )
+  })
+
+  it('should allow both base64 and URL keys on the same card', () => {
+    const vCard = new VCard()
+    vCard
+      .addKey({ key: 'pgpdata' })
+      .addKeyUrl({ url: 'https://example.com/key.pub' })
+    const output = vCard.toString()
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
+    expect(output).toContain('KEY;VALUE=uri:https://example.com/key.pub')
+  })
+
+  it('should allow multiple keys', () => {
+    const vCard = new VCard()
+    vCard
+      .addKey({ key: 'pgpdata', mime: 'PGP' })
+      .addKey({ key: 'certdata', mime: 'x509' })
+    const output = vCard.toString()
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
+    expect(output).toContain('KEY;ENCODING=b;TYPE=X509:certdata')
+  })
+})
+
 describe('Multiple note instances', () => {
   it('should allow multiple addNote calls', () => {
     const vCard = new VCard()

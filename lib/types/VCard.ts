@@ -9,6 +9,7 @@ export type Element =
   | 'geo'
   | 'impp'
   | 'jobtitle'
+  | 'key'
   | 'label'
   | 'logo'
   | 'name'

@@ -149,6 +149,37 @@ export default class VCard {
   }
 
   /**
+   * Add public key (base64-encoded).
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
+   * @throws VCardException
+   */
+  public addKey({ key, mime = 'PGP' }: { key: string; mime?: string }): this {
+    this.setProperty({
+      element: 'key',
+      key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,
+      value: key,
+    })
+
+    return this
+  }
+
+  /**
+   * Add public key by URL.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
+   */
+  public addKeyUrl({ url }: MediaUrlOptions): this {
+    this.setProperty({
+      element: 'key',
+      key: 'KEY;VALUE=uri',
+      value: url,
+    })
+
+    return this
+  }
+
+  /**
    * Add jobtitle.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.1
