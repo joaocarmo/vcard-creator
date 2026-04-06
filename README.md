@@ -77,7 +77,7 @@ import VCard from 'vcard-creator'
 const myVCard = new VCard()
 
 myVCard
-  .addName({ firstName: 'Jeroen', lastName: 'Desloovere' })
+  .addName({ givenName: 'Jeroen', familyName: 'Desloovere' })
   .addCompany({ name: 'Siesqo' })
   .addJobtitle('Web Developer')
   .addRole('Data Protection Officer')
@@ -86,8 +86,8 @@ myVCard
   .addPhoneNumber({ number: 123456789, type: ['work'] })
   .addAddress({
     street: 'street',
-    city: 'worktown',
-    zip: 'workpostcode',
+    locality: 'worktown',
+    postalCode: 'workpostcode',
     country: 'Belgium',
   })
   .addSocial({
@@ -132,11 +132,11 @@ All methods return `this` for chaining. Methods that accept multiple arguments s
 
 ### Personal
 
-| Method                                                              | Description                                    |
-| ------------------------------------------------------------------- | ---------------------------------------------- |
-| `addName({ firstName?, lastName?, additional?, prefix?, suffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
-| `addNickname(nickname)`                                             | Nickname(s) — accepts `string` or `string[]`   |
-| `addBirthday(date)`                                                 | Birthday in `YYYY-MM-DD` format                |
+| Method                                                                                       | Description                                    |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
+| `addNickname(nickname)`                                                                      | Nickname(s) — accepts `string` or `string[]`   |
+| `addBirthday(date)`                                                                          | Birthday in `YYYY-MM-DD` format                |
 
 ### Organization
 
@@ -163,10 +163,10 @@ myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 
 ### Address
 
-| Method                                                                             | Description                                                                                       |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `addAddress({ street?, city?, region?, zip?, country?, name?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['work', 'postal']`        |
-| `addLabel({ label, type? })`                                                       | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['work', 'postal']` |
+| Method                                                                                                 | Description                                                                                       |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `addAddress({ street?, locality?, region?, postalCode?, country?, postOfficeBox?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['work', 'postal']`        |
+| `addLabel({ label, type? })`                                                                           | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['work', 'postal']` |
 
 ### Social & Messaging
 
@@ -268,7 +268,7 @@ myVCard.addName('Doe', 'John')
 myVCard.addEmail('john@example.com', 'PREF;WORK')
 
 // Recommended — named fields, order doesn't matter
-myVCard.addName({ firstName: 'John', lastName: 'Doe' })
+myVCard.addName({ givenName: 'John', familyName: 'Doe' })
 myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
 ```
 
