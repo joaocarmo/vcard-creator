@@ -41,6 +41,9 @@ jobs:
           git config --local user.email "${{ secrets.GIT_AUTHOR_EMAIL }}"
           npm version --no-commit-hooks --no-git-tag-version ${{ steps.get_release.outputs.tag_name }}
 
+      - name: Sync LIB_VERSION constant
+        run: node scripts/sync-version.mjs
+
       - name: Commit and push the version change
         run: |
           git add .
