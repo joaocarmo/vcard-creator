@@ -23,7 +23,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'url',
 ]
 
-export const LIB_VERSION = '0.9.0'
+export const LIB_VERSION = '0.10.0'
 
 export const DEFAULT_CHARACTER_SET = 'utf-8'
 export const DEFAULT_CONTENT_TYPE = ContentTypes.VCARD
