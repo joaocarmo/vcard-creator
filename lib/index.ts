@@ -10,6 +10,7 @@ export type {
   CompanyOptions,
   CustomPropertyOptions,
   DateString,
+  Element,
   EmailOptions,
   EmailType,
   ImppOptions,
