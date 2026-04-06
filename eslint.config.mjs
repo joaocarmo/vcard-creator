@@ -8,4 +8,16 @@ export default tseslint.config(
   {
     ignores: ['dist/', 'node_modules', 'test-functional/'],
   },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 )
