@@ -3,6 +3,7 @@ import {
   AddressOptions,
   CompanyOptions,
   CustomPropertyOptions,
+  DateString,
   DefinedElements,
   Element,
   EmailOptions,
@@ -13,11 +14,12 @@ import {
   NameOptions,
   PhoneOptions,
   Property,
+  SetPropertyOptions,
   SocialOptions,
   UrlOptions,
 } from './types/VCard.js'
 import {
-  escape,
+  escapeText,
   fold,
   isValidMimeType,
   resolveType,
@@ -76,13 +78,23 @@ export default class VCard {
     country = '',
     type = ['work', 'postal'],
   }: AddressOptions = {}): this {
-    const value = `${postOfficeBox};${extended};${street};${locality};${region};${postalCode};${country}`
+    const value = [
+      postOfficeBox,
+      extended,
+      street,
+      locality,
+      region,
+      postalCode,
+      country,
+    ]
+      .map(escapeText)
+      .join(';')
     const resolved = resolveType(type)
-    this.setProperty(
-      'address',
-      `ADR${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
+    this.setProperty({
+      element: 'address',
+      key: `ADR${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
       value,
-    )
+    })
 
     return this
   }
@@ -91,11 +103,14 @@ export default class VCard {
    * Add birthday.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
-   * @param  {string} date Format is YYYY-MM-DD
-   * @return {this}
+   * @param  date A Date object or a string in YYYY-MM-DD format
+   * @example
+   * vCard.addBirthday(new Date('1990-05-15'))
+   * vCard.addBirthday('1990-05-15')
    */
-  public addBirthday(date: string): this {
-    this.setProperty('birthday', 'BDAY', date)
+  public addBirthday(date: Date | DateString): this {
+    const value = date instanceof Date ? date.toISOString().slice(0, 10) : date
+    this.setProperty({ element: 'birthday', key: 'BDAY', value })
 
     return this
   }
@@ -106,11 +121,13 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.5
    */
   public addCompany({ name, department = '' }: CompanyOptions): this {
-    this.setProperty(
-      'company',
-      `ORG${this.getCharsetString()}`,
-      name + (department !== '' ? `;${department}` : ''),
-    )
+    const escapedName = escapeText(name)
+    const escapedDept = department !== '' ? `;${escapeText(department)}` : ''
+    this.setProperty({
+      element: 'company',
+      key: `ORG${this.getCharsetString()}`,
+      value: escapedName + escapedDept,
+    })
 
     return this
   }
@@ -122,11 +139,11 @@ export default class VCard {
    */
   public addEmail({ address, type = [] }: EmailOptions): this {
     const resolved = resolveType(type)
-    this.setProperty(
-      'email',
-      `EMAIL${resolved !== '' ? `;${resolved}` : ''}`,
-      address,
-    )
+    this.setProperty({
+      element: 'email',
+      key: `EMAIL${resolved !== '' ? `;${resolved}` : ''}`,
+      value: address,
+    })
 
     return this
   }
@@ -139,7 +156,11 @@ export default class VCard {
    * @return {this}
    */
   public addJobtitle(jobtitle: string): this {
-    this.setProperty('jobtitle', `TITLE${this.getCharsetString()}`, jobtitle)
+    this.setProperty({
+      element: 'jobtitle',
+      key: `TITLE${this.getCharsetString()}`,
+      value: escapeText(jobtitle),
+    })
 
     return this
   }
@@ -152,7 +173,11 @@ export default class VCard {
    * @return {this}
    */
   public addRole(role: string): this {
-    this.setProperty('role', `ROLE${this.getCharsetString()}`, role)
+    this.setProperty({
+      element: 'role',
+      key: `ROLE${this.getCharsetString()}`,
+      value: escapeText(role),
+    })
 
     return this
   }
@@ -161,7 +186,11 @@ export default class VCard {
    * Add a photo or logo by URL.
    */
   private addMediaUrl(property: string, url: string, element: Element): this {
-    this.setProperty(element, `${property};VALUE=uri`, url)
+    this.setProperty({
+      element,
+      key: `${property};VALUE=uri`,
+      value: url,
+    })
 
     return this
   }
@@ -181,11 +210,11 @@ export default class VCard {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
     }
 
-    this.setProperty(
+    this.setProperty({
       element,
-      `${property};ENCODING=b;TYPE=${mime.toUpperCase()}`,
-      content,
-    )
+      key: `${property};ENCODING=b;TYPE=${mime.toUpperCase()}`,
+      value: content,
+    })
 
     return this
   }
@@ -210,14 +239,28 @@ export default class VCard {
       honorificSuffix,
     ].filter(Boolean)
 
-    const property = `${familyName};${givenName};${additionalNames};${honorificPrefix};${honorificSuffix}`
-    this.setProperty('name', `N${this.getCharsetString()}`, property)
-    if (!this.hasProperty('FN')) {
-      this.setProperty(
-        'fullname',
-        `FN${this.getCharsetString()}`,
-        values.join(' ').trim(),
-      )
+    const property = [
+      familyName,
+      givenName,
+      additionalNames,
+      honorificPrefix,
+      honorificSuffix,
+    ]
+      .map(escapeText)
+      .join(';')
+    this.setProperty({
+      element: 'name',
+      key: `N${this.getCharsetString()}`,
+      value: property,
+    })
+
+    const fnValue = escapeText(values.join(' ').trim())
+    if (!this.hasProperty('FN') && fnValue !== '') {
+      this.setProperty({
+        element: 'fullname',
+        key: `FN${this.getCharsetString()}`,
+        value: fnValue,
+      })
     }
 
     return this
@@ -230,11 +273,14 @@ export default class VCard {
    * @param  {string|string[]} nickname
    */
   public addNickname(nickname: string | string[]): this {
-    this.setProperty(
-      'nickname',
-      'NICKNAME',
-      Array.isArray(nickname) ? nickname.join(',').trim() : nickname,
-    )
+    const value = Array.isArray(nickname)
+      ? nickname.map(escapeText).join(',').trim()
+      : escapeText(nickname)
+    this.setProperty({
+      element: 'nickname',
+      key: `NICKNAME${this.getCharsetString()}`,
+      value,
+    })
 
     return this
   }
@@ -247,7 +293,11 @@ export default class VCard {
    * @return {this}
    */
   public addNote(note: string): this {
-    this.setProperty('note', `NOTE${this.getCharsetString()}`, note)
+    this.setProperty({
+      element: 'note',
+      key: `NOTE${this.getCharsetString()}`,
+      value: escapeText(note),
+    })
 
     return this
   }
@@ -260,11 +310,11 @@ export default class VCard {
    * @return {this}
    */
   public addCategories(categories: string[]): this {
-    this.setProperty(
-      'categories',
-      `CATEGORIES${this.getCharsetString()}`,
-      categories.join(',').trim(),
-    )
+    this.setProperty({
+      element: 'categories',
+      key: `CATEGORIES${this.getCharsetString()}`,
+      value: categories.map(escapeText).join(',').trim(),
+    })
 
     return this
   }
@@ -276,11 +326,11 @@ export default class VCard {
    */
   public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
     const resolved = resolveType(type)
-    this.setProperty(
-      'phoneNumber',
-      `TEL${resolved !== '' ? `;${resolved}` : ''}`,
-      `${number}`,
-    )
+    this.setProperty({
+      element: 'phoneNumber',
+      key: `TEL${resolved !== '' ? `;${resolved}` : ''}`,
+      value: `${number}`,
+    })
 
     return this
   }
@@ -342,7 +392,11 @@ export default class VCard {
    */
   public addUrl({ url, type = [] }: UrlOptions): this {
     const resolved = resolveType(type)
-    this.setProperty('url', `URL${resolved !== '' ? `;${resolved}` : ''}`, url)
+    this.setProperty({
+      element: 'url',
+      key: `URL${resolved !== '' ? `;${resolved}` : ''}`,
+      value: url,
+    })
 
     return this
   }
@@ -357,11 +411,11 @@ export default class VCard {
     const socialUser = user !== '' ? `;x-user=${user}` : ''
     const socialProfile = type !== '' ? `;type=${type}` : ''
 
-    this.setProperty(
-      'social',
-      `X-SOCIALPROFILE${socialProfile}${socialUser}`,
-      url,
-    )
+    this.setProperty({
+      element: 'social',
+      key: `X-SOCIALPROFILE${socialProfile}${socialUser}`,
+      value: url,
+    })
 
     this.addImpp({ uri: url, serviceType: type })
 
@@ -376,7 +430,11 @@ export default class VCard {
   public addImpp({ uri, serviceType = '' }: ImppOptions): this {
     const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
 
-    this.setProperty('impp', `IMPP${type}`, uri)
+    this.setProperty({
+      element: 'impp',
+      key: `IMPP${type}`,
+      value: uri,
+    })
 
     return this
   }
@@ -389,7 +447,7 @@ export default class VCard {
    * @return {this}
    */
   public addUid(uid: string): this {
-    this.setProperty('uid', 'UID', uid)
+    this.setProperty({ element: 'uid', key: 'UID', value: uid })
 
     return this
   }
@@ -416,7 +474,11 @@ export default class VCard {
       )
     }
 
-    this.setProperty('geo', 'GEO', `${latitude};${longitude}`)
+    this.setProperty({
+      element: 'geo',
+      key: 'GEO',
+      value: `${latitude};${longitude}`,
+    })
 
     return this
   }
@@ -429,7 +491,7 @@ export default class VCard {
    * @return {this}
    */
   public addTimezone(timezone: string): this {
-    this.setProperty('timezone', 'TZ', timezone)
+    this.setProperty({ element: 'timezone', key: 'TZ', value: timezone })
 
     return this
   }
@@ -442,7 +504,30 @@ export default class VCard {
    * @return {this}
    */
   public addSortString(sortString: string): this {
-    this.setProperty('sortString', 'SORT-STRING', sortString)
+    this.setProperty({
+      element: 'sortString',
+      key: `SORT-STRING${this.getCharsetString()}`,
+      value: escapeText(sortString),
+    })
+
+    return this
+  }
+
+  /**
+   * Add revision timestamp.
+   *
+   * When set, overrides the auto-generated REV timestamp.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.6.4
+   * @param  {Date} date The revision date
+   * @return {this}
+   */
+  public addRevision(date: Date): this {
+    this.setProperty({
+      element: 'revision',
+      key: 'REV',
+      value: date.toISOString(),
+    })
 
     return this
   }
@@ -454,11 +539,11 @@ export default class VCard {
    */
   public addLabel({ label, type = ['work', 'postal'] }: LabelOptions): this {
     const resolved = resolveType(type)
-    this.setProperty(
-      'label',
-      `LABEL${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
-      label,
-    )
+    this.setProperty({
+      element: 'label',
+      key: `LABEL${resolved !== '' ? `;${resolved}` : ''}${this.getCharsetString()}`,
+      value: escapeText(label),
+    })
 
     return this
   }
@@ -467,21 +552,28 @@ export default class VCard {
    * Add a custom property. Use this for non-standard X- properties
    * or any property not covered by the built-in methods.
    *
+   * NOTE: Values are NOT automatically escaped. If your value contains
+   * special characters (semicolons, commas, backslashes, newlines),
+   * you are responsible for escaping them.
+   *
    * @example
    * vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
    * vCard.addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
    * vCard.addCustomProperty({ name: 'X-CUSTOM', value: 'val', params: 'TYPE=work' })
+   * vCard.addCustomProperty({ name: 'TEL', value: '+1-555', group: 'item1' })
    */
   public addCustomProperty({
     name,
     value,
     params = '',
+    group,
   }: CustomPropertyOptions): this {
-    this.setProperty(
-      'custom',
-      `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
+    this.setProperty({
+      element: 'custom',
+      key: `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
       value,
-    )
+      group,
+    })
 
     return this
   }
@@ -492,18 +584,20 @@ export default class VCard {
    * @return {string}
    */
   public buildVCard(): string {
-    const now = new Date()
-
     let string = ''
     string += 'BEGIN:VCARD\r\n'
     string += 'VERSION:3.0\r\n'
     string += `PRODID:-//vcard-creator//vcard-creator ${constants.LIB_VERSION}//EN\r\n`
-    string += `REV:${now.toISOString()}\r\n`
+
+    if (!this.definedElements['revision']) {
+      string += `REV:${new Date().toISOString()}\r\n`
+    }
 
     // Loop all properties
     const properties = this.getProperties()
     properties.forEach((property) => {
-      string += fold(`${property.key}:${escape(property.value)}\r\n`)
+      const prefix = property.group ? `${property.group}.` : ''
+      string += fold(`${prefix}${property.key}:${property.value}\r\n`)
     })
 
     string += 'END:VCARD\r\n'
@@ -535,13 +629,11 @@ export default class VCard {
    * @return {string}
    */
   public getCharsetString(): string {
-    let charsetString = ''
-
-    if (this.charset === constants.DEFAULT_CHARACTER_SET) {
-      charsetString = `;CHARSET=${this.charset}`
+    if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
+      return `;CHARSET=${this.charset}`
     }
 
-    return charsetString
+    return ''
   }
 
   /**
@@ -574,7 +666,7 @@ export default class VCard {
   /**
    * Get properties.
    *
-   * @return {Array<{key: string, value: string}>}
+   * @return {Property[]}
    */
   public getProperties(): Property[] {
     return this.properties
@@ -589,9 +681,7 @@ export default class VCard {
   public hasProperty(key: string): boolean {
     const properties = this.getProperties()
 
-    return properties.some(
-      (property: Property) => property.key === key && property.value !== '',
-    )
+    return properties.some((property: Property) => property.key === key)
   }
 
   /**
@@ -621,14 +711,9 @@ export default class VCard {
   /**
    * Set property.
    *
-   * @param  {Element} element The element name you want to set,
-   *                           e.g.: name, email, phoneNumber, ...
-   * @param  {string}  key
-   * @param  {string}  value
    * @throws {VCardException}
-   * @return {void}
    */
-  public setProperty(element: Element, key: string, value: string): void {
+  public setProperty({ element, key, value, group }: SetPropertyOptions): void {
     if (
       !this.multiplePropertiesForElementAllowed.includes(element) &&
       this.definedElements[element]
@@ -641,6 +726,7 @@ export default class VCard {
     this.properties.push({
       key,
       value,
+      group,
     })
   }
 }

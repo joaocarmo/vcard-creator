@@ -28,6 +28,9 @@ import VCard from 'vcard-creator'
 // or as named imports
 import { VCard, VCardException } from 'vcard-creator'
 
+// types are also exported
+import type { EmailOptions, PhoneType, AddressType } from 'vcard-creator'
+
 const myVCard = new VCard()
 ```
 
@@ -73,15 +76,15 @@ BEGIN:VCARD
 VERSION:3.0
 PRODID:-//vcard-creator//vcard-creator {version}//EN
 REV:2026-04-06T00:00:00.000Z
-N;CHARSET=utf-8:Desloovere;Jeroen;;;
-FN;CHARSET=utf-8:Jeroen Desloovere
-ORG;CHARSET=utf-8:Siesqo
-TITLE;CHARSET=utf-8:Web Developer
-ROLE;CHARSET=utf-8:Data Protection Officer
+N:Desloovere;Jeroen;;;
+FN:Jeroen Desloovere
+ORG:Siesqo
+TITLE:Web Developer
+ROLE:Data Protection Officer
 EMAIL:info@jeroendesloovere.be
 TEL;TYPE=PREF,WORK:1234121212
 TEL;TYPE=WORK:123456789
-ADR;TYPE=WORK,POSTAL;CHARSET=utf-8:;;street;worktown;;workpostcode;Belgium
+ADR;TYPE=WORK,POSTAL:;;street;worktown;;workpostcode;Belgium
 X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
 IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
 URL:http://www.jeroendesloovere.be
@@ -100,7 +103,7 @@ All methods return `this` for chaining.
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
 | `addNickname(nickname)`                                                                      | Nickname(s) — accepts `string` or `string[]`   |
-| `addBirthday(date)`                                                                          | Birthday in `YYYY-MM-DD` format                |
+| `addBirthday(date)`                                                                          | Birthday — accepts `Date` or `'YYYY-MM-DD'`    |
 
 ### Organization
 
@@ -189,6 +192,7 @@ vCard.addPhoto({ image, mime: 'JPEG' })
 | `addCategories(categories)` | Categories/tags — accepts `string[]`                                                |
 | `addNote(note)`             | Free-text note                                                                      |
 | `addSortString(sortString)` | Sort key for name ordering ([RFC 2426 §3.6.5][rfc2426-sort]) — useful for CJK names |
+| `addRevision(date)`         | Revision timestamp — accepts `Date`. Overrides auto-generated `REV`                 |
 
 ### Custom Properties
 
@@ -205,7 +209,43 @@ myVCard.addCustomProperty({
 })
 ```
 
-The property name is uppercased automatically.
+The property name is uppercased automatically. Values are **not** automatically escaped — you are responsible for escaping special characters (`;`, `,`, `\`, newlines) in custom property values.
+
+### Property Grouping
+
+Apple Contacts uses property grouping for custom labels. Use the `group` option on `addCustomProperty()`:
+
+```js
+myVCard
+  .addCustomProperty({
+    name: 'TEL',
+    value: '+1-555-1234',
+    group: 'item1',
+  })
+  .addCustomProperty({
+    name: 'X-ABLabel',
+    value: 'Work Phone',
+    group: 'item1',
+  })
+```
+
+This produces:
+
+```txt
+item1.TEL:+1-555-1234
+item1.X-ABLABEL:Work Phone
+```
+
+### Text Escaping
+
+Built-in methods automatically escape special characters per [RFC 2426][rfc2426]:
+
+- Backslash (`\`) → `\\`
+- Semicolon (`;`) → `\;`
+- Comma (`,`) → `\,`
+- Newlines → `\n`
+
+This applies to text values in `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, and `addSortString`. Non-text values (URLs, emails, phone numbers, etc.) are passed through as-is.
 
 ### Error Handling
 
@@ -234,6 +274,10 @@ Key changes in v1.0:
 - **Object params only** — positional arguments have been removed
 - **Method aliases removed** — use `addUrl()`, `addUid()`, `addLogoUrl()`, `addPhotoUrl()`
 - **vCalendar format removed** — use `new VCard()` (no format parameter)
+- **CHARSET removed** — `CHARSET=utf-8` is no longer added to properties (vCard 3.0 assumes UTF-8)
+- **Text escaping** — special characters are now properly escaped per RFC 2426
+- **`addBirthday`** — accepts `Date` or `'YYYY-MM-DD'` string (was `string` only)
+- **`getProperties()`** — returns pre-escaped wire-format values
 
 ## Forking / Contributing
 
@@ -254,6 +298,7 @@ pnpm test:functional
 
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[rfc2426]: https://tools.ietf.org/html/rfc2426
 [rfc2426-adr]: https://tools.ietf.org/html/rfc2426#section-3.2.1
 [rfc2426-geo]: https://tools.ietf.org/html/rfc2426#section-3.4.2
 [rfc2426-label]: https://tools.ietf.org/html/rfc2426#section-3.2.2
