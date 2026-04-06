@@ -77,7 +77,7 @@ import VCard from 'vcard-creator'
 const myVCard = new VCard()
 
 myVCard
-  .addName({ lastName: 'Desloovere', firstName: 'Jeroen' })
+  .addName({ firstName: 'Jeroen', lastName: 'Desloovere' })
   .addCompany({ name: 'Siesqo' })
   .addJobtitle('Web Developer')
   .addRole('Data Protection Officer')
@@ -134,7 +134,7 @@ All methods return `this` for chaining. Methods that accept multiple arguments s
 
 | Method                                                              | Description                                    |
 | ------------------------------------------------------------------- | ---------------------------------------------- |
-| `addName({ lastName?, firstName?, additional?, prefix?, suffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
+| `addName({ firstName?, lastName?, additional?, prefix?, suffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
 | `addNickname(nickname)`                                             | Nickname(s) — accepts `string` or `string[]`   |
 | `addBirthday(date)`                                                 | Birthday in `YYYY-MM-DD` format                |
 
@@ -165,7 +165,7 @@ myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 
 | Method                                                                             | Description                                                                                       |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `addAddress({ name?, extended?, street?, city?, region?, zip?, country?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['work', 'postal']`        |
+| `addAddress({ street?, city?, region?, zip?, country?, name?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['work', 'postal']`        |
 | `addLabel({ label, type? })`                                                       | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['work', 'postal']` |
 
 ### Social & Messaging
@@ -263,12 +263,12 @@ try {
 Multi-argument methods now accept options objects. The old positional form still works but is deprecated and will be removed in v1.0:
 
 ```js
-// Deprecated
+// Deprecated — positional args require memorizing parameter order
 myVCard.addName('Doe', 'John')
 myVCard.addEmail('john@example.com', 'PREF;WORK')
 
-// Recommended
-myVCard.addName({ lastName: 'Doe', firstName: 'John' })
+// Recommended — named fields, order doesn't matter
+myVCard.addName({ firstName: 'John', lastName: 'Doe' })
 myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
 ```
 
