@@ -503,6 +503,22 @@ describe('Test addCustomProperty()', () => {
     expect(output).toContain('X-TEST:value')
     expect(output).not.toContain('X-TEST;')
   })
+
+  it('should accept options object', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
+    expect(vCard.toString()).toContain('X-PHONETIC-FIRST-NAME:Jon')
+  })
+
+  it('should accept options object with params', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({
+      name: 'X-CUSTOM',
+      value: 'test',
+      params: 'TYPE=work',
+    })
+    expect(vCard.toString()).toContain('X-CUSTOM;TYPE=work:test')
+  })
 })
 
 describe('Object params API', () => {
