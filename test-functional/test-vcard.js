@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import VCard from '../dist/esm/index.js'
+import VCard from '../dist/index.js'
 
 const vCard = new VCard()
 

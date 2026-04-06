@@ -3,14 +3,14 @@
   "version": "0.11.0",
   "type": "module",
   "description": "A JavaScript vCard 3.0 creator library for both node.js and the web",
-  "module": "./dist/esm/index.js",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "default": "./dist/esm/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "directories": {
     "lib": "lib"
   },
@@ -22,8 +22,7 @@
   },
   "scripts": {
     "build:esm": "tsc -p tsconfig.esm.json",
-    "build:types": "tsc -p tsconfig.types.json",
-    "build": "pnpm clean && pnpm build:esm && pnpm build:types",
+    "build": "pnpm clean && pnpm build:esm",
     "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
