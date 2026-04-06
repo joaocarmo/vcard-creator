@@ -357,3 +357,38 @@ describe('Social & IMPP', () => {
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
   })
 })
+
+describe('Multiple photo/logo instances', () => {
+  it('should allow both addPhoto and addPhotoUrl on the same card', () => {
+    const vCard = new VCard()
+    vCard
+      .addPhoto({ image: 'base64data', mime: 'jpeg' })
+      .addPhotoUrl({ url: 'https://example.com/photo.jpg' })
+
+    const output = vCard.toString()
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data')
+    expect(output).toContain('PHOTO;VALUE=uri:https://example.com/photo.jpg')
+  })
+
+  it('should allow both addLogo and addLogoUrl on the same card', () => {
+    const vCard = new VCard()
+    vCard
+      .addLogo({ image: 'base64logo', mime: 'png' })
+      .addLogoUrl({ url: 'https://example.com/logo.png' })
+
+    const output = vCard.toString()
+    expect(output).toContain('LOGO;ENCODING=b;TYPE=PNG:base64logo')
+    expect(output).toContain('LOGO;VALUE=uri:https://example.com/logo.png')
+  })
+
+  it('should allow multiple embedded photos', () => {
+    const vCard = new VCard()
+    vCard
+      .addPhoto({ image: 'thumb64', mime: 'jpeg' })
+      .addPhoto({ image: 'hires64', mime: 'png' })
+
+    const output = vCard.toString()
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:thumb64')
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=PNG:hires64')
+  })
+})
