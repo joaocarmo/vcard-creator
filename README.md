@@ -107,7 +107,7 @@ Output
 ```txt
 BEGIN:VCARD
 VERSION:3.0
-PRODID:-//vcard-creator//vcard-creator 0.10.0//EN
+PRODID:-//vcard-creator//vcard-creator {version}//EN
 REV:2026-04-06T00:00:00.000Z
 N;CHARSET=utf-8:Desloovere;Jeroen;;;
 FN;CHARSET=utf-8:Jeroen Desloovere
