@@ -603,6 +603,40 @@ describe('resolveType wire format', () => {
   })
 })
 
+describe('Metadata getters', () => {
+  it('should return default content type', () => {
+    const vCard = new VCard()
+    expect(vCard.getContentType()).toBe('text/x-vcard')
+  })
+
+  it('should return default filename', () => {
+    const vCard = new VCard()
+    expect(vCard.getFilename()).toBe('vcard')
+  })
+
+  it('should return default file extension', () => {
+    const vCard = new VCard()
+    expect(vCard.getFileExtension()).toBe('vcf')
+  })
+
+  it('should return default charset', () => {
+    const vCard = new VCard()
+    expect(vCard.getCharset()).toBe('utf-8')
+  })
+
+  it('should allow setting a custom filename', () => {
+    const vCard = new VCard()
+    vCard.setFilename('contact')
+    expect(vCard.getFilename()).toBe('contact')
+  })
+
+  it('should ignore empty filename', () => {
+    const vCard = new VCard()
+    vCard.setFilename('')
+    expect(vCard.getFilename()).toBe('vcard')
+  })
+})
+
 describe('Full chain with object API', () => {
   it('should produce valid vCard output with all object params', () => {
     const vCard = new VCard()
