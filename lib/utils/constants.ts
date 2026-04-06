@@ -1,17 +1,5 @@
 import { Element } from '../types/VCard.js'
 
-export enum ContentTypes {
-  /** @deprecated */
-  VCALENDAR = 'text/x-vcalendar',
-  VCARD = 'text/x-vcard',
-}
-
-export enum Formats {
-  /** @deprecated */
-  VCALENDAR = 'vcalendar',
-  VCARD = 'vcard',
-}
-
 export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
   'address',
   'custom',
@@ -25,11 +13,10 @@ export const ALLOWED_MULTIPLE_PROPERTIES: Element[] = [
 
 export const LIB_VERSION = '0.11.0'
 
+export const CONTENT_TYPE = 'text/x-vcard'
 export const DEFAULT_CHARACTER_SET = 'utf-8'
-export const DEFAULT_CONTENT_TYPE = ContentTypes.VCARD
 export const DEFAULT_EXTENSION = 'vcf'
 export const DEFAULT_FILENAME = 'vcard'
-export const DEFAULT_FORMAT = Formats.VCARD
 export const DEFAULT_MIME_TYPE = 'JPEG'
 
 export const MIME_TYPES = [

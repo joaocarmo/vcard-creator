@@ -1,13 +1,13 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "isolatedModules": false,
     "module": "esnext",
+    "moduleResolution": "bundler",
     "noEmit": false,
     "types": ["node"],
-    "outDir": "dist/types",
+    "outDir": "dist",
     "rootDir": "lib"
   },
   "include": ["lib/**/*.ts"],

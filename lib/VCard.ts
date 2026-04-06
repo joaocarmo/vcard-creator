@@ -1,33 +1,24 @@
 import VCardException from './VCardException.js'
 import {
   AddressOptions,
-  AddressType,
   CompanyOptions,
-  ContentType,
   CustomPropertyOptions,
   DefinedElements,
   Element,
   EmailOptions,
-  EmailType,
-  Format,
   ImppOptions,
   LabelOptions,
   MediaOptions,
   MediaUrlOptions,
   NameOptions,
   PhoneOptions,
-  PhoneType,
   Property,
   SocialOptions,
   UrlOptions,
-  UrlType,
 } from './types/VCard.js'
 import {
-  b64encode,
-  chunkSplit,
   escape,
   fold,
-  isOptions,
   isValidMimeType,
   resolveType,
 } from './utils/functions.js'
@@ -36,141 +27,55 @@ import * as constants from './utils/constants.js'
 export default class VCard {
   /**
    * Default Charset.
-   *
-   * @var string
    */
   public charset: string = constants.DEFAULT_CHARACTER_SET
 
   /**
    * Default ContentType.
-   *
-   * @var string
    */
-  private contentType: ContentType = constants.DEFAULT_CONTENT_TYPE
+  private contentType: string = constants.CONTENT_TYPE
 
   /**
    * Default filename.
-   *
-   * @var string
    */
   private filename: string = constants.DEFAULT_FILENAME
 
   /**
    * Default fileExtension.
-   *
-   * @var string
    */
   private fileExtension: string = constants.DEFAULT_EXTENSION
 
   /**
    * Properties.
-   *
-   * @var array
    */
   private properties: Property[] = []
 
   /**
    * Defined elements.
-   *
-   * @var object
    */
   private definedElements: DefinedElements = {}
 
   /**
    * Multiple properties for element allowed.
-   *
-   * @var array
    */
   private multiplePropertiesForElementAllowed: Element[] =
     constants.ALLOWED_MULTIPLE_PROPERTIES
-
-  /**
-   * Defines the output format.
-   *
-   * @var bool
-   */
-  private useVCalendar: boolean = false
-
-  public constructor(format: Format = constants.DEFAULT_FORMAT) {
-    if (format === constants.Formats.VCALENDAR) {
-      this.setFormat(format)
-    }
-  }
-
-  /**
-   * Set format.
-   *
-   * @param  {Format} format Either 'vcard' or 'vcalendar'
-   * @return {void}
-   */
-  public setFormat(format: Format = constants.DEFAULT_FORMAT): void {
-    if (format === constants.Formats.VCALENDAR) {
-      console.warn(
-        `The format 'vcalendar' is deprecated and will be removed in the next major or minor release. Use 'vcard' instead.`,
-      )
-      this.contentType = constants.ContentTypes.VCALENDAR
-      this.useVCalendar = true
-    } else if (format === constants.Formats.VCARD) {
-      this.contentType = constants.ContentTypes.VCARD
-      this.useVCalendar = false
-    }
-  }
 
   /**
    * Add address.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
    */
-  public addAddress(options: AddressOptions): this
-  /** @deprecated Use object form instead: `addAddress({ street: '...', locality: '...', type: ['work'] })` */
-  public addAddress(
-    name?: string,
-    extended?: string,
-    street?: string,
-    city?: string,
-    region?: string,
-    zip?: string,
-    country?: string,
-    type?: string,
-  ): this
-  public addAddress(
-    nameOrOptions: string | AddressOptions = '',
-    _extended: string = '',
-    _street: string = '',
-    _city: string = '',
-    _region: string = '',
-    _zip: string = '',
-    _country: string = '',
-    _type: AddressType[] | string = 'WORK;POSTAL',
-  ): this {
-    let postOfficeBox: string,
-      extended: string,
-      street: string,
-      locality: string
-    let region: string, postalCode: string, country: string
-    let type: AddressType[] | string
-
-    if (isOptions(nameOrOptions)) {
-      const o = nameOrOptions
-      postOfficeBox = o.postOfficeBox ?? ''
-      extended = o.extended ?? ''
-      street = o.street ?? ''
-      locality = o.locality ?? ''
-      region = o.region ?? ''
-      postalCode = o.postalCode ?? ''
-      country = o.country ?? ''
-      type = o.type ?? ['work', 'postal']
-    } else {
-      postOfficeBox = nameOrOptions
-      extended = _extended
-      street = _street
-      locality = _city
-      region = _region
-      postalCode = _zip
-      country = _country
-      type = _type
-    }
-
+  public addAddress({
+    postOfficeBox = '',
+    extended = '',
+    street = '',
+    locality = '',
+    region = '',
+    postalCode = '',
+    country = '',
+    type = ['work', 'postal'],
+  }: AddressOptions = {}): this {
     const value = `${postOfficeBox};${extended};${street};${locality};${region};${postalCode};${country}`
     const resolved = resolveType(type)
     this.setProperty(
@@ -200,29 +105,11 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.5
    */
-  public addCompany(options: CompanyOptions): this
-  /** @deprecated Use object form instead: `addCompany({ name: 'Acme', department: 'Eng' })` */
-  public addCompany(company: string, department?: string): this
-  public addCompany(
-    companyOrOptions: string | CompanyOptions,
-    _department: string = '',
-  ): this {
-    let company: string
-    let department: string
-
-    if (isOptions(companyOrOptions)) {
-      const o = companyOrOptions
-      company = o.name
-      department = o.department ?? ''
-    } else {
-      company = companyOrOptions
-      department = _department
-    }
-
+  public addCompany({ name, department = '' }: CompanyOptions): this {
     this.setProperty(
       'company',
       `ORG${this.getCharsetString()}`,
-      company + (department !== '' ? `;${department}` : ''),
+      name + (department !== '' ? `;${department}` : ''),
     )
 
     return this
@@ -233,25 +120,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.2
    */
-  public addEmail(options: EmailOptions): this
-  /** @deprecated Use object form instead: `addEmail({ address: 'j@x.com', type: ['work'] })` */
-  public addEmail(address: string, type?: string): this
-  public addEmail(
-    addressOrOptions: string | EmailOptions,
-    _type: EmailType[] | string = '',
-  ): this {
-    let address: string
-    let type: EmailType[] | string
-
-    if (isOptions(addressOrOptions)) {
-      const o = addressOrOptions
-      address = o.address
-      type = o.type ?? ''
-    } else {
-      address = addressOrOptions
-      type = _type
-    }
-
+  public addEmail({ address, type = [] }: EmailOptions): this {
     const resolved = resolveType(type)
     this.setProperty(
       'email',
@@ -289,12 +158,7 @@ export default class VCard {
   }
 
   /**
-   * Add a photo or logo (depending on property name).
-   *
-   * @param  {string}  property 'LOGO' | 'PHOTO'
-   * @param  {string}  url      Image url or filename
-   * @param  {Element} element  The name of the element to set
-   * @return {this}
+   * Add a photo or logo by URL.
    */
   private addMediaUrl(property: string, url: string, element: Element): this {
     this.setProperty(element, `${property};VALUE=uri`, url)
@@ -303,14 +167,9 @@ export default class VCard {
   }
 
   /**
-   * Add a photo or logo (depending on property name).
+   * Add a photo or logo by base64 content.
    *
-   * @param  {string}  property 'LOGO' | 'PHOTO'
-   * @param  {string}  content  Image content
-   * @param  {string}  mime     Image MIME type
-   * @param  {Element} element  The name of the element to set
    * @throws VCardException
-   * @return {this}
    */
   private addMediaContent(
     property: string,
@@ -336,45 +195,22 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
    */
-  public addName(options: NameOptions): this
-  /** @deprecated Use object form instead: `addName({ givenName: 'John', familyName: 'Doe' })` */
-  public addName(
-    lastName?: string,
-    firstName?: string,
-    additional?: string,
-    prefix?: string,
-    suffix?: string,
-  ): this
-  public addName(
-    lastNameOrOptions: string | NameOptions = '',
-    _firstName: string = '',
-    _additional: string = '',
-    _prefix: string = '',
-    _suffix: string = '',
-  ): this {
-    let lastName: string, firstName: string, additional: string
-    let prefix: string, suffix: string
+  public addName({
+    familyName = '',
+    givenName = '',
+    additionalNames = '',
+    honorificPrefix = '',
+    honorificSuffix = '',
+  }: NameOptions = {}): this {
+    const values = [
+      honorificPrefix,
+      givenName,
+      additionalNames,
+      familyName,
+      honorificSuffix,
+    ].filter(Boolean)
 
-    if (isOptions(lastNameOrOptions)) {
-      const o = lastNameOrOptions
-      lastName = o.familyName ?? ''
-      firstName = o.givenName ?? ''
-      additional = o.additionalNames ?? ''
-      prefix = o.honorificPrefix ?? ''
-      suffix = o.honorificSuffix ?? ''
-    } else {
-      lastName = lastNameOrOptions
-      firstName = _firstName
-      additional = _additional
-      prefix = _prefix
-      suffix = _suffix
-    }
-
-    const values = [prefix, firstName, additional, lastName, suffix].filter(
-      (m) => !!m,
-    )
-
-    const property = `${lastName};${firstName};${additional};${prefix};${suffix}`
+    const property = `${familyName};${givenName};${additionalNames};${honorificPrefix};${honorificSuffix}`
     this.setProperty('name', `N${this.getCharsetString()}`, property)
     if (!this.hasProperty('FN')) {
       this.setProperty(
@@ -438,30 +274,12 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
    */
-  public addPhoneNumber(options: PhoneOptions): this
-  /** @deprecated Use object form instead: `addPhoneNumber({ number: '+1555', type: ['cell'] })` */
-  public addPhoneNumber(number: number | string, type?: string): this
-  public addPhoneNumber(
-    numberOrOptions: number | string | PhoneOptions,
-    _type: PhoneType[] | string = '',
-  ): this {
-    let num: number | string
-    let type: PhoneType[] | string
-
-    if (isOptions(numberOrOptions)) {
-      const o = numberOrOptions
-      num = o.number
-      type = o.type ?? ''
-    } else {
-      num = numberOrOptions
-      type = _type
-    }
-
+  public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
     const resolved = resolveType(type)
     this.setProperty(
       'phoneNumber',
       `TEL${resolved !== '' ? `;${resolved}` : ''}`,
-      `${num}`,
+      `${number}`,
     )
 
     return this
@@ -472,21 +290,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
    */
-  public addLogoUrl(options: MediaUrlOptions): this
-  /** @deprecated Use object form instead: `addLogoUrl({ url: '...' })` */
-  public addLogoUrl(url: string): this
-  public addLogoUrl(urlOrOptions: string | MediaUrlOptions): this {
-    const url = isOptions(urlOrOptions) ? urlOrOptions.url : urlOrOptions
+  public addLogoUrl({ url }: MediaUrlOptions): this {
     this.addMediaUrl('LOGO', url, 'logo')
 
     return this
-  }
-
-  /**
-   * @deprecated Use `addLogoUrl` instead.
-   */
-  public addLogoURL(url: string): this {
-    return this.addLogoUrl(url)
   }
 
   /**
@@ -494,25 +301,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
    */
-  public addLogo(options: MediaOptions): this
-  /** @deprecated Use object form instead: `addLogo({ image: '...', mime: 'JPEG' })` */
-  public addLogo(image: string, mime?: string): this
-  public addLogo(
-    imageOrOptions: string | MediaOptions,
-    _mime: string = constants.DEFAULT_MIME_TYPE,
-  ): this {
-    let image: string
-    let mime: string
-
-    if (isOptions(imageOrOptions)) {
-      const o = imageOrOptions
-      image = o.image
-      mime = o.mime ?? constants.DEFAULT_MIME_TYPE
-    } else {
-      image = imageOrOptions
-      mime = _mime
-    }
-
+  public addLogo({
+    image,
+    mime = constants.DEFAULT_MIME_TYPE,
+  }: MediaOptions): this {
     this.addMediaContent('LOGO', image, mime, 'logo')
 
     return this
@@ -523,21 +315,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    */
-  public addPhotoUrl(options: MediaUrlOptions): this
-  /** @deprecated Use object form instead: `addPhotoUrl({ url: '...' })` */
-  public addPhotoUrl(url: string): this
-  public addPhotoUrl(urlOrOptions: string | MediaUrlOptions): this {
-    const url = isOptions(urlOrOptions) ? urlOrOptions.url : urlOrOptions
+  public addPhotoUrl({ url }: MediaUrlOptions): this {
     this.addMediaUrl('PHOTO', url, 'photo')
 
     return this
-  }
-
-  /**
-   * @deprecated Use `addPhotoUrl` instead.
-   */
-  public addPhotoURL(url: string): this {
-    return this.addPhotoUrl(url)
   }
 
   /**
@@ -545,25 +326,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    */
-  public addPhoto(options: MediaOptions): this
-  /** @deprecated Use object form instead: `addPhoto({ image: '...', mime: 'JPEG' })` */
-  public addPhoto(image: string, mime?: string): this
-  public addPhoto(
-    imageOrOptions: string | MediaOptions,
-    _mime: string = constants.DEFAULT_MIME_TYPE,
-  ): this {
-    let image: string
-    let mime: string
-
-    if (isOptions(imageOrOptions)) {
-      const o = imageOrOptions
-      image = o.image
-      mime = o.mime ?? constants.DEFAULT_MIME_TYPE
-    } else {
-      image = imageOrOptions
-      mime = _mime
-    }
-
+  public addPhoto({
+    image,
+    mime = constants.DEFAULT_MIME_TYPE,
+  }: MediaOptions): this {
     this.addMediaContent('PHOTO', image, mime, 'photo')
 
     return this
@@ -574,36 +340,11 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.8
    */
-  public addUrl(options: UrlOptions): this
-  /** @deprecated Use object form instead: `addUrl({ url: '...', type: ['work'] })` */
-  public addUrl(url: string, type?: string): this
-  public addUrl(
-    urlOrOptions: string | UrlOptions,
-    _type: UrlType[] | string = '',
-  ): this {
-    let url: string
-    let type: UrlType[] | string
-
-    if (isOptions(urlOrOptions)) {
-      const o = urlOrOptions
-      url = o.url
-      type = o.type ?? ''
-    } else {
-      url = urlOrOptions
-      type = _type
-    }
-
+  public addUrl({ url, type = [] }: UrlOptions): this {
     const resolved = resolveType(type)
     this.setProperty('url', `URL${resolved !== '' ? `;${resolved}` : ''}`, url)
 
     return this
-  }
-
-  /**
-   * @deprecated Use `addUrl` instead.
-   */
-  public addURL(url: string, type: string = ''): this {
-    return this.addUrl(url, type)
   }
 
   /**
@@ -612,29 +353,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    */
-  public addSocial(options: SocialOptions): this
-  /** @deprecated Use object form instead: `addSocial({ url: '...', type: 'X', user: 'handle' })` */
-  public addSocial(url: string, type: string, user?: string): this
-  public addSocial(
-    urlOrOptions: string | SocialOptions,
-    _type: string = '',
-    _user: string = '',
-  ): this {
-    let url: string
-    let type: string
-    let user: string
-
-    if (isOptions(urlOrOptions)) {
-      const o = urlOrOptions
-      url = o.url
-      type = o.type
-      user = o.user ?? ''
-    } else {
-      url = urlOrOptions
-      type = _type
-      user = _user
-    }
-
+  public addSocial({ url, type, user = '' }: SocialOptions): this {
     const socialUser = user !== '' ? `;x-user=${user}` : ''
     const socialProfile = type !== '' ? `;type=${type}` : ''
 
@@ -644,7 +363,7 @@ export default class VCard {
       url,
     )
 
-    this.addImpp(url, type)
+    this.addImpp({ uri: url, serviceType: type })
 
     return this
   }
@@ -654,25 +373,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    */
-  public addImpp(options: ImppOptions): this
-  /** @deprecated Use object form instead: `addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })` */
-  public addImpp(uri: string, serviceType?: string): this
-  public addImpp(
-    uriOrOptions: string | ImppOptions,
-    _serviceType: string = '',
-  ): this {
-    let uri: string
-    let serviceType: string
-
-    if (isOptions(uriOrOptions)) {
-      const o = uriOrOptions
-      uri = o.uri
-      serviceType = o.serviceType ?? ''
-    } else {
-      uri = uriOrOptions
-      serviceType = _serviceType
-    }
-
+  public addImpp({ uri, serviceType = '' }: ImppOptions): this {
     const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
 
     this.setProperty('impp', `IMPP${type}`, uri)
@@ -691,13 +392,6 @@ export default class VCard {
     this.setProperty('uid', 'UID', uid)
 
     return this
-  }
-
-  /**
-   * @deprecated Use `addUid` instead.
-   */
-  public addUID(uid: string): this {
-    return this.addUid(uid)
   }
 
   /**
@@ -758,25 +452,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
    */
-  public addLabel(options: LabelOptions): this
-  /** @deprecated Use object form instead: `addLabel({ label: '...', type: ['work', 'postal'] })` */
-  public addLabel(label: string, type?: string): this
-  public addLabel(
-    labelOrOptions: string | LabelOptions,
-    _type: AddressType[] | string = 'WORK;POSTAL',
-  ): this {
-    let label: string
-    let type: AddressType[] | string
-
-    if (isOptions(labelOrOptions)) {
-      const o = labelOrOptions
-      label = o.label
-      type = o.type ?? ['work', 'postal']
-    } else {
-      label = labelOrOptions
-      type = _type
-    }
-
+  public addLabel({ label, type = ['work', 'postal'] }: LabelOptions): this {
     const resolved = resolveType(type)
     this.setProperty(
       'label',
@@ -796,29 +472,11 @@ export default class VCard {
    * vCard.addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
    * vCard.addCustomProperty({ name: 'X-CUSTOM', value: 'val', params: 'TYPE=work' })
    */
-  public addCustomProperty(options: CustomPropertyOptions): this
-  /** @deprecated Use object form instead: `addCustomProperty({ name: '...', value: '...' })` */
-  public addCustomProperty(name: string, value: string, params?: string): this
-  public addCustomProperty(
-    nameOrOptions: string | CustomPropertyOptions,
-    _value: string = '',
-    _params: string = '',
-  ): this {
-    let name: string
-    let value: string
-    let params: string
-
-    if (isOptions(nameOrOptions)) {
-      const o = nameOrOptions
-      name = o.name
-      value = o.value
-      params = o.params ?? ''
-    } else {
-      name = nameOrOptions
-      value = _value
-      params = _params
-    }
-
+  public addCustomProperty({
+    name,
+    value,
+    params = '',
+  }: CustomPropertyOptions): this {
     this.setProperty(
       'custom',
       `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
@@ -854,62 +512,12 @@ export default class VCard {
   }
 
   /**
-   * Build VCalender (.ics) - Safari (< iOS 7) can not open .vcf files, so we
-   * built a workaround.
-   *
-   * @deprecated This method is deprecated and will be removed in the next major
-   * or minor release. Use `buildVCard` instead. For more information, see
-   * https://stackoverflow.com/a/11405271/8713532.
-   * @return {string}
-   */
-  public buildVCalendar(): string {
-    console.warn(
-      `The method 'buildVCalendar' is deprecated and will be removed in the next major or minor release. Use 'buildVCard' instead.`,
-    )
-
-    const nowISO = new Date().toISOString()
-    const nowBase = nowISO.replace(/-/g, '').replace(/:/g, '').substring(0, 13)
-    const dtstart = `${nowBase}00`
-    const dtend = `${nowBase}01`
-
-    // Base 64 it to be used as an attachemnt to the 'calendar' appointment
-    const b64vcard = b64encode(this.buildVCard())
-
-    /*
-     * Chunk the single long line of b64 text in accordance with RFC2045
-     * (and the exact line length determined from the original .ics file
-     * exported from Apple calendar
-     */
-    const b64mline = chunkSplit(b64vcard, 74, '\n')
-
-    // Need to indent all the lines by 1 space for the iPhone
-    const b64final = b64mline.replace(/(.+)/g, ' $1')
-
-    const string = `\
-BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART;TZID=Europe/London:${dtstart}
-DTEND;TZID=Europe/London:${dtend}
-SUMMARY:Click the attachment to save to your contacts
-DTSTAMP:${dtstart}Z
-ATTACH;VALUE=BINARY;ENCODING=BASE64;FMTTYPE=text/directory;
- X-APPLE-FILENAME=${this.getFilename()}.${this.getFileExtension()}:
-${b64final}\
-END:VEVENT
-END:VCALENDAR
-`
-
-    return string
-  }
-
-  /**
-   * Get output.
+   * Get output as string.
    *
    * @return {string}
    */
   public toString(): string {
-    return this.getOutput()
+    return this.buildVCard()
   }
 
   /**
@@ -961,18 +569,6 @@ END:VCALENDAR
    */
   public getFileExtension(): string {
     return this.fileExtension
-  }
-
-  /**
-   * Get output.
-   *
-   * iOS devices (and safari < iOS 8 in particular)can not read .vcf (= vcard)
-   * files. So there is a workaround to build a .ics (= vcalender) file.
-   *
-   * @return {string}
-   */
-  public getOutput(): string {
-    return this.useVCalendar ? this.buildVCalendar() : this.buildVCard()
   }
 
   /**

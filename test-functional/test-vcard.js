@@ -1,53 +1,29 @@
 #!/usr/bin/env node
-var fs = require('fs')
-var VCard = require('../dist/cjs/index').default
+import VCard from '../dist/index.js'
 
-// sample image
-var imagePath = './lib/assets/sample.jpg'
-
-// read image (base64 enconded)
-var image = fs.readFileSync(imagePath, { encoding: 'base64', flag: 'r' })
-
-// define vCard
-var vCard = new VCard()
-
-// define variables
-var lastname = 'Desloovere'
-var firstname = 'Jeroen'
-var additional = ''
-var prefix = ''
-var suffix = ''
+const vCard = new VCard()
 
 vCard
-  // add personal data
-  .addName(lastname, firstname, additional, prefix, suffix)
-  .addNickname('Jero')
-  // add work data
-  .addCompany('Siesqo')
-  .addJobtitle('Web Developer')
-  .addRole('Data Protection Officer')
-  .addEmail('info@jeroendesloovere.be')
-  .addPhoneNumber(1234121212, 'PREF;WORK')
-  .addPhoneNumber(123456789, 'WORK')
-  .addAddress(
-    'name',
-    'extended',
-    'street',
-    'worktown',
-    'state',
-    'workpostcode',
-    'Belgium',
-  )
-  .addSocial('https://x.com/xuser', 'X', 'xuser')
-  .addSocial('http://www.facebook.com/facebookuser', 'Facebook', 'facebookuser')
-  .addSocial('http://www.flickr.com/photos/flickruser', 'Flickr', 'flickruser')
-  .addSocial(
-    'http://www.linkedin.com/in/linkedinuser',
-    'LinkedIn',
-    'linkedinuser',
-  )
-  .addSocial('http://www.custom.social/customuser', 'Custom', 'customuser')
-  .addUrl('http://www.jeroendesloovere.be')
-  .addPhoto(image, 'JPEG')
+  .addName({ givenName: 'Jeroen', familyName: 'Desloovere' })
+  .addCompany({ name: 'Siesqo' })
+  .addEmail({ address: 'info@jeroendesloovere.be' })
+  .addSocial({
+    url: 'https://x.com/desloovere_j',
+    type: 'X',
+    user: 'desloovere_j',
+  })
+  .addUrl({ url: 'http://www.jeroendesloovere.be' })
 
-console.log(vCard.toString())
+const output = vCard.toString()
+
+if (!output.includes('BEGIN:VCARD')) {
+  console.error('ESM functional test FAILED: output missing BEGIN:VCARD')
+  process.exit(1)
+}
+
+if (!output.includes('IMPP;X-SERVICE-TYPE=X')) {
+  console.error('ESM functional test FAILED: output missing IMPP property')
+  process.exit(1)
+}
+
+console.log(output)

@@ -1,45 +1,36 @@
 {
   "name": "vcard-creator",
   "version": "0.11.0",
-  "description": "A JavaScript vCard creator library for both node.js and the web",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
+  "type": "module",
+  "description": "A JavaScript vCard 3.0 creator library for both node.js and the web",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/cjs/index.js"
-      }
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "directories": {
     "lib": "lib"
   },
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
-    "build:types": "tsc -p tsconfig.types.json",
-    "build:umd": "vite build",
-    "build": "pnpm clean && pnpm build:cjs && pnpm build:esm && pnpm build:types && pnpm build:umd",
-    "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf *.ics",
+    "build:lib": "tsc -p tsconfig.build.json",
+    "build": "pnpm clean && pnpm build:lib",
+    "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
     "prepare": "husky",
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
-    "test:esm": "node ./test-functional/test-vcard.mjs",
-    "test:functional": "(./test-functional/test-vcard.js | tee vcard.vcf) && pnpm test:esm && (./test-functional/test-vcalendar.js 2>/dev/null | tee vcard.ics)",
+    "test:functional": "node ./test-functional/test-vcard.js | tee vcard.vcf",
     "test:unit": "vitest run",
-    "test:web-build": "vite build --config vite.config.test.ts && open ./test-functional/test-build.html",
-    "test:web-export": "open ./test-functional/test-export.html",
     "type-check:watch": "pnpm type-check --watch",
     "type-check": "tsc --noEmit"
   },

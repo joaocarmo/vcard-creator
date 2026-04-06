@@ -1,41 +1,4 @@
-import {
-  b64encode,
-  chunkSplit,
-  escape,
-  fold,
-  isValidMimeType,
-} from './functions'
-
-describe("testing the 'b64encode' function", () => {
-  it('should return an empty string, given an empty string', () => {
-    expect(b64encode('')).toEqual('')
-  })
-
-  it('should encode data with MIME base64', () => {
-    const string = 'quoth the raven nevermore'
-    const b64string = 'cXVvdGggdGhlIHJhdmVuIG5ldmVybW9yZQ=='
-    expect(b64encode(string)).toEqual(b64string)
-  })
-})
-
-describe("testing the 'chunkSplit' function", () => {
-  it('should split a string into smaller chunks', () => {
-    const bigString =
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'
-    const splitString =
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temp\r\nor incididunt ut labore et dolore magna aliqua\r\n'
-    expect(chunkSplit(bigString)).toBe(splitString)
-  })
-
-  it('should not match fold — chunkSplit counts characters, fold counts octets', () => {
-    const bigString =
-      'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'
-    // chunkSplit at 73 chars differs from fold at 75 octets for ASCII
-    expect(chunkSplit(bigString, 73, '\r\n ').trim()).not.toBe(
-      fold(bigString).trim(),
-    )
-  })
-})
+import { escape, fold, isValidMimeType, resolveType } from './functions'
 
 describe("testing the 'escape' function", () => {
   it('should convert CRLF to LF', () => {
@@ -61,7 +24,6 @@ describe("testing the 'fold' function", () => {
   it('should fold a line according to RFC2425 section 5.8.1.', () => {
     const bigString =
       'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'
-    // First line: 75 octets, continuation: remaining
     const splitString =
       'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tem\r\n por incididunt ut labore et dolore magna aliqua\r\n'
     expect(fold(bigString)).toEqual(splitString)
@@ -75,5 +37,19 @@ describe("testing the 'isValidMimeType' function", () => {
 
   it('should be false if the supplied mime type is invalid', () => {
     expect(isValidMimeType('foobar')).toBe(false)
+  })
+})
+
+describe("testing the 'resolveType' function", () => {
+  it('should produce TYPE= format from array', () => {
+    expect(resolveType(['work', 'postal'])).toBe('TYPE=WORK,POSTAL')
+  })
+
+  it('should produce single TYPE= from single-element array', () => {
+    expect(resolveType(['cell'])).toBe('TYPE=CELL')
+  })
+
+  it('should return empty string from empty array', () => {
+    expect(resolveType([])).toBe('')
   })
 })

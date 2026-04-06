@@ -1,13 +1,3 @@
-export type MultipleElements =
-  | 'address'
-  | 'email'
-  | 'impp'
-  | 'phoneNumber'
-  | 'social'
-  | 'url'
-
-export type ContentType = 'text/x-vcalendar' | 'text/x-vcard'
-
 export type Element =
   | 'address'
   | 'birthday'
@@ -32,8 +22,6 @@ export type Element =
   | 'timezone'
   | 'uid'
   | 'url'
-
-export type Format = 'vcalendar' | 'vcard'
 
 export type DefinedElements = {
   [key in Element]?: boolean
