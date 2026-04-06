@@ -142,7 +142,7 @@ describe('Test PRODID', () => {
 describe('Metadata getters', () => {
   it('should return default content type', () => {
     const vCard = new VCard()
-    expect(vCard.getContentType()).toBe('text/x-vcard')
+    expect(vCard.getContentType()).toBe('text/vcard')
   })
 
   it('should return default filename', () => {
