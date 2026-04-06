@@ -4,6 +4,38 @@ const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
 /**
+ * Check if the argument is an options object (as opposed to a positional
+ * string/number).
+ * When used as `isOptions<SomeOptions>(arg)`, TypeScript narrows to
+ * `SomeOptions` on true and excludes it on false.
+ */
+export function isOptions<T extends object>(
+  arg: T | string | number,
+): arg is T {
+  return typeof arg === 'object' && arg !== null && !Array.isArray(arg)
+}
+
+/**
+ * Convert a type array or legacy string to the vCard TYPE= wire format.
+ * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
+ * 'WORK;POSTAL'      → 'TYPE=WORK,POSTAL' (legacy string, best-effort)
+ * ''                 → ''
+ */
+export function resolveType<T extends string>(type: T[] | string): string {
+  if (Array.isArray(type)) {
+    return type.length > 0
+      ? `TYPE=${type.map((t) => t.toUpperCase()).join(',')}`
+      : ''
+  }
+
+  if (type === '') {
+    return ''
+  }
+
+  return `TYPE=${type.replace(/;/g, ',').toUpperCase()}`
+}
+
+/**
  * Encodes data with MIME base64.
  *
  * @param  {string} data text
