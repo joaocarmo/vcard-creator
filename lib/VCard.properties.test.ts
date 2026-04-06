@@ -35,7 +35,7 @@ describe('Test addFullName()', () => {
     expect(vCard.toString()).toContain('FN:Smith\\, John\\; Jr.')
   })
 
-  it('should prevent duplicate FN with non-default charset', () => {
+  it('should prevent duplicate FN with non-default charset (addFullName first)', () => {
     const vCard = new VCard()
     vCard.setCharset('iso-8859-1')
     vCard.addFullName('Custom Name')
@@ -44,6 +44,13 @@ describe('Test addFullName()', () => {
     const fnMatches = output.match(/FN/g)
     expect(fnMatches).toHaveLength(1)
     expect(output).toContain('FN;CHARSET=iso-8859-1:Custom Name')
+  })
+
+  it('should throw on addFullName when addName already set FN with non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addName({ givenName: 'John', familyName: 'Doe' })
+    expect(() => vCard.addFullName('Custom')).toThrow(VCardException)
   })
 })
 
