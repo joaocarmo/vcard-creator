@@ -67,7 +67,7 @@ export type PhoneType =
   | 'isdn'
   | 'video'
 
-export type EmailType = 'pref' | 'work' | 'home'
+export type EmailType = 'internet' | 'pref' | 'work' | 'home'
 
 export type UrlType = 'work' | 'home'
 
