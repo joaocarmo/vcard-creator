@@ -117,6 +117,8 @@ export default class VCard {
 
   /**
    * Add address.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
    */
   public addAddress(options: AddressOptions): this
   /** @deprecated Use object form instead: `addAddress({ street, city, type: ['work'] })` */
@@ -179,6 +181,7 @@ export default class VCard {
   /**
    * Add birthday.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
    * @param  {string} date Format is YYYY-MM-DD
    * @return {this}
    */
@@ -190,6 +193,8 @@ export default class VCard {
 
   /**
    * Add company.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.5
    */
   public addCompany(options: CompanyOptions): this
   /** @deprecated Use object form instead: `addCompany({ name: 'Acme', department: 'Eng' })` */
@@ -221,6 +226,8 @@ export default class VCard {
 
   /**
    * Add email.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.3.2
    */
   public addEmail(options: EmailOptions): this
   /** @deprecated Use object form instead: `addEmail({ address: 'j@x.com', type: ['work'] })` */
@@ -254,6 +261,7 @@ export default class VCard {
   /**
    * Add jobtitle.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.1
    * @param  {string} jobtitle The jobtitle for the person
    * @return {this}
    */
@@ -266,6 +274,7 @@ export default class VCard {
   /**
    * Add role.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.5.2
    * @param  {string} role The role for the person
    * @return {this}
    */
@@ -320,6 +329,8 @@ export default class VCard {
 
   /**
    * Add name.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
    */
   public addName(options: NameOptions): this
   /** @deprecated Use object form instead: `addName({ lastName: 'Doe', firstName: 'John' })` */
@@ -375,6 +386,7 @@ export default class VCard {
   /**
    * Add nickname.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.3
    * @param  {string|string[]} nickname
    */
   public addNickname(nickname: string | string[]): this {
@@ -388,8 +400,9 @@ export default class VCard {
   }
 
   /**
-   * Add note
+   * Add note.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.6.2
    * @param  {string} note
    * @return {this}
    */
@@ -400,8 +413,9 @@ export default class VCard {
   }
 
   /**
-   * Add categories
+   * Add categories.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.6.1
    * @param  {Array<string>} categories
    * @return {this}
    */
@@ -417,6 +431,8 @@ export default class VCard {
 
   /**
    * Add phone number.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
    */
   public addPhoneNumber(options: PhoneOptions): this
   /** @deprecated Use object form instead: `addPhoneNumber({ number: '+1555', type: ['cell'] })` */
@@ -551,6 +567,8 @@ export default class VCard {
 
   /**
    * Add URL.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.6.8
    */
   public addUrl(options: UrlOptions): this
   /** @deprecated Use object form instead: `addUrl({ url: '...', type: ['work'] })` */
@@ -587,6 +605,8 @@ export default class VCard {
   /**
    * Add social profile.
    * Emits both X-SOCIALPROFILE (iOS/macOS) and IMPP (RFC 4770) for cross-platform compatibility.
+   *
+   * @link   https://tools.ietf.org/html/rfc4770#section-1
    */
   public addSocial(options: SocialOptions): this
   /** @deprecated Use object form instead: `addSocial({ url: '...', type: 'X', user: 'handle' })` */
@@ -659,6 +679,7 @@ export default class VCard {
   /**
    * Add UID.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.6.7
    * @param  {string} uid
    * @return {this}
    */
