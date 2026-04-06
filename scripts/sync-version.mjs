@@ -5,7 +5,9 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const { version } = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'))
+const { version } = JSON.parse(
+  readFileSync(resolve(root, 'package.json'), 'utf8'),
+)
 const file = resolve(root, 'lib/utils/constants.ts')
 
 const src = readFileSync(file, 'utf8')
