@@ -27,8 +27,8 @@ npm install vcard-creator
 ```js
 import VCard from 'vcard-creator'
 
-// or as a named import
-import { VCard } from 'vcard-creator'
+// or as named imports
+import { VCard, VCardException } from 'vcard-creator'
 
 const myVCard = new VCard()
 ```
@@ -77,16 +77,25 @@ import VCard from 'vcard-creator'
 const myVCard = new VCard()
 
 myVCard
-  .addName('Desloovere', 'Jeroen')
-  .addCompany('Siesqo')
+  .addName({ lastName: 'Desloovere', firstName: 'Jeroen' })
+  .addCompany({ name: 'Siesqo' })
   .addJobtitle('Web Developer')
   .addRole('Data Protection Officer')
-  .addEmail('info@jeroendesloovere.be')
-  .addPhoneNumber(1234121212, 'PREF;WORK')
-  .addPhoneNumber(123456789, 'WORK')
-  .addAddress('', '', 'street', 'worktown', '', 'workpostcode', 'Belgium')
-  .addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
-  .addUrl('http://www.jeroendesloovere.be')
+  .addEmail({ address: 'info@jeroendesloovere.be' })
+  .addPhoneNumber({ number: 1234121212, type: ['pref', 'work'] })
+  .addPhoneNumber({ number: 123456789, type: ['work'] })
+  .addAddress({
+    street: 'street',
+    city: 'worktown',
+    zip: 'workpostcode',
+    country: 'Belgium',
+  })
+  .addSocial({
+    url: 'https://x.com/desloovere_j',
+    type: 'X',
+    user: 'desloovere_j',
+  })
+  .addUrl({ url: 'http://www.jeroendesloovere.be' })
   .addGeo(51.0543, 3.7174)
   .addTimezone('Europe/Brussels')
 
@@ -98,7 +107,7 @@ Output
 ```txt
 BEGIN:VCARD
 VERSION:3.0
-PRODID:-//vcard-creator//vcard-creator 0.9.0//EN
+PRODID:-//vcard-creator//vcard-creator 0.10.0//EN
 REV:2026-04-06T00:00:00.000Z
 N;CHARSET=utf-8:Desloovere;Jeroen;;;
 FN;CHARSET=utf-8:Jeroen Desloovere
@@ -106,9 +115,9 @@ ORG;CHARSET=utf-8:Siesqo
 TITLE;CHARSET=utf-8:Web Developer
 ROLE;CHARSET=utf-8:Data Protection Officer
 EMAIL:info@jeroendesloovere.be
-TEL;PREF;WORK:1234121212
-TEL;WORK:123456789
-ADR;WORK;POSTAL;CHARSET=utf-8:;;street;worktown;;workpostcode;Belgium
+TEL;TYPE=PREF,WORK:1234121212
+TEL;TYPE=WORK:123456789
+ADR;TYPE=WORK,POSTAL;CHARSET=utf-8:;;street;worktown;;workpostcode;Belgium
 X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
 IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
 URL:http://www.jeroendesloovere.be
@@ -119,54 +128,65 @@ END:VCARD
 
 ## API
 
-All methods return `this` for chaining.
+All methods return `this` for chaining. Methods that accept multiple arguments support an options object (recommended) and a positional form (deprecated).
 
 ### Personal
 
-| Method                                                | Description                                    |
-| ----------------------------------------------------- | ---------------------------------------------- |
-| `addName(last, first, additional?, prefix?, suffix?)` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
-| `addNickname(nickname)`                               | Nickname(s) — accepts `string` or `string[]`   |
-| `addBirthday(date)`                                   | Birthday in `YYYY-MM-DD` format                |
+| Method                                                              | Description                                    |
+| ------------------------------------------------------------------- | ---------------------------------------------- |
+| `addName({ lastName?, firstName?, additional?, prefix?, suffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
+| `addNickname(nickname)`                                             | Nickname(s) — accepts `string` or `string[]`   |
+| `addBirthday(date)`                                                 | Birthday in `YYYY-MM-DD` format                |
 
 ### Organization
 
-| Method                             | Description                          |
-| ---------------------------------- | ------------------------------------ |
-| `addCompany(company, department?)` | Organization and optional department |
-| `addJobtitle(title)`               | Job title                            |
-| `addRole(role)`                    | Role or occupation                   |
+| Method                              | Description                          |
+| ----------------------------------- | ------------------------------------ |
+| `addCompany({ name, department? })` | Organization and optional department |
+| `addJobtitle(title)`                | Job title                            |
+| `addRole(role)`                     | Role or occupation                   |
 
 ### Contact
 
-| Method                          | Description                                                              |
-| ------------------------------- | ------------------------------------------------------------------------ |
-| `addEmail(address, type?)`      | Email address. Type: `PREF`, `WORK`, `HOME`                              |
-| `addPhoneNumber(number, type?)` | Phone number. Type: `PREF`, `WORK`, `HOME`, `VOICE`, `FAX`, `CELL`, etc. |
-| `addUrl(url, type?)`            | URL. Type: `WORK`, `HOME`                                                |
+| Method                              | Description                                                                 |
+| ----------------------------------- | --------------------------------------------------------------------------- |
+| `addEmail({ address, type? })`      | Email address. Type: `['pref', 'work', 'home']`                             |
+| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]` |
+| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                               |
+
+The `type` parameter accepts a typed array for IDE autocomplete and type safety:
+
+```js
+myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
+myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
+```
 
 ### Address
 
-| Method                                                                         | Description                                                                                |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `addAddress(name?, extended?, street?, city?, region?, zip?, country?, type?)` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `WORK;POSTAL`        |
-| `addLabel(label, type?)`                                                       | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `WORK;POSTAL` |
+| Method                                                                             | Description                                                                                       |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `addAddress({ name?, extended?, street?, city?, region?, zip?, country?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['work', 'postal']`        |
+| `addLabel({ label, type? })`                                                       | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['work', 'postal']` |
 
 ### Social & Messaging
 
-| Method                        | Description                                                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `addSocial(url, type, user?)` | Social profile — emits both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]) for cross-platform compatibility |
-| `addImpp(uri, serviceType?)`  | Instant messaging ([RFC 4770][rfc4770]) — for protocols like XMPP, SIP                                                      |
+| Method                            | Description                                                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `addSocial({ url, type, user? })` | Social profile — emits both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]) for cross-platform compatibility |
+| `addImpp({ uri, serviceType? })`  | Instant messaging ([RFC 4770][rfc4770]) — for protocols like XMPP, SIP                                                      |
 
 ```js
 // Social profiles (dual output for iOS + Android)
-myVCard.addSocial('https://x.com/desloovere_j', 'X', 'desloovere_j')
-myVCard.addSocial('https://linkedin.com/in/jdoe', 'LinkedIn')
+myVCard.addSocial({
+  url: 'https://x.com/desloovere_j',
+  type: 'X',
+  user: 'desloovere_j',
+})
+myVCard.addSocial({ url: 'https://linkedin.com/in/jdoe', type: 'LinkedIn' })
 
 // Standalone IM protocols
-myVCard.addImpp('xmpp:user@example.com', 'XMPP')
-myVCard.addImpp('sip:user@example.com', 'SIP')
+myVCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })
+myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 ```
 
 ### Geographic
@@ -178,12 +198,12 @@ myVCard.addImpp('sip:user@example.com', 'SIP')
 
 ### Media
 
-| Method                   | Description                                      |
-| ------------------------ | ------------------------------------------------ |
-| `addPhotoUrl(url)`       | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])  |
-| `addPhoto(image, mime?)` | Photo as base64 content. MIME defaults to `JPEG` |
-| `addLogoUrl(url)`        | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
-| `addLogo(image, mime?)`  | Logo as base64 content. MIME defaults to `JPEG`  |
+| Method                       | Description                                      |
+| ---------------------------- | ------------------------------------------------ |
+| `addPhotoUrl({ url })`       | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])  |
+| `addPhoto({ image, mime? })` | Photo as base64 content. MIME defaults to `JPEG` |
+| `addLogoUrl({ url })`        | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
+| `addLogo({ image, mime? })`  | Logo as base64 content. MIME defaults to `JPEG`  |
 
 Images must be provided already base64-encoded. Include the proper [MIME type][mime-types].
 
@@ -194,7 +214,7 @@ import VCard from 'vcard-creator'
 const image = readFileSync('./path/to/sample.jpg', { encoding: 'base64' })
 
 const vCard = new VCard()
-vCard.addPhoto(image, 'JPEG')
+vCard.addPhoto({ image, mime: 'JPEG' })
 ```
 
 ### Other
@@ -219,7 +239,38 @@ myVCard.addCustomProperty('X-CUSTOM', 'value', 'TYPE=work')
 
 The property name is uppercased automatically. The optional third argument adds parameters.
 
+### Error Handling
+
+`VCardException` is thrown for invalid operations (duplicate single-value properties, invalid MIME types, out-of-range coordinates). It's exported for catch blocks:
+
+```js
+import { VCard, VCardException } from 'vcard-creator'
+
+try {
+  const vCard = new VCard()
+  vCard.addGeo(999, 0) // out of range
+} catch (error) {
+  if (error instanceof VCardException) {
+    console.error('vCard error:', error.message)
+  }
+}
+```
+
 ## Deprecated
+
+### Positional arguments
+
+Multi-argument methods now accept options objects. The old positional form still works but is deprecated and will be removed in v1.0:
+
+```js
+// Deprecated
+myVCard.addName('Doe', 'John')
+myVCard.addEmail('john@example.com', 'PREF;WORK')
+
+// Recommended
+myVCard.addName({ lastName: 'Doe', firstName: 'John' })
+myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
+```
 
 ### Method names
 
