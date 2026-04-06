@@ -29,7 +29,7 @@ import VCard from 'vcard-creator'
 import { VCard, VCardException } from 'vcard-creator'
 
 // types are also exported
-import type { EmailOptions, PhoneType, AddressType } from 'vcard-creator'
+import type { EmailOptions, PhoneType, PhotoOptions } from 'vcard-creator'
 
 const myVCard = new VCard()
 ```
@@ -63,7 +63,7 @@ myVCard
     user: 'desloovere_j',
   })
   .addUrl({ url: 'http://www.jeroendesloovere.be' })
-  .addGeo(51.0543, 3.7174)
+  .addGeo({ latitude: 51.0543, longitude: 3.7174 })
   .addTimezone('Europe/Brussels')
 
 console.log(myVCard.toString())
@@ -99,11 +99,14 @@ All `add*` methods return `this` for chaining.
 
 ### Personal
 
-| Method                                                                                       | Description                                    |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]) |
-| `addNickname(nickname)`                                                                      | Nickname(s) — accepts `string` or `string[]`   |
-| `addBirthday(date)`                                                                          | Birthday — accepts `Date` or `'YYYY-MM-DD'`    |
+| Method                                                                                       | Description                                                                  |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `addFullName(fullName)`                                                                      | Formatted name — overrides auto-generated FN ([RFC 2426 §3.1.1][rfc2426-fn]) |
+| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n])                               |
+| `addNickname(nickname)`                                                                      | Nickname(s) — accepts `string` or `string[]`                                 |
+| `addBirthday(date)`                                                                          | Birthday — accepts `Date` or `'YYYY-MM-DD'`                                  |
+
+`addName()` auto-generates FN from the name components. Use `addFullName()` to set it directly — useful for mononyms, company-as-contact, or custom formatting.
 
 ### Organization
 
@@ -117,7 +120,7 @@ All `add*` methods return `this` for chaining.
 
 | Method                              | Description                                                                 |
 | ----------------------------------- | --------------------------------------------------------------------------- |
-| `addEmail({ address, type? })`      | Email address. Type: `['pref', 'work', 'home']`                             |
+| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`                 |
 | `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]` |
 | `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                               |
 
@@ -158,21 +161,21 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 
 ### Geographic
 
-| Method                        | Description                                                                             |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| `addGeo(latitude, longitude)` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Validates ranges.              |
-| `addTimezone(timezone)`       | UTC offset (`-05:00`) or IANA name (`America/New_York`) ([RFC 2426 §3.4.1][rfc2426-tz]) |
+| Method                            | Description                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Validates ranges.              |
+| `addTimezone(timezone)`           | UTC offset (`-05:00`) or IANA name (`America/New_York`) ([RFC 2426 §3.4.1][rfc2426-tz]) |
 
 ### Media
 
 | Method                       | Description                                      |
 | ---------------------------- | ------------------------------------------------ |
-| `addPhotoUrl({ url })`       | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])  |
+| `addPhoto({ url })`          | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])  |
 | `addPhoto({ image, mime? })` | Photo as base64 content. MIME defaults to `JPEG` |
-| `addLogoUrl({ url })`        | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
+| `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
 | `addLogo({ image, mime? })`  | Logo as base64 content. MIME defaults to `JPEG`  |
 
-Images must be provided already base64-encoded. Include the proper [MIME type][mime-types].
+Each method accepts either a `{ url }` or `{ image, mime? }` object. Multiple photos/logos are allowed (e.g., a base64 thumbnail and a URL fallback).
 
 ```js
 import { readFileSync } from 'fs'
@@ -182,6 +185,22 @@ const image = readFileSync('./path/to/sample.jpg', { encoding: 'base64' })
 
 const vCard = new VCard()
 vCard.addPhoto({ image, mime: 'JPEG' })
+vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
+```
+
+### Security
+
+| Method                   | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
+| `addKey({ key, mime? })` | Public key as base64. MIME defaults to `PGP`       |
+
+```js
+// PGP key by URL
+vCard.addKey({ url: 'https://example.com/key.pub' })
+
+// Embedded X.509 certificate
+vCard.addKey({ key: base64cert, mime: 'X509' })
 ```
 
 ### Other
@@ -245,7 +264,7 @@ Built-in methods automatically escape special characters per [RFC 2426][rfc2426]
 - Comma (`,`) → `\,`
 - Newlines → `\n`
 
-This applies to text values in `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, and `addSortString`. Non-text values (URLs, emails, phone numbers, etc.) are passed through as-is.
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, and `addSortString`. Non-text values (URLs, emails, phone numbers, etc.) are passed through as-is.
 
 ### Error Handling
 
@@ -256,7 +275,7 @@ import { VCard, VCardException } from 'vcard-creator'
 
 try {
   const vCard = new VCard()
-  vCard.addGeo(999, 0) // out of range
+  vCard.addGeo({ latitude: 999, longitude: 0 }) // out of range
 } catch (error) {
   if (error instanceof VCardException) {
     console.error('vCard error:', error.message)
@@ -296,7 +315,13 @@ Key changes in v1.0:
 
 - **ESM only** — `require('vcard-creator')` is no longer supported
 - **Object params only** — positional arguments have been removed
-- **Method aliases removed** — use `addUrl()`, `addUid()`, `addLogoUrl()`, `addPhotoUrl()`
+- **Merged media methods** — `addPhotoUrl()`/`addLogoUrl()` merged into `addPhoto({ url })`/`addLogo({ url })`
+- **`addGeo(lat, lon)`** → `addGeo({ latitude, longitude })`
+- **`addFullName()`** — new method to set FN directly
+- **`addKey()`** — new method for public encryption keys (PGP, X.509)
+- **Multiple instances** — `photo`, `logo`, `note`, `nickname`, and `key` now allow multiple additions
+- **Content-Type** — `getContentType()` returns `text/vcard` (was `text/x-vcard`)
+- **`EmailType`** — added `'internet'` per RFC 2426
 - **vCalendar format removed** — use `new VCard()` (no format parameter)
 - **CHARSET removed** — `CHARSET=utf-8` is no longer added to properties (vCard 3.0 assumes UTF-8)
 - **Text escaping** — special characters are now properly escaped per RFC 2426
@@ -325,7 +350,9 @@ pnpm test:functional
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
 [rfc2426]: https://tools.ietf.org/html/rfc2426
 [rfc2426-adr]: https://tools.ietf.org/html/rfc2426#section-3.2.1
+[rfc2426-fn]: https://tools.ietf.org/html/rfc2426#section-3.1.1
 [rfc2426-geo]: https://tools.ietf.org/html/rfc2426#section-3.4.2
+[rfc2426-key]: https://tools.ietf.org/html/rfc2426#section-3.7.1
 [rfc2426-label]: https://tools.ietf.org/html/rfc2426#section-3.2.2
 [rfc2426-logo]: https://tools.ietf.org/html/rfc2426#section-3.5.3
 [rfc2426-n]: https://tools.ietf.org/html/rfc2426#section-3.1.2
