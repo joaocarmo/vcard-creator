@@ -66,16 +66,16 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
    */
-  public addAddress(options: AddressOptions): this {
-    const postOfficeBox = options.postOfficeBox ?? ''
-    const extended = options.extended ?? ''
-    const street = options.street ?? ''
-    const locality = options.locality ?? ''
-    const region = options.region ?? ''
-    const postalCode = options.postalCode ?? ''
-    const country = options.country ?? ''
-    const type = options.type ?? ['work', 'postal']
-
+  public addAddress({
+    postOfficeBox = '',
+    extended = '',
+    street = '',
+    locality = '',
+    region = '',
+    postalCode = '',
+    country = '',
+    type = ['work', 'postal'],
+  }: AddressOptions = {}): this {
     const value = `${postOfficeBox};${extended};${street};${locality};${region};${postalCode};${country}`
     const resolved = resolveType(type)
     this.setProperty(
@@ -105,14 +105,11 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.5
    */
-  public addCompany(options: CompanyOptions): this {
-    const company = options.name
-    const department = options.department ?? ''
-
+  public addCompany({ name, department = '' }: CompanyOptions): this {
     this.setProperty(
       'company',
       `ORG${this.getCharsetString()}`,
-      company + (department !== '' ? `;${department}` : ''),
+      name + (department !== '' ? `;${department}` : ''),
     )
 
     return this
@@ -123,10 +120,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.2
    */
-  public addEmail(options: EmailOptions): this {
-    const address = options.address
-    const type = options.type ?? []
-
+  public addEmail({ address, type = [] }: EmailOptions): this {
     const resolved = resolveType(type)
     this.setProperty(
       'email',
@@ -201,18 +195,22 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
    */
-  public addName(options: NameOptions): this {
-    const lastName = options.familyName ?? ''
-    const firstName = options.givenName ?? ''
-    const additional = options.additionalNames ?? ''
-    const prefix = options.honorificPrefix ?? ''
-    const suffix = options.honorificSuffix ?? ''
+  public addName({
+    familyName = '',
+    givenName = '',
+    additionalNames = '',
+    honorificPrefix = '',
+    honorificSuffix = '',
+  }: NameOptions = {}): this {
+    const values = [
+      honorificPrefix,
+      givenName,
+      additionalNames,
+      familyName,
+      honorificSuffix,
+    ].filter((m) => !!m)
 
-    const values = [prefix, firstName, additional, lastName, suffix].filter(
-      (m) => !!m,
-    )
-
-    const property = `${lastName};${firstName};${additional};${prefix};${suffix}`
+    const property = `${familyName};${givenName};${additionalNames};${honorificPrefix};${honorificSuffix}`
     this.setProperty('name', `N${this.getCharsetString()}`, property)
     if (!this.hasProperty('FN')) {
       this.setProperty(
@@ -276,15 +274,12 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
    */
-  public addPhoneNumber(options: PhoneOptions): this {
-    const num = options.number
-    const type = options.type ?? []
-
+  public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
     const resolved = resolveType(type)
     this.setProperty(
       'phoneNumber',
       `TEL${resolved !== '' ? `;${resolved}` : ''}`,
-      `${num}`,
+      `${number}`,
     )
 
     return this
@@ -295,8 +290,8 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
    */
-  public addLogoUrl(options: MediaUrlOptions): this {
-    this.addMediaUrl('LOGO', options.url, 'logo')
+  public addLogoUrl({ url }: MediaUrlOptions): this {
+    this.addMediaUrl('LOGO', url, 'logo')
 
     return this
   }
@@ -306,10 +301,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.3
    */
-  public addLogo(options: MediaOptions): this {
-    const image = options.image
-    const mime = options.mime ?? constants.DEFAULT_MIME_TYPE
-
+  public addLogo({
+    image,
+    mime = constants.DEFAULT_MIME_TYPE,
+  }: MediaOptions): this {
     this.addMediaContent('LOGO', image, mime, 'logo')
 
     return this
@@ -320,8 +315,8 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    */
-  public addPhotoUrl(options: MediaUrlOptions): this {
-    this.addMediaUrl('PHOTO', options.url, 'photo')
+  public addPhotoUrl({ url }: MediaUrlOptions): this {
+    this.addMediaUrl('PHOTO', url, 'photo')
 
     return this
   }
@@ -331,10 +326,10 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.4
    */
-  public addPhoto(options: MediaOptions): this {
-    const image = options.image
-    const mime = options.mime ?? constants.DEFAULT_MIME_TYPE
-
+  public addPhoto({
+    image,
+    mime = constants.DEFAULT_MIME_TYPE,
+  }: MediaOptions): this {
     this.addMediaContent('PHOTO', image, mime, 'photo')
 
     return this
@@ -345,10 +340,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.8
    */
-  public addUrl(options: UrlOptions): this {
-    const url = options.url
-    const type = options.type ?? []
-
+  public addUrl({ url, type = [] }: UrlOptions): this {
     const resolved = resolveType(type)
     this.setProperty('url', `URL${resolved !== '' ? `;${resolved}` : ''}`, url)
 
@@ -361,11 +353,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    */
-  public addSocial(options: SocialOptions): this {
-    const url = options.url
-    const type = options.type
-    const user = options.user ?? ''
-
+  public addSocial({ url, type, user = '' }: SocialOptions): this {
     const socialUser = user !== '' ? `;x-user=${user}` : ''
     const socialProfile = type !== '' ? `;type=${type}` : ''
 
@@ -385,10 +373,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    */
-  public addImpp(options: ImppOptions): this {
-    const uri = options.uri
-    const serviceType = options.serviceType ?? ''
-
+  public addImpp({ uri, serviceType = '' }: ImppOptions): this {
     const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
 
     this.setProperty('impp', `IMPP${type}`, uri)
@@ -467,10 +452,7 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
    */
-  public addLabel(options: LabelOptions): this {
-    const label = options.label
-    const type = options.type ?? ['work', 'postal']
-
+  public addLabel({ label, type = ['work', 'postal'] }: LabelOptions): this {
     const resolved = resolveType(type)
     this.setProperty(
       'label',
@@ -490,11 +472,11 @@ export default class VCard {
    * vCard.addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
    * vCard.addCustomProperty({ name: 'X-CUSTOM', value: 'val', params: 'TYPE=work' })
    */
-  public addCustomProperty(options: CustomPropertyOptions): this {
-    const name = options.name
-    const value = options.value
-    const params = options.params ?? ''
-
+  public addCustomProperty({
+    name,
+    value,
+    params = '',
+  }: CustomPropertyOptions): this {
     this.setProperty(
       'custom',
       `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
