@@ -18,7 +18,7 @@ export const ALLOWED_MULTIPLE_PROPERTIES: readonly Element[] = [
   'url',
 ]
 
-export const TEXT_ELEMENTS: readonly Element[] = [
+export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
   'address',
   'categories',
   'company',
@@ -30,7 +30,7 @@ export const TEXT_ELEMENTS: readonly Element[] = [
   'note',
   'role',
   'sortString',
-]
+])
 
 // Updated automatically during the release action
 export const LIB_VERSION = '0.11.0'
