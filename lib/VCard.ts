@@ -63,7 +63,7 @@ export default class VCard {
   /**
    * Multiple properties for element allowed.
    */
-  private multiplePropertiesForElementAllowed: readonly Element[] =
+  private multiplePropertiesForElementAllowed: ReadonlySet<Element> =
     constants.ALLOWED_MULTIPLE_PROPERTIES
 
   /**
@@ -750,7 +750,7 @@ export default class VCard {
     group,
   }: SetPropertyOptions): void {
     if (
-      !this.multiplePropertiesForElementAllowed.includes(element) &&
+      !this.multiplePropertiesForElementAllowed.has(element) &&
       this.definedElements[element]
     ) {
       throw new VCardException(`This element already exists (${element})`)
