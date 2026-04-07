@@ -33,7 +33,7 @@ export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
 ])
 
 // Updated automatically during the release action
-export const LIB_VERSION = '0.11.0'
+export const LIB_VERSION = '1.0.0'
 
 export const CONTENT_TYPE = 'text/vcard'
 export const DEFAULT_CHARACTER_SET = 'utf-8'
