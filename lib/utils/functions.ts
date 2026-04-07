@@ -92,9 +92,5 @@ export function fold(text: string): string {
  * @link    https://www.iana.org/assignments/media-types/media-types.xhtml#image
  */
 export function isValidMimeType(mime: string): boolean {
-  if (mime && MIME_TYPES.includes(mime.toLowerCase())) {
-    return true
-  }
-
-  return false
+  return mime !== '' && MIME_TYPES.has(mime.toLowerCase())
 }

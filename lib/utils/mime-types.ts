@@ -3,7 +3,7 @@
  *
  * @link https://www.iana.org/assignments/media-types/media-types.xhtml#image
  */
-export const MIME_TYPES = [
+export const MIME_TYPES: ReadonlySet<string> = new Set([
   'aces',
   'apng',
   'avci',
@@ -82,4 +82,4 @@ export const MIME_TYPES = [
   'vnd.zbrush.pcx',
   'webp',
   'wmf',
-]
+])

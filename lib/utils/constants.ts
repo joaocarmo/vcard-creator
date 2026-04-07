@@ -2,7 +2,7 @@ import { Element } from '../types/VCard.js'
 
 export { MIME_TYPES } from './mime-types.js'
 
-export const ALLOWED_MULTIPLE_PROPERTIES: readonly Element[] = [
+export const ALLOWED_MULTIPLE_PROPERTIES: ReadonlySet<Element> = new Set([
   'address',
   'custom',
   'email',
@@ -16,9 +16,9 @@ export const ALLOWED_MULTIPLE_PROPERTIES: readonly Element[] = [
   'photo',
   'social',
   'url',
-]
+])
 
-export const TEXT_ELEMENTS: readonly Element[] = [
+export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
   'address',
   'categories',
   'company',
@@ -30,7 +30,7 @@ export const TEXT_ELEMENTS: readonly Element[] = [
   'note',
   'role',
   'sortString',
-]
+])
 
 // Updated automatically during the release action
 export const LIB_VERSION = '0.11.0'

@@ -63,7 +63,7 @@ export default class VCard {
   /**
    * Multiple properties for element allowed.
    */
-  private multiplePropertiesForElementAllowed: readonly Element[] =
+  private multiplePropertiesForElementAllowed: ReadonlySet<Element> =
     constants.ALLOWED_MULTIPLE_PROPERTIES
 
   /**
@@ -602,28 +602,30 @@ export default class VCard {
    * Build vCard (.vcf).
    */
   public buildVCard(): string {
-    let string = ''
-    string += 'BEGIN:VCARD\r\n'
-    string += 'VERSION:3.0\r\n'
-    string += `PRODID:-//vcard-creator//vcard-creator ${constants.LIB_VERSION}//EN\r\n`
+    const parts: string[] = [
+      'BEGIN:VCARD\r\n',
+      'VERSION:3.0\r\n',
+      `PRODID:-//vcard-creator//vcard-creator ${constants.LIB_VERSION}//EN\r\n`,
+    ]
 
     if (!this.definedElements['revision']) {
-      string += `REV:${new Date().toISOString()}\r\n`
+      parts.push(`REV:${new Date().toISOString()}\r\n`)
     }
 
-    // Loop all properties
     const charsetStr = this.getCharsetString()
-    this.properties.forEach((property) => {
+    for (const property of this.properties) {
       const prefix = property.group ? `${property.group}.` : ''
-      const charset = constants.TEXT_ELEMENTS.includes(property.element)
+      const charset = constants.TEXT_ELEMENTS.has(property.element)
         ? charsetStr
         : ''
-      string += fold(`${prefix}${property.key}${charset}:${property.value}\r\n`)
-    })
+      parts.push(
+        fold(`${prefix}${property.key}${charset}:${property.value}\r\n`),
+      )
+    }
 
-    string += 'END:VCARD\r\n'
+    parts.push('END:VCARD\r\n')
 
-    return string
+    return parts.join('')
   }
 
   /**
@@ -748,7 +750,7 @@ export default class VCard {
     group,
   }: SetPropertyOptions): void {
     if (
-      !this.multiplePropertiesForElementAllowed.includes(element) &&
+      !this.multiplePropertiesForElementAllowed.has(element) &&
       this.definedElements[element]
     ) {
       throw new VCardException(`This element already exists (${element})`)
