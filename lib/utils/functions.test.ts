@@ -1,4 +1,11 @@
-import { escapeText, fold, isValidMimeType, resolveType } from './functions'
+import {
+  buildParam,
+  buildPrefParam,
+  escapeText,
+  fold,
+  isValidMimeType,
+  resolveType,
+} from './functions'
 
 describe('escapeText()', () => {
   it('should escape backslashes first', () => {
@@ -133,5 +140,101 @@ describe('resolveType()', () => {
 
   it('should return empty string from empty array', () => {
     expect(resolveType([])).toBe('')
+  })
+
+  describe('v4 mode', () => {
+    it('should strip pref from TYPE list', () => {
+      expect(resolveType(['work', 'pref'], 4)).toBe('TYPE=WORK')
+    })
+
+    it('should strip all pref and return empty when only pref given', () => {
+      expect(resolveType(['pref'], 4)).toBe('')
+    })
+
+    it('should strip obsolete ADR types dom, intl, postal, parcel', () => {
+      expect(resolveType(['dom', 'intl', 'postal', 'parcel', 'home'], 4)).toBe(
+        'TYPE=HOME',
+      )
+    })
+
+    it('should strip obsolete TEL types msg, bbs, car, modem, isdn', () => {
+      expect(
+        resolveType(['msg', 'bbs', 'car', 'modem', 'isdn', 'voice'], 4),
+      ).toBe('TYPE=VOICE')
+    })
+
+    it('should return empty string when all types are obsolete', () => {
+      expect(resolveType(['dom', 'intl', 'pref'], 4)).toBe('')
+    })
+
+    it('should be case-insensitive when stripping obsolete types', () => {
+      expect(resolveType(['PREF', 'DOM', 'Work'], 4)).toBe('TYPE=WORK')
+    })
+
+    it('should pass through non-obsolete types unchanged', () => {
+      expect(resolveType(['work', 'home'], 4)).toBe('TYPE=WORK,HOME')
+    })
+  })
+
+  describe('v3 mode (default)', () => {
+    it('should not strip pref in v3', () => {
+      expect(resolveType(['work', 'pref'], 3)).toBe('TYPE=WORK,PREF')
+    })
+
+    it('should not strip dom/intl in v3', () => {
+      expect(resolveType(['dom', 'intl'], 3)).toBe('TYPE=DOM,INTL')
+    })
+  })
+})
+
+describe('buildPrefParam()', () => {
+  it('should return PREF=N for valid value 1', () => {
+    expect(buildPrefParam(1)).toBe('PREF=1')
+  })
+
+  it('should return PREF=N for valid value 100', () => {
+    expect(buildPrefParam(100)).toBe('PREF=100')
+  })
+
+  it('should return PREF=N for a mid-range value', () => {
+    expect(buildPrefParam(50)).toBe('PREF=50')
+  })
+
+  it('should return empty string for undefined', () => {
+    expect(buildPrefParam(undefined)).toBe('')
+  })
+
+  it('should return empty string for 0 (out of range)', () => {
+    expect(buildPrefParam(0)).toBe('')
+  })
+
+  it('should return empty string for 101 (out of range)', () => {
+    expect(buildPrefParam(101)).toBe('')
+  })
+
+  it('should return empty string for negative values', () => {
+    expect(buildPrefParam(-1)).toBe('')
+  })
+
+  it('should round non-integer values', () => {
+    expect(buildPrefParam(1.6)).toBe('PREF=2')
+  })
+})
+
+describe('buildParam()', () => {
+  it('should return NAME=value for a given name and value', () => {
+    expect(buildParam('ALTID', '1')).toBe('ALTID=1')
+  })
+
+  it('should return empty string for undefined value', () => {
+    expect(buildParam('ALTID', undefined)).toBe('')
+  })
+
+  it('should return empty string for empty string value', () => {
+    expect(buildParam('PID', '')).toBe('')
+  })
+
+  it('should use the provided name as-is', () => {
+    expect(buildParam('MEDIATYPE', 'text/html')).toBe('MEDIATYPE=text/html')
   })
 })

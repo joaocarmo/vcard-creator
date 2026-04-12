@@ -4,18 +4,27 @@ export { MIME_TYPES } from './mime-types.js'
 
 export const ALLOWED_MULTIPLE_PROPERTIES: ReadonlySet<Element> = new Set([
   'address',
+  'calAdrUri',
+  'calUri',
+  'clientPidMap',
   'custom',
   'email',
+  'fbUrl',
   'impp',
   'key',
   'label',
+  'lang',
   'logo',
+  'member',
   'nickname',
   'note',
   'phoneNumber',
   'photo',
+  'related',
   'social',
+  'source',
   'url',
+  'xml',
 ])
 
 export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
@@ -23,11 +32,15 @@ export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
   'categories',
   'company',
   'fullname',
+  'gender',
   'jobtitle',
+  'kind',
   'label',
+  'lang',
   'name',
   'nickname',
   'note',
+  'related',
   'role',
   'sortString',
 ])

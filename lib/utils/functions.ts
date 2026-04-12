@@ -1,17 +1,85 @@
 import { MIME_TYPES } from './constants.js'
+import type { VCardVersion } from '../types/VCard.js'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
 /**
  * Convert a type array to the vCard TYPE= wire format.
- * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
- * []                 → ''
+ *
+ * In v4 mode (RFC 6350):
+ * - `'pref'` is never emitted as `TYPE=PREF`; use the `PREF=` integer parameter instead.
+ * - Obsolete v3 ADR types (`dom`, `intl`, `postal`, `parcel`) are silently stripped.
+ * - Obsolete v3 TEL types (`msg`, `bbs`, `car`, `modem`, `isdn`) are silently stripped.
+ *
+ * @param type  The type values to convert.
+ * @param version  The vCard version controlling which values are valid. Defaults to 3.
+ * @example
+ * resolveType(['work', 'postal'])         // 'TYPE=WORK,POSTAL'  (v3)
+ * resolveType(['work', 'pref'], 4)        // 'TYPE=WORK'         (v4: pref stripped)
+ * resolveType(['dom', 'home'], 4)         // 'TYPE=HOME'         (v4: dom stripped)
+ * resolveType([])                         // ''
  */
-export function resolveType<T extends string>(type: T[]): string {
-  return type.length > 0
-    ? `TYPE=${type.map((t) => t.toUpperCase()).join(',')}`
+export function resolveType<T extends string>(
+  type: T[],
+  version: VCardVersion = 3,
+): string {
+  let types = type as string[]
+
+  if (version === 4) {
+    const V3_OBSOLETE = new Set([
+      'dom',
+      'intl',
+      'postal',
+      'parcel', // obsolete ADR types
+      'msg',
+      'bbs',
+      'car',
+      'modem',
+      'isdn', // obsolete TEL types
+      'pref', // v4 uses PREF= integer param instead
+    ])
+    types = types.filter((t) => !V3_OBSOLETE.has(t.toLowerCase()))
+  }
+
+  return types.length > 0
+    ? `TYPE=${types.map((t) => t.toUpperCase()).join(',')}`
     : ''
+}
+
+/**
+ * Build a `PREF=` parameter string for vCard 4.0 (RFC 6350 §5.3).
+ *
+ * Returns an empty string if `pref` is `undefined` or outside the valid range of 1–100.
+ *
+ * @param pref  Preference value (1 = highest, 100 = lowest).
+ * @example
+ * buildPrefParam(1)         // 'PREF=1'
+ * buildPrefParam(50)        // 'PREF=50'
+ * buildPrefParam(undefined) // ''
+ * buildPrefParam(0)         // ''
+ * buildPrefParam(101)       // ''
+ */
+export function buildPrefParam(pref: number | undefined): string {
+  if (pref === undefined || pref < 1 || pref > 100) return ''
+  return `PREF=${Math.round(pref)}`
+}
+
+/**
+ * Build a named parameter string (e.g., `ALTID=`, `PID=`, `MEDIATYPE=`).
+ *
+ * Returns an empty string if `value` is `undefined` or empty.
+ *
+ * @param name   Parameter name (e.g., `'ALTID'`).
+ * @param value  Parameter value; returns `''` if falsy.
+ * @example
+ * buildParam('ALTID', '1')        // 'ALTID=1'
+ * buildParam('MEDIATYPE', '')     // ''
+ * buildParam('PID', undefined)    // ''
+ */
+export function buildParam(name: string, value: string | undefined): string {
+  if (!value) return ''
+  return `${name}=${value}`
 }
 
 /**
