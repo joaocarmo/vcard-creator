@@ -498,10 +498,10 @@ describe('addEmail() v4 params', () => {
 })
 
 describe('addPhoneNumber() v4 params', () => {
-  it('should default to VALUE=uri in v4', () => {
+  it('should default to VALUE=uri with tel: prefix in v4', () => {
     const vCard = VCard.v4()
     vCard.addPhoneNumber({ number: '+1-555-0100' })
-    expect(vCard.buildVCard()).toContain('TEL;VALUE=uri:+1-555-0100')
+    expect(vCard.buildVCard()).toContain('TEL;VALUE=uri:tel:+1-555-0100')
   })
 
   it('should emit VALUE=uri when explicitly set in v4', () => {
@@ -755,5 +755,64 @@ describe('v4 full round-trip', () => {
     )
     expect(output).toContain('CALURI:https://example.com/cal/ada')
     expect(output).toContain('END:VCARD')
+  })
+})
+
+// ── Validation fixes (Copilot review recommendations) ─────────────────────────
+
+describe('buildPrefParam() NaN guard', () => {
+  it('should return empty string for NaN', () => {
+    const vCard = VCard.v4()
+    vCard.addEmail({ address: 'a@b.com', pref: Number.NaN })
+    expect(vCard.buildVCard()).not.toContain('PREF=NaN')
+  })
+})
+
+describe('addGender() validation', () => {
+  it('should throw when called with an empty object', () => {
+    expect(() => VCard.v4().addGender({})).toThrow(VCardException)
+  })
+
+  it('should escape special characters in identity', () => {
+    const vCard = VCard.v4()
+    vCard.addGender({ identity: 'non;binary' })
+    expect(vCard.buildVCard()).toContain(String.raw`GENDER:non\;binary`)
+  })
+})
+
+describe('addClientPidMap() pid validation', () => {
+  it('should throw for pid = 0', () => {
+    expect(() => VCard.v4().addClientPidMap(0, 'urn:uuid:test')).toThrow(
+      VCardException,
+    )
+  })
+
+  it('should throw for negative pid', () => {
+    expect(() => VCard.v4().addClientPidMap(-1, 'urn:uuid:test')).toThrow(
+      VCardException,
+    )
+  })
+
+  it('should throw for non-integer pid', () => {
+    expect(() => VCard.v4().addClientPidMap(1.5, 'urn:uuid:test')).toThrow(
+      VCardException,
+    )
+  })
+})
+
+describe('addPhoneNumber() tel: URI normalisation', () => {
+  it('should not double-prefix a value that already has a tel: scheme', () => {
+    const vCard = VCard.v4()
+    vCard.addPhoneNumber({ number: 'tel:+1-555-0100' })
+    expect(vCard.buildVCard()).toContain('TEL;VALUE=uri:tel:+1-555-0100')
+    expect(vCard.buildVCard()).not.toContain('tel:tel:')
+  })
+})
+
+describe('addRelated() text escaping', () => {
+  it('should escape special characters in non-URI value', () => {
+    const vCard = VCard.v4()
+    vCard.addRelated({ value: 'Smith, Alice' })
+    expect(vCard.buildVCard()).toContain(String.raw`RELATED:Smith\, Alice`)
   })
 })

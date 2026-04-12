@@ -188,15 +188,20 @@ export default class VCard {
     const keyParts: string[] = [resolved]
 
     if (this.version === 4) {
-      const labelEscape = String.raw`\"`
+      const escapeQuotedParamValue = (input: string): string =>
+        input
+          .replaceAll('\r\n', String.raw`\n`)
+          .replaceAll('\r', String.raw`\n`)
+          .replaceAll('\n', String.raw`\n`)
+          .replaceAll('"', String.raw`\"`)
       const labelParam = label
-        ? `LABEL="${label.replaceAll('"', labelEscape)}"`
+        ? `LABEL="${escapeQuotedParamValue(escapeText(label))}"`
         : ''
       keyParts.push(
         hadPref ? 'PREF=1' : buildPrefParam(pref),
         labelParam,
-        geo ? `GEO="${geo}"` : '',
-        tz ? `TZ="${tz}"` : '',
+        geo ? `GEO="${escapeQuotedParamValue(geo)}"` : '',
+        tz ? `TZ="${escapeQuotedParamValue(tz)}"` : '',
         buildParam('ALTID', altid),
         buildParam('PID', pid),
       )
@@ -240,7 +245,10 @@ export default class VCard {
     const escapedName = escapeText(name)
     const escapedDept = department === '' ? '' : `;${escapeText(department)}`
     let key = 'ORG'
-    if (this.version === 4 && sortAs) key += `;SORT-AS="${sortAs}"`
+    if (this.version === 4 && sortAs) {
+      const escapedSortAs = sortAs.replaceAll('"', String.raw`"`)
+      key += `;SORT-AS="${escapedSortAs}"`
+    }
     this.setProperty({
       element: 'company',
       key,
@@ -445,7 +453,8 @@ export default class VCard {
     // Build N property key: in v4 mode, apply SORT-AS option directly.
     let nameKey = 'N'
     if (this.version === 4 && sortAs) {
-      nameKey += `;SORT-AS="${sortAs}"`
+      const escapedSortAs = sortAs.replaceAll('"', String.raw`"`)
+      nameKey += `;SORT-AS="${escapedSortAs}"`
     }
 
     this.setProperty({
@@ -464,7 +473,8 @@ export default class VCard {
         const pending = this.properties[pendingIdx]
         const nameProperty = this.properties.find((p) => p.element === 'name')
         if (nameProperty) {
-          nameProperty.key = `${nameProperty.key};SORT-AS="${pending.value}"`
+          const escapedPending = pending.value.replaceAll('"', String.raw`"`)
+          nameProperty.key = `${nameProperty.key};SORT-AS="${escapedPending}"`
         }
         this.properties.splice(pendingIdx, 1)
         delete this.definedElements['sortString']
@@ -564,10 +574,17 @@ export default class VCard {
     }
 
     const key = keyParts.filter(Boolean).join(';')
+    // RFC 6350 §6.4.1 / RFC 3966: VALUE=uri requires a tel: URI, not a bare
+    // number. Auto-normalise by prepending "tel:" when no URI scheme is present.
+    const hasUriScheme = /^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(`${number}`)
+    const resolvedNumber =
+      effectiveValueType === 'uri' && !hasUriScheme
+        ? `tel:${number}`
+        : `${number}`
     this.setProperty({
       element: 'phoneNumber',
       key,
-      value: `${number}`,
+      value: resolvedNumber,
       group: this.useGroups && group ? group : undefined,
     })
 
@@ -1149,13 +1166,21 @@ export default class VCard {
    */
   public addGender({ sex, identity }: GenderOptions): this {
     this.assertV4('addGender')
+    const hasSex = sex !== undefined
+    const hasIdentity = identity !== undefined && identity !== ''
+    if (!hasSex && !hasIdentity) {
+      throw new VCardException(
+        'addGender requires at least one of "sex" or "identity".',
+      )
+    }
+    const escapedIdentity = hasIdentity ? escapeText(identity) : undefined
     let value: string
-    if (sex && identity) {
-      value = `${sex};${identity}`
-    } else if (sex) {
-      value = sex
+    if (hasSex && escapedIdentity) {
+      value = `${sex};${escapedIdentity}`
+    } else if (hasSex) {
+      value = sex!
     } else {
-      value = identity ?? ''
+      value = escapedIdentity!
     }
     this.setProperty({ element: 'gender', key: 'GENDER', value })
     return this
@@ -1219,10 +1244,11 @@ export default class VCard {
   public addRelated({ value, type }: RelatedOptions): this {
     this.assertV4('addRelated')
     const isUri = /^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(value)
+    const serializedValue = isUri ? value : escapeText(value)
     let key = 'RELATED'
     if (isUri) key += ';VALUE=uri'
     if (type && type.length > 0) key += `;${resolveType(type, 4)}`
-    this.setProperty({ element: 'related', key, value })
+    this.setProperty({ element: 'related', key, value: serializedValue })
     return this
   }
 
@@ -1240,10 +1266,13 @@ export default class VCard {
    */
   public addClientPidMap(pid: number, uri: string): this {
     this.assertV4('addClientPidMap')
+    if (!Number.isInteger(pid) || pid <= 0) {
+      throw new VCardException('addClientPidMap pid must be a positive integer')
+    }
     this.setProperty({
       element: 'clientPidMap',
       key: 'CLIENTPIDMAP',
-      value: `${Math.round(pid)};${uri}`,
+      value: `${pid};${uri}`,
     })
     return this
   }

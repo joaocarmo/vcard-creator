@@ -50,18 +50,21 @@ export function resolveType<T extends string>(
 /**
  * Build a `PREF=` parameter string for vCard 4.0 (RFC 6350 §5.3).
  *
- * Returns an empty string if `pref` is `undefined` or outside the valid range of 1–100.
+ * Returns an empty string if `pref` is `undefined`, non-finite, or outside
+ * the valid range of 1–100.
  *
  * @param pref  Preference value (1 = highest, 100 = lowest).
  * @example
  * buildPrefParam(1)         // 'PREF=1'
  * buildPrefParam(50)        // 'PREF=50'
  * buildPrefParam(undefined) // ''
+ * buildPrefParam(NaN)       // ''
  * buildPrefParam(0)         // ''
  * buildPrefParam(101)       // ''
  */
 export function buildPrefParam(pref: number | undefined): string {
-  if (pref === undefined || pref < 1 || pref > 100) return ''
+  if (pref === undefined || !Number.isFinite(pref) || pref < 1 || pref > 100)
+    return ''
   return `PREF=${Math.round(pref)}`
 }
 

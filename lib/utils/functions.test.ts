@@ -219,6 +219,14 @@ describe('buildPrefParam()', () => {
   it('should round non-integer values', () => {
     expect(buildPrefParam(1.6)).toBe('PREF=2')
   })
+
+  it('should return empty string for NaN', () => {
+    expect(buildPrefParam(Number.NaN)).toBe('')
+  })
+
+  it('should return empty string for Infinity', () => {
+    expect(buildPrefParam(Infinity)).toBe('')
+  })
 })
 
 describe('buildParam()', () => {

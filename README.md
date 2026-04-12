@@ -151,7 +151,7 @@ ORG;SORT-AS="Analytical":Analytical Engine Ltd
 TITLE:Mathematician
 EMAIL;PREF=1:ada@example.com
 TEL;VALUE=uri;TYPE=WORK,CELL;PREF=1:tel:+1-555-0100
-ADR;TYPE=INTL,POSTAL,PARCEL,WORK;LABEL="1 Mill Road\nCambridge\nUK":;;1 Mill Road;Cambridge;;; UK
+ADR;TYPE=WORK;LABEL="1 Mill Road\nCambridge\nUK":;;1 Mill Road;Cambridge;;; UK
 URL:https://en.wikipedia.org/wiki/Ada_Lovelace
 GEO:geo:52.2053,0.1218
 ANNIVERSARY:1815-12-10
