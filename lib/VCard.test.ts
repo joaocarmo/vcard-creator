@@ -135,6 +135,15 @@ describe('PRODID', () => {
     expect(prodidIdx).toBeGreaterThan(versionIdx)
     expect(prodidIdx).toBeLessThan(revIdx)
   })
+
+  it('should use custom PRODID when set via setProdId', () => {
+    const vCard = new VCard()
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
+    vCard.setProdId('-//MyApp//MyApp 1.0//EN')
+    const output = vCard.toString()
+    expect(output).toContain('PRODID:-//MyApp//MyApp 1.0//EN')
+    expect(output).not.toContain(`PRODID:-//vcard-creator//vcard-creator ${LIB_VERSION}//EN`)
+  })
 })
 
 describe('Metadata getters', () => {

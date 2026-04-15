@@ -61,6 +61,11 @@ export default class VCard {
   private definedElements: DefinedElements = {}
 
   /**
+   * PRODID string.
+   */
+  private prodId: string = `-//vcard-creator//vcard-creator ${constants.LIB_VERSION}//EN`
+
+  /**
    * Multiple properties for element allowed.
    */
   private multiplePropertiesForElementAllowed: ReadonlySet<Element> =
@@ -605,7 +610,7 @@ export default class VCard {
     const parts: string[] = [
       'BEGIN:VCARD\r\n',
       'VERSION:3.0\r\n',
-      `PRODID:-//vcard-creator//vcard-creator ${constants.LIB_VERSION}//EN\r\n`,
+      `PRODID:${this.prodId}\r\n`,
     ]
 
     if (!this.definedElements['revision']) {
@@ -725,6 +730,13 @@ export default class VCard {
    */
   public setCharset(charset: string): void {
     this.charset = charset
+  }
+
+  /**
+   * Set PRODID.
+   */
+  public setProdId(prodId: string): void {
+    this.prodId = prodId
   }
 
   /**
