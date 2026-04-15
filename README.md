@@ -205,13 +205,19 @@ vCard.addKey({ key: base64cert, mime: 'X509' })
 
 ### Other
 
-| Method                      | Description                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `addUid(uid)`               | Unique identifier                                                                   |
-| `addCategories(categories)` | Categories/tags — accepts `string[]`                                                |
-| `addNote(note)`             | Free-text note                                                                      |
-| `addSortString(sortString)` | Sort key for name ordering ([RFC 2426 §3.6.5][rfc2426-sort]) — useful for CJK names |
-| `addRevision(date)`         | Revision timestamp — accepts `Date`. Overrides auto-generated `REV`                 |
+| Method                      | Description                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `addUid(uid)`               | Unique identifier                                                                                |
+| `addCategories(categories)` | Categories/tags — accepts `string[]`                                                             |
+| `addNote(note)`             | Free-text note                                                                                   |
+| `addSortString(sortString)` | Sort key for name ordering ([RFC 2426 §3.6.5][rfc2426-sort]) — useful for CJK names              |
+| `addRevision(date)`         | Revision timestamp — accepts `Date`. Overrides auto-generated `REV`                              |
+| `setProdId(prodId)`         | Override the default `PRODID` field. Defaults to `-//vcard-creator//vcard-creator {version}//EN` |
+
+```js
+// Custom PRODID
+myVCard.setProdId('-//MyApp//MyApp 1.0//EN')
+```
 
 ### Custom Properties
 
