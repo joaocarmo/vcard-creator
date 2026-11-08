@@ -7,6 +7,7 @@ on:
     branches: ['main']
   schedule:
     - cron: '43 7 * * 2'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
