@@ -1,5 +1,6 @@
 /**
- * IANA registered image MIME types.
+ * IANA registered image MIME types. Entries are lower case, because the lookup
+ * lower-cases its input.
  *
  * @link https://www.iana.org/assignments/media-types/media-types.xhtml#image
  */
@@ -33,8 +34,8 @@ export const MIME_TYPES: ReadonlySet<string> = new Set([
   'jpx',
   'jxl',
   'jxr',
-  'jxrA',
-  'jxrS',
+  'jxra',
+  'jxrs',
   'jxs',
   'jxsc',
   'jxsi',

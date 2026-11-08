@@ -854,6 +854,9 @@ describe.each([
     ['png', 'PNG'],
     ['jpeg', 'JPEG'],
     ['JPEG', 'JPEG'],
+    ['jxrA', 'JXRA'],
+    ['jxra', 'JXRA'],
+    ['jxrS', 'JXRS'],
   ])("should write '%s' as TYPE=%s", (mime, type) => {
     const vCard = new VCard()
     vCard[method]({ image: 'data', mime })
@@ -867,6 +870,31 @@ describe.each([
     vCard[method]({ image: 'data' })
     expect(vCard.toString()).toContain(`${property};ENCODING=b;TYPE=JPEG:data`)
   })
+
+  it('should default to TYPE=JPEG when mime is undefined', () => {
+    const vCard = new VCard()
+    vCard[method]({ image: 'data', mime: undefined })
+    expect(vCard.toString()).toContain(`${property};ENCODING=b;TYPE=JPEG:data`)
+  })
+
+  const nonStringMimes: [string, unknown][] = [
+    ['42', 42],
+    ['{}', {}],
+    ['true', true],
+    ['[]', []],
+    ["Symbol('x')", Symbol('x')],
+  ]
+
+  it.each(nonStringMimes)(
+    'should throw on a non-string mime (%s)',
+    (_, mime) => {
+      const vCard = new VCard()
+      const add = () =>
+        vCard[method]({ image: 'data', mime: mime as unknown as string })
+      expect(add).toThrow(VCardException)
+      expect(add).toThrow(/must be a string/)
+    },
+  )
 
   it.each(['foobar', 'image/foo', 'image/', 'jpgx'])(
     "should throw on '%s'",
