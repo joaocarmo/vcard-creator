@@ -483,7 +483,7 @@ Build and test your changes:
 # Build
 pnpm build
 
-# Unit tests
+# Unit tests with coverage
 pnpm test:unit
 
 # Functional test (uses dist/, so run pnpm build first)
@@ -494,6 +494,8 @@ pnpm lint
 pnpm type-check
 pnpm pretty
 ```
+
+`pnpm test:unit` also measures test coverage of `lib/`. Coverage must stay at 100% for statements, branches, functions and lines. The command fails below 100%, and so does the `test` CI job.
 
 ## License
 
