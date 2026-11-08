@@ -1,4 +1,23 @@
-import { escapeText, fold, isValidMimeType, resolveType } from './functions'
+import {
+  escapeText,
+  fold,
+  formatFloat,
+  isValidMimeType,
+  resolveType,
+} from './functions'
+
+describe('formatFloat()', () => {
+  it('should keep the default form for ordinary values', () => {
+    expect(formatFloat(51.0543)).toEqual('51.0543')
+    expect(formatFloat(-122.082932)).toEqual('-122.082932')
+    expect(formatFloat(0)).toEqual('0')
+  })
+
+  it('should expand exponent notation', () => {
+    expect(formatFloat(1e-7)).toEqual('0.0000001')
+    expect(formatFloat(-1.5e-7)).toEqual('-0.00000015')
+  })
+})
 
 describe('escapeText()', () => {
   it('should escape backslashes first', () => {

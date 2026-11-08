@@ -2,6 +2,7 @@ import VCardException from './VCardException.js'
 import {
   AddressOptions,
   CompanyOptions,
+  CoordinateOptions,
   CustomPropertyOptions,
   DateString,
   DefinedElements,
@@ -24,6 +25,7 @@ import {
 import {
   escapeText,
   fold,
+  formatFloat,
   isValidMimeType,
   resolveType,
 } from './utils/functions.js'
@@ -485,25 +487,40 @@ export default class VCard {
    * @throws VCardException
    */
   public addGeo({ latitude, longitude }: GeoOptions): this {
-    if (latitude < -90 || latitude > 90) {
-      throw new VCardException(
-        `Invalid latitude: ${latitude}. Must be between -90 and 90.`,
-      )
-    }
-
-    if (longitude < -180 || longitude > 180) {
-      throw new VCardException(
-        `Invalid longitude: ${longitude}. Must be between -180 and 180.`,
-      )
-    }
+    this.assertCoordinate({ name: 'latitude', value: latitude, limit: 90 })
+    this.assertCoordinate({ name: 'longitude', value: longitude, limit: 180 })
 
     this.setProperty({
       element: 'geo',
       key: 'GEO',
-      value: `${latitude};${longitude}`,
+      value: `${formatFloat(latitude)};${formatFloat(longitude)}`,
     })
 
     return this
+  }
+
+  /**
+   * Check that a coordinate is a finite number from -limit to limit.
+   *
+   * @throws VCardException
+   */
+  private assertCoordinate({ name, value, limit }: CoordinateOptions): void {
+    if (!Number.isFinite(value)) {
+      // String() throws on objects without a usable toString()
+      const shown =
+        typeof value === 'object' && value !== null
+          ? typeof value
+          : String(value)
+      throw new VCardException(
+        `Invalid ${name}: ${shown}. Must be a finite number.`,
+      )
+    }
+
+    if (value < -limit || value > limit) {
+      throw new VCardException(
+        `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
+      )
+    }
   }
 
   /**

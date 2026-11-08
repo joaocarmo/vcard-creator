@@ -42,6 +42,12 @@ export interface SetPropertyOptions {
   group?: string
 }
 
+export interface CoordinateOptions {
+  name: string
+  value: number
+  limit: number
+}
+
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =

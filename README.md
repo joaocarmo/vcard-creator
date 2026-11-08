@@ -233,12 +233,10 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 
 ### Geographic
 
-| Method                            | Description                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Throws if a value is out of range              |
-| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`) |
-
-`addGeo()` does not reject `NaN` yet ([#105][issue-105]).
+| Method                            | Description                                                                                                                                                                                    |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Both values must be finite numbers. Latitude must be from -90 to 90 and longitude from -180 to 180. Throws `VCardException` otherwise |
+| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`)                                                                                        |
 
 For `addTimezone()`, the RFC form is a UTC offset, such as `-05:00`.
 An IANA name is written as it is (`TZ:America/New_York`). The RFC asks for `VALUE=text` in that case, and some apps may ignore the value ([#104][issue-104]).
@@ -351,7 +349,7 @@ This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompa
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, or coordinates out of range. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, or coordinates that are not finite numbers or are out of range. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
@@ -470,7 +468,6 @@ pnpm pretty
 [issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
 [issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
 [issue-104]: https://github.com/joaocarmo/vcard-creator/issues/104
-[issue-105]: https://github.com/joaocarmo/vcard-creator/issues/105
 [issue-106]: https://github.com/joaocarmo/vcard-creator/issues/106
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
 [issue-109]: https://github.com/joaocarmo/vcard-creator/issues/109
