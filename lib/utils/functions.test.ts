@@ -118,6 +118,16 @@ describe('assertNoControlChars()', () => {
     ).toThrow('Email values cannot contain control characters ("a\\nb")')
   })
 
+  it.each([
+    ['\x7F', '\\u007f'],
+    ['\x85', '\\u0085'],
+    ['\u{2028}', '\\u2028'],
+  ])('should escape %j in the message', (char, shown) => {
+    expect(() =>
+      assertNoControlChars({ value: `a${char}b`, label: 'UID' }),
+    ).toThrow(`UID values cannot contain control characters ("a${shown}b")`)
+  })
+
   it('should accept a tab with allowTab', () => {
     expect(() =>
       assertNoControlChars({
@@ -238,20 +248,34 @@ describe('escapeText()', () => {
     expect(escapeText('')).toEqual('')
   })
 
-  it.each(['\x00', '\x08', '\x0B', '\x0C', '\x0E', '\x1C', '\x1E', '\x1F'])(
-    'should throw on C0 control character %j',
+  it.each(['\x00', '\x08', '\x0E', '\x1C', '\x1E', '\x1F', '\x7F'])(
+    'should throw on control character %j',
     (char) => {
       expect(() => escapeText(`a${char}b`)).toThrow(VCardException)
     },
   )
 
   it('should name the character in the message', () => {
-    expect(() => escapeText('a\x0Bb')).toThrow(
-      'Text values cannot contain control characters ("a\\u000bb")',
+    expect(() => escapeText('a\x01b')).toThrow(
+      'Text values cannot contain control characters ("a\\u0001b")',
+    )
+    expect(() => escapeText('a\x7Fb')).toThrow(
+      'Text values cannot contain control characters ("a\\u007fb")',
     )
   })
 
-  it.each(['\t', '\x85', '\u{2028}', '\u{2029}'])(
+  it.each(['\x0B', '\x0C', '\x85', '\u{2028}', '\u{2029}'])(
+    'should escape %j as a line break',
+    (char) => {
+      expect(escapeText(`a${char}b`)).toEqual('a\\nb')
+    },
+  )
+
+  it('should count CRLF as one line break and VT as another', () => {
+    expect(escapeText('a\r\n\x0Bb')).toEqual('a\\n\\nb')
+  })
+
+  it.each(['\t', '\x80', '\x9F', 'é', '漢', '😀'])(
     'should pass through %j',
     (char) => {
       expect(escapeText(`a${char}b`)).toEqual(`a${char}b`)

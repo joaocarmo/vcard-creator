@@ -267,17 +267,18 @@ describe('Text escaping', () => {
       },
     )
 
-    it.each(Object.entries(calls))(
-      'should reject a C0 control character in %s()',
-      (_, methodCalls) => {
-        for (const call of methodCalls) {
-          const vCard = new VCard()
+    it.each(
+      Object.entries(calls).flatMap(([method, methodCalls]) =>
+        ['\x01', '\x7F'].map((char) => [char, method, methodCalls] as const),
+      ),
+    )('should reject control character %j in %s()', (char, _, methodCalls) => {
+      for (const call of methodCalls) {
+        const vCard = new VCard()
 
-          expect(() => call(vCard, 'a\x0Bb')).toThrow(VCardException)
-          expect(vCard.getProperties()).toEqual([])
-        }
-      },
-    )
+        expect(() => call(vCard, `a${char}b`)).toThrow(VCardException)
+        expect(vCard.getProperties()).toEqual([])
+      }
+    })
 
     // Built-in methods that escape text values
     const textMethods = new Set([
@@ -297,12 +298,12 @@ describe('Text escaping', () => {
 
     it.each(
       Object.entries(calls).flatMap(([method, methodCalls]) =>
-        ['\x85', '\u{2028}', '\u{2029}'].map(
+        ['\x0B', '\x0C', '\x85', '\u{2028}', '\u{2029}'].map(
           (char) => [method, char, methodCalls] as const,
         ),
       ),
     )(
-      'should reject or keep a line separator in %s(): %j',
+      'should reject or escape a line separator in %s(): %j',
       (method, char, methodCalls) => {
         for (const call of methodCalls) {
           const vCard = new VCard()
@@ -316,12 +317,23 @@ describe('Text escaping', () => {
             continue
           }
 
-          // Only text values may keep the character
+          // Only text values may escape the character
           expect(textMethods).toContain(method)
-          expect(vCard.toString().replace(/\r\n /g, '')).toContain(s)
+
+          const output = vCard.toString().replace(/\r\n /g, '')
+          expect(output).toContain('a\\nb')
+          expect(output).not.toContain(char)
         }
       },
     )
+
+    it('should not let U+2028 start a new property in a note', () => {
+      const output = new VCard().addNote('a\u{2028}X-INJECTED:1').toString()
+
+      expect(output).not.toContain('\u{2028}')
+      expect(output).toContain('NOTE:a\\nX-INJECTED:1')
+      expect(output).not.toMatch(/^X-INJECTED/m)
+    })
 
     it('should throw on U+2028 in a URL', () => {
       expect(() =>

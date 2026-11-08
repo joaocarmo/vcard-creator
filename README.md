@@ -361,10 +361,10 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Backslash (`\`) → `\\`
 - Semicolon (`;`) → `\;`
 - Comma (`,`) → `\,`
-- Line breaks (`\r\n`, `\n` and a lone `\r`) → `\n`
+- Line breaks (`\r\n`, `\n`, a lone `\r`, VT (`\x0B`), FF (`\x0C`), NEL (`\x85`), U+2028 and U+2029) → `\n`
 
 This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only).
-A text value with a C0 control character (`\x00` to `\x1F`) other than tab, CR or LF throws a `VCardException`. C1 control characters (`\x80` to `\x9F`), U+2028 and U+2029 are allowed in text values.
+A text value with DEL (`\x7F`) or a C0 control character (`\x00` to `\x1F`) other than tab, CR, LF, VT or FF throws a `VCardException`. The other C1 control characters (`\x80` to `\x84` and `\x86` to `\x9F`) are allowed in text values.
 
 Other values are written as they are. They throw a `VCardException` if they contain a control character: `\x00` to `\x1F`, `\x7F`, C1 (`\x80` to `\x9F`, including NEL), U+2028 (line separator) or U+2029 (paragraph separator). Some parsers treat these as line breaks. This applies to:
 
@@ -383,7 +383,7 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with a C0 control character other than tab, CR or LF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
