@@ -8,6 +8,7 @@ import {
   resolveType,
   toImageSubtype,
 } from './functions'
+import { MIME_TYPES } from './constants'
 import VCardException from '../VCardException'
 
 describe('quoteParamValue()', () => {
@@ -189,6 +190,13 @@ describe('fold()', () => {
 describe('isValidMimeType()', () => {
   it('should return true for a valid MIME type', () => {
     expect(isValidMimeType('jpeg')).toBe(true)
+  })
+
+  it('should store every MIME_TYPES entry in lower case', () => {
+    const notLowerCase = [...MIME_TYPES].filter(
+      (mime) => mime !== mime.toLowerCase(),
+    )
+    expect(notLowerCase).toEqual([])
   })
 
   it('should return false for an invalid MIME type', () => {

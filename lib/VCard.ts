@@ -244,6 +244,13 @@ export default class VCard {
     mime: string,
     element: Element,
   ): this {
+    // Plain JavaScript callers can pass non-string values
+    if (typeof mime !== 'string') {
+      throw new VCardException(
+        `The MIME Media Type must be a string (got ${typeof mime})`,
+      )
+    }
+
     const subtype = toImageSubtype(mime)
 
     if (!isValidMimeType(subtype)) {
