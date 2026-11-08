@@ -6,25 +6,29 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Enable corepack
-        run: corepack enable pnpm
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          persist-credentials: false
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Set up pnpm, Node.js and dependencies
+        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          require-lockfile: true
+          cache: true
+          save-cache: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Lint the source files
         run: pnpm lint
@@ -37,21 +41,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Enable corepack
-        run: |
-          corepack enable pnpm
-          corepack use pnpm@latest
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          persist-credentials: false
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Set up pnpm, Node.js and dependencies
+        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+        with:
+          require-lockfile: true
+          cache: true
+          save-cache: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build the library
         run: pnpm build
