@@ -1,4 +1,12 @@
 import VCard from './VCard'
+import VCardException from './VCardException'
+import type {
+  AddressType,
+  DateString,
+  EmailType,
+  PhoneType,
+  UrlType,
+} from './types/VCard'
 
 describe('Text escaping', () => {
   describe('structured values', () => {
@@ -114,6 +122,164 @@ describe('Text escaping', () => {
       const vCard = new VCard()
       vCard.addCustomProperty({ name: 'X-TEST', value: 'a;b,c\\d' })
       expect(vCard.toString()).toContain('X-TEST:a;b,c\\d')
+    })
+  })
+
+  describe('line breaks in every string value', () => {
+    type Call = (card: VCard, s: string) => unknown
+
+    // Each call appends `s` to 1 string value and keeps the others valid
+    const calls: Record<string, Call[]> = {
+      addAddress: [
+        (c, s) => c.addAddress({ postOfficeBox: s }),
+        (c, s) => c.addAddress({ extended: s }),
+        (c, s) => c.addAddress({ street: s }),
+        (c, s) => c.addAddress({ locality: s }),
+        (c, s) => c.addAddress({ region: s }),
+        (c, s) => c.addAddress({ postalCode: s }),
+        (c, s) => c.addAddress({ country: s }),
+        (c, s) => c.addAddress({ type: [`home${s}` as AddressType] }),
+      ],
+      addBirthday: [(c, s) => c.addBirthday(`1990-05-15${s}` as DateString)],
+      addCompany: [
+        (c, s) => c.addCompany({ name: `Acme${s}` }),
+        (c, s) => c.addCompany({ name: 'Acme', department: `Dev${s}` }),
+      ],
+      addEmail: [
+        (c, s) => c.addEmail({ address: `a@example.com${s}` }),
+        (c, s) =>
+          c.addEmail({
+            address: 'a@example.com',
+            type: [`work${s}` as EmailType],
+          }),
+      ],
+      addKey: [
+        (c, s) => c.addKey({ url: `https://example.com/k${s}` }),
+        (c, s) => c.addKey({ key: `data${s}` }),
+        (c, s) => c.addKey({ key: 'data', mime: `PGP${s}` }),
+      ],
+      addJobtitle: [(c, s) => c.addJobtitle(s)],
+      addRole: [(c, s) => c.addRole(s)],
+      addFullName: [(c, s) => c.addFullName(s)],
+      addName: [
+        (c, s) => c.addName({ familyName: s }),
+        (c, s) => c.addName({ givenName: s }),
+        (c, s) => c.addName({ additionalNames: s }),
+        (c, s) => c.addName({ honorificPrefix: s }),
+        (c, s) => c.addName({ honorificSuffix: s }),
+      ],
+      addNickname: [
+        (c, s) => c.addNickname(s),
+        (c, s) => c.addNickname(['Jo', s]),
+      ],
+      addNote: [(c, s) => c.addNote(s)],
+      addCategories: [(c, s) => c.addCategories(['Work', s])],
+      addPhoneNumber: [
+        (c, s) => c.addPhoneNumber({ number: `+1-555-0100${s}` }),
+        (c, s) =>
+          c.addPhoneNumber({
+            number: '+1-555-0100',
+            type: [`cell${s}` as PhoneType],
+          }),
+      ],
+      addLogo: [
+        (c, s) => c.addLogo({ url: `https://example.com/l${s}` }),
+        (c, s) => c.addLogo({ image: `data${s}` }),
+        (c, s) => c.addLogo({ image: 'data', mime: `png${s}` }),
+      ],
+      addPhoto: [
+        (c, s) => c.addPhoto({ url: `https://example.com/p${s}` }),
+        (c, s) => c.addPhoto({ image: `data${s}` }),
+        (c, s) => c.addPhoto({ image: 'data', mime: `png${s}` }),
+      ],
+      addUrl: [
+        (c, s) => c.addUrl({ url: `https://example.com/${s}` }),
+        (c, s) =>
+          c.addUrl({
+            url: 'https://example.com',
+            type: [`work${s}` as UrlType],
+          }),
+      ],
+      addSocial: [
+        (c, s) => c.addSocial({ url: `https://example.com/${s}`, type: 'x' }),
+        (c, s) => c.addSocial({ url: 'https://example.com', type: `x${s}` }),
+        (c, s) =>
+          c.addSocial({ url: 'https://example.com', type: 'x', user: `u${s}` }),
+      ],
+      addImpp: [
+        (c, s) => c.addImpp({ uri: `xmpp:a@example.com${s}` }),
+        (c, s) =>
+          c.addImpp({ uri: 'xmpp:a@example.com', serviceType: `Jabber${s}` }),
+      ],
+      addUid: [(c, s) => c.addUid(`uid${s}`)],
+      addGeo: [],
+      addTimezone: [(c, s) => c.addTimezone(`Europe/Lisbon${s}`)],
+      addSortString: [(c, s) => c.addSortString(s)],
+      addRevision: [],
+      addLabel: [
+        (c, s) => c.addLabel({ label: `Street 1${s}` }),
+        (c, s) =>
+          c.addLabel({ label: 'Street 1', type: [`home${s}` as AddressType] }),
+      ],
+      addCustomProperty: [
+        (c, s) => c.addCustomProperty({ name: `X-A${s}`, value: 'v' }),
+        (c, s) => c.addCustomProperty({ name: 'X-A', value: s }),
+        (c, s) =>
+          c.addCustomProperty({ name: 'X-A', value: 'v', params: `X-P=1${s}` }),
+        (c, s) =>
+          c.addCustomProperty({ name: 'X-A', value: 'v', group: `item1${s}` }),
+      ],
+    }
+
+    it('should cover every public add*() method', () => {
+      const methods = Object.getOwnPropertyNames(VCard.prototype).filter(
+        (name) =>
+          name.startsWith('add') &&
+          name !== 'addMediaUrl' &&
+          name !== 'addMediaContent',
+      )
+
+      expect(Object.keys(calls).sort()).toEqual(methods.sort())
+    })
+
+    it.each(Object.entries(calls))(
+      'should escape or reject line breaks in %s()',
+      (_, methodCalls) => {
+        for (const call of methodCalls) {
+          // The other values are valid, so a throw below comes from `s`
+          expect(() => call(new VCard(), '')).not.toThrow()
+
+          for (const lineBreak of ['\r', '\n', '\r\n']) {
+            const vCard = new VCard()
+            const s = `a${lineBreak}X-INJECTED:1`
+
+            try {
+              call(vCard, s)
+            } catch (error) {
+              expect(error).toBeInstanceOf(VCardException)
+              expect(vCard.getProperties()).toEqual([])
+              continue
+            }
+
+            expect(vCard.toString().replace(/\r\n/g, '')).not.toMatch(/[\r\n]/)
+          }
+        }
+      },
+    )
+
+    it('should write valid values as before', () => {
+      const vCard = new VCard()
+      vCard
+        .addLabel({ label: 'Street 1', type: ['home'] })
+        .addNote('Call me')
+        .addCustomProperty({ name: 'X-A', value: 'a;b', group: 'item1' })
+        .addUid('urn:uuid:1234')
+
+      const output = vCard.toString()
+      expect(output).toContain('LABEL;TYPE=HOME:Street 1\r\n')
+      expect(output).toContain('NOTE:Call me\r\n')
+      expect(output).toContain('item1.X-A:a;b\r\n')
+      expect(output).toContain('UID:urn:uuid:1234\r\n')
     })
   })
 })

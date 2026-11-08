@@ -23,6 +23,7 @@ import {
   UrlOptions,
 } from './types/VCard.js'
 import {
+  assertNoControlChars,
   assertUri,
   escapeText,
   fold,
@@ -78,6 +79,7 @@ export default class VCard {
    * Add address.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
+   * @throws VCardException
    */
   public addAddress({
     postOfficeBox = '',
@@ -115,12 +117,15 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
    * @param  date A Date object or a string in YYYY-MM-DD format
+   * @throws VCardException
    * @example
    * vCard.addBirthday(new Date('1990-05-15'))
    * vCard.addBirthday('1990-05-15')
    */
   public addBirthday(date: Date | DateString): this {
     const value = date instanceof Date ? date.toISOString().slice(0, 10) : date
+    assertNoControlChars(value, 'Birthday')
+
     this.setProperty({ element: 'birthday', key: 'BDAY', value })
 
     return this
@@ -147,8 +152,11 @@ export default class VCard {
    * Add email.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.2
+   * @throws VCardException
    */
   public addEmail({ address, type = [] }: EmailOptions): this {
+    assertNoControlChars(address, 'Email')
+
     const resolved = resolveType(type)
     this.setProperty({
       element: 'email',
@@ -176,6 +184,9 @@ export default class VCard {
       })
     } else {
       const mime = options.mime ?? 'PGP'
+      assertNoControlChars(options.key, 'Key')
+      assertNoControlChars(mime, 'Key type')
+
       this.setProperty({
         element: 'key',
         key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,
@@ -256,6 +267,8 @@ export default class VCard {
     if (!isValidMimeType(subtype)) {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
     }
+
+    assertNoControlChars(content, 'Image')
 
     this.setProperty({
       element,
@@ -386,13 +399,17 @@ export default class VCard {
    * Add phone number.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
+   * @throws VCardException
    */
   public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
+    const value = `${number}`
+    assertNoControlChars(value, 'Phone number')
+
     const resolved = resolveType(type)
     this.setProperty({
       element: 'phoneNumber',
       key: `TEL${resolved !== '' ? `;${resolved}` : ''}`,
-      value: `${number}`,
+      value,
     })
 
     return this
@@ -511,8 +528,11 @@ export default class VCard {
    * Add UID.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.7
+   * @throws VCardException
    */
   public addUid(uid: string): this {
+    assertNoControlChars(uid, 'UID')
+
     this.setProperty({ element: 'uid', key: 'UID', value: uid })
 
     return this
@@ -626,6 +646,7 @@ export default class VCard {
    * Add formatted address label.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
+   * @throws VCardException
    */
   public addLabel({
     label,
@@ -646,9 +667,11 @@ export default class VCard {
    * or any property not covered by the built-in methods.
    *
    * NOTE: Values are NOT automatically escaped. If your value contains
-   * special characters (semicolons, commas, backslashes, newlines),
-   * you are responsible for escaping them.
+   * special characters (semicolons, commas, backslashes), you are
+   * responsible for escaping them. A control character other than tab,
+   * such as a line break, throws.
    *
+   * @throws VCardException
    * @example
    * vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
    * vCard.addCustomProperty({ name: 'X-ANNIVERSARY', value: '2010-06-15' })
@@ -661,6 +684,13 @@ export default class VCard {
     params = '',
     group,
   }: CustomPropertyOptions): this {
+    assertNoControlChars(name, 'Property name')
+    assertNoControlChars(value, 'Property', { allowTab: true })
+    assertNoControlChars(params, 'Parameter', { allowTab: true })
+    if (group !== undefined) {
+      assertNoControlChars(group, 'Group')
+    }
+
     this.setProperty({
       element: 'custom',
       key: `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,

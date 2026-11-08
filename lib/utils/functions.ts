@@ -8,8 +8,15 @@ const decoder = new TextDecoder()
  * Convert a type array to the vCard TYPE= wire format.
  * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
  * []                 → ''
+ *
+ * @throws VCardException
  */
 export function resolveType<T extends string>(type: T[]): string {
+  // Plain JavaScript callers can pass any string
+  for (const t of type) {
+    assertNoControlChars(t, 'Type')
+  }
+
   return type.length > 0
     ? `TYPE=${type.map((t) => t.toUpperCase()).join(',')}`
     : ''
@@ -18,7 +25,8 @@ export function resolveType<T extends string>(type: T[]): string {
 /**
  * Escape special characters in text values per RFC 2426.
  *
- * Backslashes are replaced first to avoid double-escaping.
+ * Backslashes are replaced first to avoid double-escaping. Line breaks
+ * (`\r\n`, `\n` and a lone `\r`) become `\n`.
  *
  * @link   http://tools.ietf.org/html/rfc2426
  */
@@ -27,8 +35,7 @@ export function escapeText(text: string): string {
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
-    .replace(/\r\n/g, '\\n')
-    .replace(/\n/g, '\\n')
+    .replace(/\r\n|\r|\n/g, '\\n')
 }
 
 /**
@@ -65,18 +72,37 @@ export function quoteParamValue(value: string): string {
 }
 
 /**
+ * Check that a value written as it is has no control characters, such as a
+ * line break. Tab is rejected unless `allowTab` is set.
+ *
+ * @throws VCardException
+ */
+export function assertNoControlChars(
+  value: string,
+  label: string,
+  { allowTab = false }: { allowTab?: boolean } = {},
+): void {
+  const pattern = allowTab
+    ? // oxlint-disable-next-line no-control-regex
+      /[\x00-\x08\x0A-\x1F\x7F]/
+    : // oxlint-disable-next-line no-control-regex
+      /[\x00-\x1F\x7F]/
+
+  if (pattern.test(value)) {
+    throw new VCardException(
+      `${label} values cannot contain control characters (${JSON.stringify(value)})`,
+    )
+  }
+}
+
+/**
  * Check that a URI value has no control characters, tab included.
  *
  * @link   https://tools.ietf.org/html/rfc3986#section-2
  * @throws VCardException
  */
 export function assertUri(value: string): void {
-  // oxlint-disable-next-line no-control-regex
-  if (/[\x00-\x1F\x7F]/.test(value)) {
-    throw new VCardException(
-      `URI values cannot contain control characters (${JSON.stringify(value)})`,
-    )
-  }
+  assertNoControlChars(value, 'URI')
 }
 
 /**

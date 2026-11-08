@@ -172,7 +172,7 @@ export interface StoredProperty extends Property {
 export interface CustomPropertyOptions {
   /** Property name (automatically uppercased) */
   name: string
-  /** Property value (NOT automatically escaped — caller is responsible for escaping) */
+  /** Property value (NOT automatically escaped — caller is responsible for escaping). A control character other than tab throws */
   value: string
   /** Optional parameters (e.g., 'TYPE=work') */
   params?: string
