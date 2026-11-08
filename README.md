@@ -280,7 +280,7 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
 | `addKey({ key, mime? })` | Public key as base64. `mime` defaults to `PGP`     |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. It is not checked. Pass raw base64 only, as for photos.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. It is not checked. Pass raw base64 only, as for photos. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL

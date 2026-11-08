@@ -928,6 +928,26 @@ describe('addKey()', () => {
     expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
     expect(output).toContain('KEY;ENCODING=b;TYPE=X509:certdata')
   })
+
+  it('should write a URL with a comma and a semicolon as it is', () => {
+    const vCard = new VCard()
+    vCard.addKey({ url: 'https://example.com/a;b?c=1,2' })
+
+    expect(vCard.toString()).toContain(
+      'KEY;VALUE=uri:https://example.com/a;b?c=1,2',
+    )
+  })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in url',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addKey({ url: `https://example.com/k${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addUid()', () => {
