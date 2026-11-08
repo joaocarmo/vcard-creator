@@ -670,7 +670,9 @@ export default class VCard {
    * @deprecated Use `toString()`. Removed in the next major version.
    */
   public buildVCard(): string {
-    return this.toString()
+    // Calls build() directly so a subclass toString() that calls
+    // buildVCard() does not recurse.
+    return this.build()
   }
 
   private build(): string {

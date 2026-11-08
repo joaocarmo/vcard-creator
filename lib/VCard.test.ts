@@ -269,16 +269,31 @@ describe('buildVCard()', () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it('should not make toString() call getCharsetString()', () => {
+  it('should not recurse when a subclass toString() calls it', () => {
+    class UpperVCard extends VCard {
+      override toString(): string {
+        return this.buildVCard().toUpperCase()
+      }
+    }
+    const name = { familyName: 'Doe', givenName: 'John' }
+    const expected = new VCard().addName(name).toString().toUpperCase()
+    expect(new UpperVCard().addName(name).toString()).toBe(expected)
+  })
+})
+
+describe('getCharsetString()', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('should not be called by toString()', () => {
     const spy = vi.spyOn(VCard.prototype, 'getCharsetString')
     const vCard = new VCard()
     vCard.setCharset('iso-8859-1')
     vCard.addName({ familyName: 'Doe', givenName: 'John' }).toString()
     expect(spy).not.toHaveBeenCalled()
   })
-})
 
-describe('getCharsetString()', () => {
   it('should return an empty string for the default charset', () => {
     expect(new VCard().getCharsetString()).toBe('')
   })
