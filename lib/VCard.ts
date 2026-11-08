@@ -5,7 +5,6 @@ import {
   CoordinateOptions,
   CustomPropertyOptions,
   DateCheckOptions,
-  DateString,
   DefinedElements,
   Element,
   EmailOptions,
@@ -26,15 +25,18 @@ import {
 import {
   assertName,
   assertNoControlChars,
+  assertOptions,
   assertString,
   assertUri,
   describeType,
   escapeText,
   fold,
   formatFloat,
+  isRfcDateOrDateTime,
   isValidMimeType,
   quoteParamValue,
   resolveType,
+  showValue,
   toImageSubtype,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
@@ -85,16 +87,19 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
    * @throws VCardException
    */
-  public addAddress({
-    postOfficeBox = '',
-    extended = '',
-    street = '',
-    locality = '',
-    region = '',
-    postalCode = '',
-    country = '',
-    type = ['intl', 'postal', 'parcel', 'work'],
-  }: AddressOptions = {}): this {
+  public addAddress(options: AddressOptions = {}): this {
+    assertOptions({ value: options, label: 'addAddress()' })
+    const {
+      postOfficeBox = '',
+      extended = '',
+      street = '',
+      locality = '',
+      region = '',
+      postalCode = '',
+      country = '',
+      type = ['intl', 'postal', 'parcel', 'work'],
+    } = options
+
     const value = [
       postOfficeBox,
       extended,
@@ -120,19 +125,33 @@ export default class VCard {
    * Add birthday.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
-   * @param  date A Date object or a string in YYYY-MM-DD format
+   * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
+   * @param  date A Date object with a UTC year from 0000 to 9999, or a date or
+   *              date-time string in the RFC 2425 format
    * @throws VCardException
    * @example
    * vCard.addBirthday(new Date('1990-05-15'))
    * vCard.addBirthday('1990-05-15')
+   * vCard.addBirthday('19900515')
+   * vCard.addBirthday('1953-10-15T23:10:00Z')
    */
-  public addBirthday(date: Date | DateString): this {
+  public addBirthday(date: Date | string): this {
+    let value: string
+
     if (date instanceof Date) {
       this.assertValidDate({ date, label: 'birthday' })
-    }
+      value = date.toISOString().slice(0, 10)
+    } else {
+      assertString({ value: date, label: 'Birthday' })
 
-    const value = date instanceof Date ? date.toISOString().slice(0, 10) : date
-    assertNoControlChars({ value, label: 'Birthday' })
+      if (!isRfcDateOrDateTime(date)) {
+        throw new VCardException(
+          `Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(date)})`,
+        )
+      }
+
+      value = date
+    }
 
     this.setProperty({ element: 'birthday', key: 'BDAY', value })
 
@@ -145,7 +164,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.5
    * @throws VCardException
    */
-  public addCompany({ name, department = '' }: CompanyOptions): this {
+  public addCompany(options: CompanyOptions): this {
+    assertOptions({ value: options, label: 'addCompany()' })
+    const { name, department = '' } = options
+
     const escapedName = escapeText(name)
     const escapedDept = department !== '' ? `;${escapeText(department)}` : ''
     this.setProperty({
@@ -163,7 +185,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.2
    * @throws VCardException
    */
-  public addEmail({ address, type = [] }: EmailOptions): this {
+  public addEmail(options: EmailOptions): this {
+    assertOptions({ value: options, label: 'addEmail()' })
+    const { address, type = [] } = options
+
     assertNoControlChars({ value: address, label: 'Email' })
 
     const resolved = resolveType(type)
@@ -183,6 +208,8 @@ export default class VCard {
    * @throws VCardException
    */
   public addKey(options: KeyOptions): this {
+    assertOptions({ value: options, label: 'addKey()' })
+
     if ('url' in options) {
       assertUri(options.url)
 
@@ -311,13 +338,16 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
    * @throws VCardException
    */
-  public addName({
-    familyName = '',
-    givenName = '',
-    additionalNames = '',
-    honorificPrefix = '',
-    honorificSuffix = '',
-  }: NameOptions = {}): this {
+  public addName(options: NameOptions = {}): this {
+    assertOptions({ value: options, label: 'addName()' })
+    const {
+      familyName = '',
+      givenName = '',
+      additionalNames = '',
+      honorificPrefix = '',
+      honorificSuffix = '',
+    } = options
+
     const values = [
       honorificPrefix,
       givenName,
@@ -420,12 +450,21 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
    * @throws VCardException
    */
-  public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
+  public addPhoneNumber(options: PhoneOptions): this {
+    assertOptions({ value: options, label: 'addPhoneNumber()' })
+    const { number, type = [] } = options
+
     // Plain JavaScript callers can pass null or undefined, which would be
     // written as text
     if (typeof number !== 'string' && typeof number !== 'number') {
       throw new VCardException(
         `Phone number values must be strings or numbers (got ${describeType(number)})`,
+      )
+    }
+
+    if (typeof number === 'number' && !Number.isFinite(number)) {
+      throw new VCardException(
+        `Phone number values must be finite numbers (got ${number})`,
       )
     }
 
@@ -449,6 +488,8 @@ export default class VCard {
    * @throws VCardException
    */
   public addLogo(options: LogoOptions): this {
+    assertOptions({ value: options, label: 'addLogo()' })
+
     if ('url' in options) {
       this.addMediaUrl('LOGO', options.url, 'logo')
     } else {
@@ -470,6 +511,8 @@ export default class VCard {
    * @throws VCardException
    */
   public addPhoto(options: PhotoOptions): this {
+    assertOptions({ value: options, label: 'addPhoto()' })
+
     if ('url' in options) {
       this.addMediaUrl('PHOTO', options.url, 'photo')
     } else {
@@ -490,7 +533,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.8
    * @throws VCardException
    */
-  public addUrl({ url, type = [] }: UrlOptions): this {
+  public addUrl(options: UrlOptions): this {
+    assertOptions({ value: options, label: 'addUrl()' })
+    const { url, type = [] } = options
+
     assertUri(url)
 
     const resolved = resolveType(type)
@@ -510,7 +556,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    * @throws VCardException
    */
-  public addSocial({ url, type, user = '' }: SocialOptions): this {
+  public addSocial(options: SocialOptions): this {
+    assertOptions({ value: options, label: 'addSocial()' })
+    const { url, type, user = '' } = options
+
     // addImpp() checks too, but only after X-SOCIALPROFILE is stored
     assertUri(url)
 
@@ -534,7 +583,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    * @throws VCardException
    */
-  public addImpp({ uri, serviceType = '' }: ImppOptions): this {
+  public addImpp(options: ImppOptions): this {
+    assertOptions({ value: options, label: 'addImpp()' })
+    const { uri, serviceType = '' } = options
+
     assertUri(uri)
 
     const type =
@@ -571,7 +623,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.2
    * @throws VCardException
    */
-  public addGeo({ latitude, longitude }: GeoOptions): this {
+  public addGeo(options: GeoOptions): this {
+    assertOptions({ value: options, label: 'addGeo()' })
+    const { latitude, longitude } = options
+
     this.assertCoordinate({ name: 'latitude', value: latitude, limit: 90 })
     this.assertCoordinate({ name: 'longitude', value: longitude, limit: 180 })
 
@@ -623,6 +678,14 @@ export default class VCard {
 
     if (Number.isNaN(date.getTime())) {
       throw new VCardException(`Invalid ${label}: the Date is invalid`)
+    }
+
+    // toISOString() writes other years with a sign and 6 digits
+    const year = date.getUTCFullYear()
+    if (year < 0 || year > 9999) {
+      throw new VCardException(
+        `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,
+      )
     }
   }
 
@@ -680,6 +743,7 @@ export default class VCard {
    * When set, overrides the auto-generated REV timestamp.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.4
+   * @param  date A Date object with a UTC year from 0000 to 9999
    * @throws VCardException
    */
   public addRevision(date: Date): this {
@@ -700,10 +764,10 @@ export default class VCard {
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.2
    * @throws VCardException
    */
-  public addLabel({
-    label,
-    type = ['intl', 'postal', 'parcel', 'work'],
-  }: LabelOptions): this {
+  public addLabel(options: LabelOptions): this {
+    assertOptions({ value: options, label: 'addLabel()' })
+    const { label, type = ['intl', 'postal', 'parcel', 'work'] } = options
+
     const resolved = resolveType(type)
     this.setProperty({
       element: 'label',
@@ -732,12 +796,10 @@ export default class VCard {
    * vCard.addCustomProperty({ name: 'X-CUSTOM', value: 'val', params: 'TYPE=work' })
    * vCard.addCustomProperty({ name: 'TEL', value: '+1-555', group: 'item1' })
    */
-  public addCustomProperty({
-    name,
-    value,
-    params = '',
-    group,
-  }: CustomPropertyOptions): this {
+  public addCustomProperty(options: CustomPropertyOptions): this {
+    assertOptions({ value: options, label: 'addCustomProperty()' })
+    const { name, value, params = '', group } = options
+
     assertName({ value: name, label: 'Property name' })
     const upperName = name.toUpperCase()
     const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)

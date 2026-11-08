@@ -155,19 +155,20 @@ All `add*` methods return `this`, so you can chain them.
 
 ### Personal
 
-| Method                                                                                       | Description                                                                  |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `addFullName(fullName)`                                                                      | Formatted name ([RFC 2426 §3.1.1][rfc2426-fn]). Call it before `addName()`   |
-| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n])                               |
-| `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                        |
-| `addBirthday(date)`                                                                          | Birthday. Accepts `'YYYY-MM-DD'` or `Date` (read in UTC, see the note below) |
+| Method                                                                                       | Description                                                                                           |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `addFullName(fullName)`                                                                      | Formatted name ([RFC 2426 §3.1.1][rfc2426-fn]). Call it before `addName()`                            |
+| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n])                                                        |
+| `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                                                 |
+| `addBirthday(date)`                                                                          | Birthday. Accepts an RFC 2425 date or date-time string, or a `Date` (read in UTC, see the note below) |
 
 `addName()` creates FN from the name parts. To set FN yourself, call `addFullName()` **before** `addName()`. `addName()` then keeps your FN.
 If `addName()` already created an FN, calling `addFullName()` after it throws a `VCardException`.
 Use `addFullName()` for single names, a company as the contact, or a custom format.
 
-`addBirthday()` writes a `'YYYY-MM-DD'` string as it is. Use a string for an exact date.
-A string with a control character, such as a line break, throws a `VCardException`.
+`addBirthday()` writes a string as it is. Use a string for an exact date.
+A string must be a date or date-time in the RFC 2425 format ([§5.8.4][rfc2425-datetime]), such as `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`. The date must exist, so `1990-02-30` throws.
+A `Date` must have a year from `0000` to `9999`. Other values throw a `VCardException`.
 A `Date` is read in UTC:
 
 - `new Date('1990-05-15')` and the `valueAsDate` of a date input are UTC midnight, so they give the right day.
@@ -206,7 +207,7 @@ A `url` must not contain control characters, such as a line break. Such a value 
 
 A `url` must be a string. Pass a `URL` object as `url.href`.
 
-An `address` or a `number` with a control character also throws a `VCardException`.
+An `address` or a `number` with a control character also throws a `VCardException`. So does a `number` that is `NaN`, `Infinity` or `-Infinity`.
 
 A `type` entry can contain `;`, `:` and `,`. An entry with these characters is written in double quotes, such as `TYPE="A;B"`. An entry with a double quote (`"`) or a control character other than tab, such as a line break, throws a `VCardException`.
 
@@ -383,7 +384,7 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an options argument that is missing (except for `addAddress()` and `addName()`) or is not an object, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, a phone number that is not finite, a birthday string that is not an RFC 2425 date or date-time, a date that does not exist, a `Date` with a year outside `0000` to `9999`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
@@ -514,6 +515,7 @@ pnpm pretty
 [rfc2426-label]: https://tools.ietf.org/html/rfc2426#section-3.2.2
 [rfc2426-logo]: https://tools.ietf.org/html/rfc2426#section-3.5.3
 [rfc2426-n]: https://tools.ietf.org/html/rfc2426#section-3.1.2
+[rfc2425-datetime]: https://tools.ietf.org/html/rfc2425#section-5.8.4
 [rfc2426-photo]: https://tools.ietf.org/html/rfc2426#section-3.1.4
 [rfc2426-sort]: https://tools.ietf.org/html/rfc2426#section-3.6.5
 [rfc2426-tz]: https://tools.ietf.org/html/rfc2426#section-3.4.1

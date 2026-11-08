@@ -1,11 +1,13 @@
 import {
   assertName,
   assertNoControlChars,
+  assertOptions,
   assertString,
   assertUri,
   escapeText,
   fold,
   formatFloat,
+  isRfcDateOrDateTime,
   isValidMimeType,
   quoteParamValue,
   resolveType,
@@ -71,6 +73,31 @@ describe('assertString()', () => {
     expect(() => assertString({ value, label: 'UID' })).toThrow(VCardException)
     expect(() => assertString({ value, label: 'UID' })).toThrow(
       `UID values must be strings (got ${shown})`,
+    )
+  })
+})
+
+describe('assertOptions()', () => {
+  it.each([
+    ['{}', {}],
+    ['Object.create(null)', Object.create(null)],
+  ])('should accept %s', (_, value) => {
+    expect(() => assertOptions({ value, label: 'addX()' })).not.toThrow()
+  })
+
+  it.each([
+    ['undefined', undefined, 'undefined'],
+    ['null', null, 'null'],
+    ["'x'", 'x', 'string'],
+    ['42', 42, 'number'],
+    ['[]', [], 'array'],
+    ['a function', () => ({}), 'function'],
+  ])('should throw on %s', (_, value, shown) => {
+    expect(() => assertOptions({ value, label: 'addX()' })).toThrow(
+      VCardException,
+    )
+    expect(() => assertOptions({ value, label: 'addX()' })).toThrow(
+      `addX() options must be an object (got ${shown})`,
     )
   })
 })
@@ -354,6 +381,37 @@ describe('fold()', () => {
     const cjkCount = (result.match(/漢/g) || []).length
     expect(aCount).toBe(60)
     expect(cjkCount).toBe(6)
+  })
+})
+
+describe('isRfcDateOrDateTime()', () => {
+  it.each([
+    '1990-05-15',
+    '19900515',
+    '1990-0515',
+    '1953-10-15T23:10:00Z',
+    '19531015T231000Z',
+    '1953-10-15T23:10:00,123+01:00',
+    '1953-10-15T23:10:00-0500',
+    '2000-02-29',
+    '0000-02-29',
+  ])('should accept %j', (value) => {
+    expect(isRfcDateOrDateTime(value)).toBe(true)
+  })
+
+  it.each([
+    '1990-5-15',
+    '90-05-15',
+    '1990-05-15T23:10',
+    '1990-05-15T23:10:00.5Z',
+    '1990-05-15T23:10:00+01',
+    '1900-02-29',
+    '1990-04-31',
+    '1990-13-01',
+    '1990-05-15T24:00:00Z',
+    '1990-05-15\n',
+  ])('should reject %j', (value) => {
+    expect(isRfcDateOrDateTime(value)).toBe(false)
   })
 })
 
