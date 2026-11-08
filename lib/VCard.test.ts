@@ -238,3 +238,69 @@ describe('CHARSET handling', () => {
     )
   })
 })
+
+describe('buildVCard()', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2024-01-15T10:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it('should return the same string as toString()', () => {
+    const vCard = new VCard()
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
+    expect(vCard.buildVCard()).toBe(vCard.toString())
+  })
+
+  it('should return the same string as toString() for a non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
+    expect(vCard.buildVCard()).toBe(vCard.toString())
+  })
+
+  it('should not be called by toString()', () => {
+    const spy = vi.spyOn(VCard.prototype, 'buildVCard')
+    new VCard().addName({ familyName: 'Doe', givenName: 'John' }).toString()
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it('should not recurse when a subclass toString() calls it', () => {
+    class UpperVCard extends VCard {
+      override toString(): string {
+        return this.buildVCard().toUpperCase()
+      }
+    }
+    const name = { familyName: 'Doe', givenName: 'John' }
+    const expected = new VCard().addName(name).toString().toUpperCase()
+    expect(new UpperVCard().addName(name).toString()).toBe(expected)
+  })
+})
+
+describe('getCharsetString()', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('should not be called by toString()', () => {
+    const spy = vi.spyOn(VCard.prototype, 'getCharsetString')
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    vCard.addName({ familyName: 'Doe', givenName: 'John' }).toString()
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it('should return an empty string for the default charset', () => {
+    expect(new VCard().getCharsetString()).toBe('')
+  })
+
+  it('should return the CHARSET parameter for a non-default charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('iso-8859-1')
+    expect(vCard.getCharsetString()).toBe(';CHARSET=iso-8859-1')
+  })
+})
