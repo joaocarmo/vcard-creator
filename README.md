@@ -204,7 +204,9 @@ Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#
 
 A `url` must not contain control characters, such as a line break. Such a value throws a `VCardException`. Percent-encode them (`%0A`).
 
-An `address`, a `number` or a `type` entry with a control character also throws a `VCardException`.
+An `address` or a `number` with a control character also throws a `VCardException`.
+
+A `type` entry can contain `;`, `:` and `,`. An entry with these characters is written in double quotes, such as `TYPE="A;B"`. An entry with a double quote (`"`) or a control character other than tab, such as a line break, throws a `VCardException`.
 
 ### Address
 
@@ -213,7 +215,7 @@ An `address`, a `number` or a `type` entry with a control character also throws 
 | `addAddress({ street?, locality?, region?, postalCode?, country?, postOfficeBox?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['intl', 'postal', 'parcel', 'work']`        |
 | `addLabel({ label, type? })`                                                                           | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['intl', 'postal', 'parcel', 'work']` |
 
-A `type` entry with a control character, such as a line break, throws a `VCardException`.
+A `type` entry can contain `;`, `:` and `,`. An entry with these characters is written in double quotes. An entry with a double quote (`"`) or a control character other than tab, such as a line break, throws a `VCardException`.
 
 ### Social & Messaging
 
@@ -285,7 +287,7 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
 | `addKey({ key, mime? })` | Public key as base64. `mime` defaults to `PGP`     |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. It is only checked for control characters. Pass raw base64 only, as for photos. A `url`, `key` or `mime` with a control character, such as a line break, throws a `VCardException`.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. Pass raw base64 only, as for photos. A `url` or `key` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL
@@ -321,7 +323,8 @@ myVCard.addCustomProperty({
 ```
 
 The property name is changed to upper case. Values and `params` are **not** escaped. You must escape special characters (`;`, `,`, `\`) in custom property values yourself. Write a line break as `\n`.
-A control character, such as a raw line break, in `name`, `value`, `params` or `group` throws a `VCardException`. A tab is allowed in `value` and `params`.
+`name` and `group` may contain only ASCII letters, digits and `-`, as [RFC 2425][rfc2425] requires. Any other character throws a `VCardException`.
+A control character, such as a raw line break, in `value` or `params` throws a `VCardException`. A tab is allowed in `value` and `params`.
 
 ### Property Grouping
 
@@ -364,16 +367,19 @@ Other values are written as they are. They throw a `VCardException` if they cont
 - `addUid` uid
 - `addEmail` address and `addPhoneNumber` number
 - `addBirthday` string
-- `addKey` key and `mime`
+- `addKey` key
 - `addPhoto` and `addLogo` image
-- `addCustomProperty` name, value, `params` and `group` (a tab is allowed in value and `params`)
-- `type` entries
+- `addCustomProperty` value and `params` (a tab is allowed in both)
 - URLs and URIs
 - the deprecated `charset` (checked by `toString()`)
 
+Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are written in double quotes when they contain `;`, `:` or `,`. A double quote or a control character other than tab throws a `VCardException`.
+
+`addCustomProperty` `name` and `group` may contain only ASCII letters, digits and `-`.
+
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a value that is written as it is and contains a control character, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, or a property name or group with a character other than a letter, digit or `-`. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
@@ -495,6 +501,7 @@ pnpm pretty
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[rfc2425]: https://tools.ietf.org/html/rfc2425#section-5.8.2
 [rfc2426]: https://tools.ietf.org/html/rfc2426
 [rfc2426-adr]: https://tools.ietf.org/html/rfc2426#section-3.2.1
 [rfc2426-fn]: https://tools.ietf.org/html/rfc2426#section-3.1.1

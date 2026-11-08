@@ -54,6 +54,11 @@ export interface ControlCharsOptions {
   allowTab?: boolean
 }
 
+export interface PropertyNameOptions {
+  value: string
+  label: string
+}
+
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =
@@ -158,7 +163,7 @@ export type KeyOptions =
   | { url: string }
   | {
       /** Base64-encoded public key data */ key: string
-      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. */ mime?: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` throws */ mime?: string
     }
 
 export interface GeoOptions {
@@ -176,12 +181,12 @@ export interface StoredProperty extends Property {
 }
 
 export interface CustomPropertyOptions {
-  /** Property name (automatically uppercased) */
+  /** Property name (automatically uppercased). Only letters, digits and `-` */
   name: string
   /** Property value (NOT automatically escaped: the caller is responsible for escaping). A control character other than tab throws */
   value: string
   /** Optional parameters (e.g., 'TYPE=work') */
   params?: string
-  /** Optional group prefix for property grouping (e.g., 'item1') */
+  /** Optional group prefix for property grouping (e.g., 'item1'). Only letters, digits and `-` */
   group?: string
 }

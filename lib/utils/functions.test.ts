@@ -1,4 +1,5 @@
 import {
+  assertName,
   assertNoControlChars,
   assertUri,
   escapeText,
@@ -289,6 +290,53 @@ describe('resolveType()', () => {
   it('should throw on an entry with a control character', () => {
     expect(() => resolveType(['work', 'home\nX-INJECTED:1'])).toThrow(
       VCardException,
+    )
+  })
+
+  it('should quote each entry with a semicolon, colon or comma', () => {
+    expect(resolveType(['work', 'a,b'])).toBe('TYPE=WORK,"A,B"')
+    expect(resolveType(['a;b', 'c:d'])).toBe('TYPE="A;B","C:D"')
+  })
+
+  it('should throw on an entry with a double quote', () => {
+    expect(() => resolveType(['work', 'a"b'])).toThrow(VCardException)
+  })
+
+  it.each([undefined, 1])('should throw VCardException on entry %j', (t) => {
+    expect(() => resolveType([t as unknown as string])).toThrow(VCardException)
+  })
+
+  it('should allow a tab in an entry', () => {
+    expect(resolveType(['a\tb'])).toBe('TYPE=A\tB')
+  })
+})
+
+describe('assertName()', () => {
+  it.each(['X-A', 'item1', 'TEL', 'x-custom-field'])(
+    'should accept %j',
+    (v) => {
+      expect(() => assertName({ value: v, label: 'Group' })).not.toThrow()
+    },
+  )
+
+  it.each(['', 'X:A', 'X;A', 'X.A', 'X A', 'X_A', 'É', 'X\tA', 'X\nA'])(
+    'should throw on %j',
+    (v) => {
+      expect(() => assertName({ value: v, label: 'Group' })).toThrow(
+        VCardException,
+      )
+    },
+  )
+
+  it.each([undefined, null, 1])('should throw on non-string %j', (v) => {
+    expect(() =>
+      assertName({ value: v as unknown as string, label: 'Group' }),
+    ).toThrow(VCardException)
+  })
+
+  it('should name the label in the message', () => {
+    expect(() => assertName({ value: 'X:A', label: 'Property name' })).toThrow(
+      'Property name values can contain only letters, digits and "-" ("X:A")',
     )
   })
 })
