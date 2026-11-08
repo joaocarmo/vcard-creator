@@ -361,8 +361,9 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Line breaks (`\r\n`, `\n` and a lone `\r`) → `\n`
 
 This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only).
+A text value with a C0 control character (`\x00` to `\x1F`) other than tab, CR or LF throws a `VCardException`. C1 control characters (`\x80` to `\x9F`), U+2028 and U+2029 are allowed in text values.
 
-Other values are written as they are. They throw a `VCardException` if they contain a control character, such as a line break:
+Other values are written as they are. They throw a `VCardException` if they contain a control character: `\x00` to `\x1F`, `\x7F`, C1 (`\x80` to `\x9F`, including NEL), U+2028 (line separator) or U+2029 (paragraph separator). Some parsers treat these as line breaks. This applies to:
 
 - `addUid` uid
 - `addEmail` address and `addPhoneNumber` number
@@ -379,7 +380,7 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, or a property name or group with a character other than a letter, digit or `-`. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with a C0 control character other than tab, CR or LF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, or a property name or group with a character other than a letter, digit or `-`. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

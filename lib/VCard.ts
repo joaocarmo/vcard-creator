@@ -136,6 +136,7 @@ export default class VCard {
    * Add company.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.5
+   * @throws VCardException
    */
   public addCompany({ name, department = '' }: CompanyOptions): this {
     const escapedName = escapeText(name)
@@ -203,6 +204,7 @@ export default class VCard {
    * Add jobtitle.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.1
+   * @throws VCardException
    */
   public addJobtitle(jobtitle: string): this {
     this.setProperty({
@@ -218,6 +220,7 @@ export default class VCard {
    * Add role.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.2
+   * @throws VCardException
    */
   public addRole(role: string): this {
     this.setProperty({
@@ -288,6 +291,7 @@ export default class VCard {
    * Useful for mononyms, company-as-contact, or custom formatting.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.1
+   * @throws VCardException
    */
   public addFullName(fullName: string): this {
     this.setProperty({
@@ -303,6 +307,7 @@ export default class VCard {
    * Add name.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
+   * @throws VCardException
    */
   public addName({
     familyName = '',
@@ -353,6 +358,7 @@ export default class VCard {
    * Add nickname.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.3
+   * @throws VCardException
    */
   public addNickname(nickname: string | string[]): this {
     const value = Array.isArray(nickname)
@@ -371,6 +377,7 @@ export default class VCard {
    * Add note.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.2
+   * @throws VCardException
    */
   public addNote(note: string): this {
     this.setProperty({
@@ -386,6 +393,7 @@ export default class VCard {
    * Add categories.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.1
+   * @throws VCardException
    */
   public addCategories(categories: string[]): this {
     this.setProperty({
@@ -616,6 +624,7 @@ export default class VCard {
    * Add sort string for name ordering (useful for CJK names).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.5
+   * @throws VCardException
    */
   public addSortString(sortString: string): this {
     this.setProperty({
