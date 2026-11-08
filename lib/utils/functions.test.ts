@@ -118,6 +118,16 @@ describe('assertNoControlChars()', () => {
     ).toThrow('Email values cannot contain control characters ("a\\nb")')
   })
 
+  it.each([
+    ['\x7F', '\\u007f'],
+    ['\x85', '\\u0085'],
+    ['\u{2028}', '\\u2028'],
+  ])('should escape %j in the message', (char, shown) => {
+    expect(() =>
+      assertNoControlChars({ value: `a${char}b`, label: 'UID' }),
+    ).toThrow(`UID values cannot contain control characters ("a${shown}b")`)
+  })
+
   it('should accept a tab with allowTab', () => {
     expect(() =>
       assertNoControlChars({
@@ -248,6 +258,9 @@ describe('escapeText()', () => {
   it('should name the character in the message', () => {
     expect(() => escapeText('a\x01b')).toThrow(
       'Text values cannot contain control characters ("a\\u0001b")',
+    )
+    expect(() => escapeText('a\x7Fb')).toThrow(
+      'Text values cannot contain control characters ("a\\u007fb")',
     )
   })
 

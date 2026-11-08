@@ -26,6 +26,21 @@ const RAW_CONTROL_CHARS_EXCEPT_TAB =
   // oxlint-disable-next-line no-control-regex
   /[\x00-\x08\x0A-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
 
+// JSON.stringify() writes these characters as they are
+// oxlint-disable-next-line no-control-regex
+const CONTROL_CHARS_KEPT_BY_JSON = /[\x7F-\x9F\u{2028}\u{2029}]/gu
+
+/**
+ * Quote a value for an error message, with every control character written
+ * as a `\uXXXX` escape.
+ */
+function showValue(value: string): string {
+  return JSON.stringify(value).replace(
+    CONTROL_CHARS_KEPT_BY_JSON,
+    (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`,
+  )
+}
+
 /**
  * Convert a type array to the vCard TYPE= wire format.
  * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
@@ -56,8 +71,7 @@ export function resolveType<T extends string>(type: T[]): string {
  *
  * Backslashes are replaced first to avoid double-escaping. Line breaks
  * (`\r\n`, `\n`, a lone `\r`, VT, FF, NEL, U+2028 and U+2029) become `\n`.
- * DEL and other C0 control characters, except tab, cannot appear in text
- * values.
+ * DEL and any other C0 control character except tab throw.
  *
  * @link   http://tools.ietf.org/html/rfc2426
  * @throws VCardException
@@ -67,7 +81,7 @@ export function escapeText(text: string): string {
 
   if (TEXT_CONTROL_CHARS.test(text)) {
     throw new VCardException(
-      `Text values cannot contain control characters (${JSON.stringify(text)})`,
+      `Text values cannot contain control characters (${showValue(text)})`,
     )
   }
 
@@ -121,7 +135,7 @@ export function assertNoControlChars({
 
   if (pattern.test(value)) {
     throw new VCardException(
-      `${label} values cannot contain control characters (${JSON.stringify(value)})`,
+      `${label} values cannot contain control characters (${showValue(value)})`,
     )
   }
 }
