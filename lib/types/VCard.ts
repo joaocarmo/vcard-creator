@@ -138,14 +138,14 @@ export type PhotoOptions =
   | { url: string }
   | {
       /** Base64-encoded image data */ image: string
-      /** Image MIME type (defaults to 'JPEG') */ mime?: string
+      /** Image MIME type, such as 'png', 'jpg' or 'image/png' (defaults to 'JPEG') */ mime?: string
     }
 
 export type LogoOptions =
   | { url: string }
   | {
       /** Base64-encoded image data */ image: string
-      /** Image MIME type (defaults to 'JPEG') */ mime?: string
+      /** Image MIME type, such as 'png', 'jpg' or 'image/png' (defaults to 'JPEG') */ mime?: string
     }
 
 export type KeyOptions =

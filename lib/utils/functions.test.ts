@@ -5,6 +5,7 @@ import {
   isValidMimeType,
   quoteParamValue,
   resolveType,
+  toImageSubtype,
 } from './functions'
 import VCardException from '../VCardException'
 
@@ -176,6 +177,22 @@ describe('isValidMimeType()', () => {
 
   it('should return false for an invalid MIME type', () => {
     expect(isValidMimeType('foobar')).toBe(false)
+  })
+})
+
+describe('toImageSubtype()', () => {
+  it('should keep a subtype as it is', () => {
+    expect(toImageSubtype('png')).toBe('png')
+  })
+
+  it('should remove the image/ prefix in any case', () => {
+    expect(toImageSubtype('image/png')).toBe('png')
+    expect(toImageSubtype('IMAGE/svg+xml')).toBe('svg+xml')
+  })
+
+  it('should change jpg to jpeg', () => {
+    expect(toImageSubtype('jpg')).toBe('jpeg')
+    expect(toImageSubtype('image/JPG')).toBe('jpeg')
   })
 })
 

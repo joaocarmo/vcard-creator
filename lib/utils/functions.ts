@@ -133,6 +133,15 @@ export function formatFloat(value: number): string {
 }
 
 /**
+ * Get the image subtype from a MIME type value. Accepts a subtype (`png`), a
+ * full MIME type (`image/png`, such as `File.type`) and the `jpg` file
+ * extension, which becomes `jpeg`.
+ */
+export function toImageSubtype(mime: string): string {
+  return mime.replace(/^image\//i, '').replace(/^jpg$/i, 'jpeg')
+}
+
+/**
  * Determines whether the given MIME Media Type is one of the IANA registered
  * image formats.
  *

@@ -676,6 +676,52 @@ describe('addLogo()', () => {
   })
 })
 
+describe.each([
+  ['addPhoto', 'PHOTO'],
+  ['addLogo', 'LOGO'],
+] as const)('%s() MIME type', (method, property) => {
+  it.each([
+    ['jpg', 'JPEG'],
+    ['JPG', 'JPEG'],
+    ['image/png', 'PNG'],
+    ['image/jpeg', 'JPEG'],
+    ['IMAGE/PNG', 'PNG'],
+    ['image/jpg', 'JPEG'],
+    ['png', 'PNG'],
+    ['jpeg', 'JPEG'],
+    ['JPEG', 'JPEG'],
+  ])("should write '%s' as TYPE=%s", (mime, type) => {
+    const vCard = new VCard()
+    vCard[method]({ image: 'data', mime })
+    expect(vCard.toString()).toContain(
+      `${property};ENCODING=b;TYPE=${type}:data`,
+    )
+  })
+
+  it('should default to TYPE=JPEG', () => {
+    const vCard = new VCard()
+    vCard[method]({ image: 'data' })
+    expect(vCard.toString()).toContain(`${property};ENCODING=b;TYPE=JPEG:data`)
+  })
+
+  it.each(['foobar', 'image/foo', 'image/', 'jpgx'])(
+    "should throw on '%s'",
+    (mime) => {
+      const vCard = new VCard()
+      expect(() => vCard[method]({ image: 'data', mime })).toThrow(
+        VCardException,
+      )
+    },
+  )
+
+  it('should report the original value in the error', () => {
+    const vCard = new VCard()
+    expect(() => vCard[method]({ image: 'data', mime: 'image/foo' })).toThrow(
+      '(image/foo)',
+    )
+  })
+})
+
 describe('addKey()', () => {
   it('should add a base64-encoded PGP key', () => {
     const vCard = new VCard()

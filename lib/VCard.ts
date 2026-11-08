@@ -29,6 +29,7 @@ import {
   isValidMimeType,
   quoteParamValue,
   resolveType,
+  toImageSubtype,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
 
@@ -235,13 +236,15 @@ export default class VCard {
     mime: string,
     element: Element,
   ): this {
-    if (!isValidMimeType(mime)) {
+    const subtype = toImageSubtype(mime)
+
+    if (!isValidMimeType(subtype)) {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
     }
 
     this.setProperty({
       element,
-      key: `${property};ENCODING=b;TYPE=${mime.toUpperCase()}`,
+      key: `${property};ENCODING=b;TYPE=${subtype.toUpperCase()}`,
       value: content,
     })
 
