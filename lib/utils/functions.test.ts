@@ -3,8 +3,26 @@ import {
   fold,
   formatFloat,
   isValidMimeType,
+  quoteParamValue,
   resolveType,
 } from './functions'
+import VCardException from '../VCardException'
+
+describe('quoteParamValue()', () => {
+  it('should keep simple values as they are', () => {
+    expect(quoteParamValue('X')).toEqual('X')
+  })
+
+  it('should quote values with a semicolon, colon or comma', () => {
+    expect(quoteParamValue('My Site;x')).toEqual('"My Site;x"')
+    expect(quoteParamValue('a:b')).toEqual('"a:b"')
+    expect(quoteParamValue('a,b')).toEqual('"a,b"')
+  })
+
+  it('should throw on a double quote', () => {
+    expect(() => quoteParamValue('a"b')).toThrow(VCardException)
+  })
+})
 
 describe('formatFloat()', () => {
   it('should keep the default form for ordinary values', () => {

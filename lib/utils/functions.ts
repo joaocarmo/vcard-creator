@@ -1,3 +1,4 @@
+import VCardException from '../VCardException.js'
 import { MIME_TYPES } from './constants.js'
 
 const encoder = new TextEncoder()
@@ -28,6 +29,23 @@ export function escapeText(text: string): string {
     .replace(/,/g, '\\,')
     .replace(/\r\n/g, '\\n')
     .replace(/\n/g, '\\n')
+}
+
+/**
+ * Prepare a property parameter value. A value with `;`, `:` or `,` is put in
+ * double quotes. A double quote cannot appear in any parameter value.
+ *
+ * @link   https://tools.ietf.org/html/rfc2426#section-4
+ * @throws VCardException
+ */
+export function quoteParamValue(value: string): string {
+  if (value.includes('"')) {
+    throw new VCardException(
+      `Parameter values cannot contain a double quote (${value})`,
+    )
+  }
+
+  return /[;:,]/.test(value) ? `"${value}"` : value
 }
 
 /**

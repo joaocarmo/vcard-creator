@@ -357,6 +357,42 @@ describe('addSocial()', () => {
       'IMPP;X-SERVICE-TYPE=LinkedIn:https://linkedin.com/in/jdoe',
     )
   })
+
+  it('should quote a type with a semicolon', () => {
+    const vCard = new VCard()
+    vCard.addSocial({ url: 'u', type: 'My Site;x' })
+
+    const output = vCard.toString()
+    expect(output).toContain('X-SOCIALPROFILE;type="My Site;x":u')
+    expect(output).toContain('IMPP;X-SERVICE-TYPE="My Site;x":u')
+  })
+
+  it('should quote a user with a comma', () => {
+    const vCard = new VCard()
+    vCard.addSocial({ url: 'u', type: 'X', user: 'a,b' })
+
+    expect(vCard.toString()).toContain('X-SOCIALPROFILE;type=X;x-user="a,b":u')
+  })
+
+  it('should throw on a double quote in type or user', () => {
+    expect(() => new VCard().addSocial({ url: 'u', type: 'a"b' })).toThrow(
+      VCardException,
+    )
+    expect(() =>
+      new VCard().addSocial({ url: 'u', type: 'X', user: 'a"b' }),
+    ).toThrow(VCardException)
+  })
+
+  it('should store nothing when user has a double quote', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addSocial({ url: 'u', type: 'X', user: 'a"b' })).toThrow(
+      VCardException,
+    )
+
+    const output = vCard.toString()
+    expect(output).not.toContain('X-SOCIALPROFILE')
+    expect(output).not.toContain('IMPP')
+  })
 })
 
 describe('addImpp()', () => {
@@ -387,6 +423,21 @@ describe('addImpp()', () => {
     const output = vCard.toString()
     expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
+  })
+
+  it('should quote a service type with a colon', () => {
+    const vCard = new VCard()
+    vCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'a:b' })
+
+    expect(vCard.toString()).toContain(
+      'IMPP;X-SERVICE-TYPE="a:b":xmpp:user@example.com',
+    )
+  })
+
+  it('should throw on a double quote in service type', () => {
+    expect(() =>
+      new VCard().addImpp({ uri: 'sip:user@example.com', serviceType: 'a"b' }),
+    ).toThrow(VCardException)
   })
 })
 
