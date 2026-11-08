@@ -670,6 +670,10 @@ export default class VCard {
    * @deprecated Use `toString()`. Removed in the next major version.
    */
   public buildVCard(): string {
+    return this.toString()
+  }
+
+  private build(): string {
     const parts: string[] = [
       'BEGIN:VCARD\r\n',
       'VERSION:3.0\r\n',
@@ -680,7 +684,7 @@ export default class VCard {
       parts.push(`REV:${new Date().toISOString()}\r\n`)
     }
 
-    const charsetStr = this.getCharsetString()
+    const charsetStr = this.charsetParam()
     for (const property of this.properties) {
       const prefix = property.group ? `${property.group}.` : ''
       const charset = constants.TEXT_ELEMENTS.has(property.element)
@@ -700,7 +704,7 @@ export default class VCard {
    * Get output as string.
    */
   public toString(): string {
-    return this.buildVCard()
+    return this.build()
   }
 
   /**
@@ -728,7 +732,7 @@ export default class VCard {
   }
 
   private static _concat(cards: VCard[]): string {
-    return cards.map((card) => card.buildVCard()).join('')
+    return cards.map((card) => card.toString()).join('')
   }
 
   /**
@@ -743,8 +747,15 @@ export default class VCard {
 
   /**
    * Get charset string.
+   *
+   * @deprecated The output is always a UTF-8 string. Removed in the next
+   * major version.
    */
   public getCharsetString(): string {
+    return this.charsetParam()
+  }
+
+  private charsetParam(): string {
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
       return `;CHARSET=${this.charset}`
     }

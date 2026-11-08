@@ -103,4 +103,22 @@ describe('VCard.concat', () => {
       expect(card.concat()).toBe(card.buildVCard())
     })
   })
+
+  describe('buildVCard() calls', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('should not be called by static concat()', () => {
+      const spy = vi.spyOn(VCard.prototype, 'buildVCard')
+      VCard.concat(createCard('Alice', 'Smith'), createCard('Bob', 'Jones'))
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('should not be called by instance concat()', () => {
+      const spy = vi.spyOn(VCard.prototype, 'buildVCard')
+      createCard('Alice', 'Smith').concat(createCard('Bob', 'Jones'))
+      expect(spy).not.toHaveBeenCalled()
+    })
+  })
 })

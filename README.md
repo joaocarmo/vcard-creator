@@ -416,6 +416,7 @@ Most users do not need these. The members marked **Deprecated** are removed in t
 | `getFilename()` / `setFilename(name)`              | **Deprecated**: choose the file name in your code. The library never saves files. Gets or sets a stored file name (default `'vcard'`). It does not change the output                                                                                                                                         |
 | `getFileExtension()`                               | **Deprecated**: use the literal `'vcf'`. Returns `'vcf'`                                                                                                                                                                                                                                                     |
 | `getCharset()` / `setCharset(charset)` / `charset` | **Deprecated**: the output is always a UTF-8 string. Encode the file yourself if you need another charset. Gets or sets the charset (default `'utf-8'`). Any other value adds `;CHARSET=<value>` to text properties. The check is case-sensitive, so `'UTF-8'` also adds it. It does not change the encoding |
+| `getCharsetString()`                               | **Deprecated**: no replacement. Returns `;CHARSET=<value>` when the charset is not `'utf-8'`, and an empty string otherwise                                                                                                                                                                                  |
 
 ## Migration from v0.x
 
