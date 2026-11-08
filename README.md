@@ -1,10 +1,10 @@
 # vcard-creator
 
 [![npm version](https://badge.fury.io/js/vcard-creator.svg)](https://badge.fury.io/js/vcard-creator)
-![tests](https://github.com/joaocarmo/vcard-creator/workflows/Tests/badge.svg)
+[![tests](https://github.com/joaocarmo/vcard-creator/actions/workflows/tests.yml/badge.svg)](https://github.com/joaocarmo/vcard-creator/actions/workflows/tests.yml)
 
-A JavaScript vCard 3.0 creator library for both node.js and the web.
-It outputs the vCard text that should be saved as a `*.vcf` file.
+A JavaScript library that creates vCard 3.0 contacts, for Node.js and the browser.
+It returns the vCard text, which you save as a `.vcf` file.
 
 ## Origin
 
@@ -22,19 +22,36 @@ npm install vcard-creator
 
 ## Usage
 
-```js
+Use the default import:
+
+```ts
 import VCard from 'vcard-creator'
-
-// or as named imports
-import { VCard, VCardException } from 'vcard-creator'
-
-// types are also exported
-import type { EmailOptions, PhoneType, PhotoOptions } from 'vcard-creator'
 
 const myVCard = new VCard()
 ```
 
-Works with Node.js (>=18), bundlers (webpack, esbuild, Vite), and `<script type="module">`.
+Or use named imports. Types are also exported:
+
+```ts
+import { VCard, VCardException } from 'vcard-creator'
+import type { EmailOptions, PhoneType, PhotoOptions } from 'vcard-creator'
+```
+
+It works with Node.js 18 or later, bundlers (webpack, esbuild, Vite) and `<script type="module">`:
+
+```html
+<script type="module">
+  import VCard from 'https://cdn.jsdelivr.net/npm/vcard-creator@1/+esm'
+
+  const myVCard = new VCard().addName({ givenName: 'Jane', familyName: 'Doe' })
+  console.log(myVCard.toString())
+</script>
+```
+
+### TypeScript
+
+The `type` unions (`AddressType`, `EmailType`, `PhoneType`, `UrlType`) give autocomplete for `type` arrays.
+Methods that take an object have an exported options type, such as `NameOptions`, `AddressOptions` or `PhotoOptions`.
 
 ## Example
 
@@ -49,8 +66,8 @@ myVCard
   .addJobtitle('Web Developer')
   .addRole('Data Protection Officer')
   .addEmail({ address: 'info@jeroendesloovere.be' })
-  .addPhoneNumber({ number: 1234121212, type: ['pref', 'work'] })
-  .addPhoneNumber({ number: 123456789, type: ['work'] })
+  .addPhoneNumber({ number: '+32 123 41 21 21', type: ['pref', 'work'] })
+  .addPhoneNumber({ number: '+32 123 45 67 89', type: ['work'] })
   .addAddress({
     street: 'street',
     locality: 'worktown',
@@ -62,9 +79,9 @@ myVCard
     type: 'X',
     user: 'desloovere_j',
   })
-  .addUrl({ url: 'http://www.jeroendesloovere.be' })
+  .addUrl({ url: 'https://www.jeroendesloovere.be' })
   .addGeo({ latitude: 51.0543, longitude: 3.7174 })
-  .addTimezone('Europe/Brussels')
+  .addTimezone('+01:00')
 
 console.log(myVCard.toString())
 ```
@@ -75,44 +92,95 @@ Output
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//vcard-creator//vcard-creator {version}//EN
-REV:2026-04-06T00:00:00.000Z
+REV:{timestamp}
 N:Desloovere;Jeroen;;;
 FN:Jeroen Desloovere
 ORG:Siesqo
 TITLE:Web Developer
 ROLE:Data Protection Officer
 EMAIL:info@jeroendesloovere.be
-TEL;TYPE=PREF,WORK:1234121212
-TEL;TYPE=WORK:123456789
+TEL;TYPE=PREF,WORK:+32 123 41 21 21
+TEL;TYPE=WORK:+32 123 45 67 89
 ADR;TYPE=INTL,POSTAL,PARCEL,WORK:;;street;worktown;;workpostcode;Belgium
 X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
 IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
-URL:http://www.jeroendesloovere.be
+URL:https://www.jeroendesloovere.be
 GEO:51.0543;3.7174
-TZ:Europe/Brussels
+TZ:+01:00
 END:VCARD
 ```
 
+## Saving the File
+
+`toString()` returns the vCard text. Save it as a `.vcf` file.
+
+In the browser:
+
+```js
+const blob = new Blob([myVCard.toString()], {
+  type: myVCard.getContentType(),
+})
+const url = URL.createObjectURL(blob)
+
+const link = document.createElement('a')
+link.href = url
+link.download = 'contact.vcf'
+document.body.append(link)
+link.click()
+link.remove()
+
+// revoke later, so slow downloads (Safari, WebViews) can finish first
+setTimeout(() => URL.revokeObjectURL(url), 40_000)
+```
+
+Use `getContentType()` (`text/vcard`) as the type. With `text/plain`, Safari on iOS saves the file as `.vcf.txt` ([#41][issue-41]).
+
+In Node.js:
+
+```js
+import { writeFileSync } from 'node:fs'
+
+writeFileSync('contact.vcf', myVCard.toString())
+```
+
+## Output Format
+
+- Lines end with CRLF (`\r\n`), as the RFC requires.
+- Lines longer than 75 octets are folded. Folding never splits a UTF-8 character.
+- `VERSION`, `PRODID` and `REV` are added automatically. `REV` is the time `toString()` runs, unless you set it with `addRevision()`.
+
 ## API
 
-All `add*` methods return `this` for chaining.
+All `add*` methods return `this`, so you can chain them.
 
 ### Personal
 
 | Method                                                                                       | Description                                                                  |
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `addFullName(fullName)`                                                                      | Formatted name — overrides auto-generated FN ([RFC 2426 §3.1.1][rfc2426-fn]) |
+| `addFullName(fullName)`                                                                      | Formatted name ([RFC 2426 §3.1.1][rfc2426-fn]). Call it before `addName()`   |
 | `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n])                               |
-| `addNickname(nickname)`                                                                      | Nickname(s) — accepts `string` or `string[]`                                 |
-| `addBirthday(date)`                                                                          | Birthday — accepts `Date` or `'YYYY-MM-DD'`                                  |
+| `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                        |
+| `addBirthday(date)`                                                                          | Birthday. Accepts `'YYYY-MM-DD'` or `Date` (read in UTC, see the note below) |
 
-`addName()` auto-generates FN from the name components. Use `addFullName()` to set it directly — useful for mononyms, company-as-contact, or custom formatting.
+`addName()` creates FN from the name parts. To set FN yourself, call `addFullName()` **before** `addName()`. `addName()` then keeps your FN.
+If `addName()` already created an FN, calling `addFullName()` after it throws a `VCardException`.
+Use `addFullName()` for single names, a company as the contact, or a custom format.
 
-### Organization
+`addBirthday()` writes a `'YYYY-MM-DD'` string as it is. Use a string for an exact date.
+A `Date` is read in UTC:
+
+- `new Date('1990-05-15')` and the `valueAsDate` of a date input are UTC midnight, so they give the right day.
+- `new Date(1990, 4, 15)` is local midnight. East of UTC, it becomes the day before.
+
+```js
+myVCard.addBirthday('1990-05-15')
+```
+
+### Organisation
 
 | Method                              | Description                          |
 | ----------------------------------- | ------------------------------------ |
-| `addCompany({ name, department? })` | Organization and optional department |
+| `addCompany({ name, department? })` | Organisation and optional department |
 | `addJobtitle(title)`                | Job title                            |
 | `addRole(role)`                     | Role or occupation                   |
 
@@ -124,12 +192,14 @@ All `add*` methods return `this` for chaining.
 | `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]` |
 | `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                               |
 
-The `type` parameter accepts a typed array for IDE autocomplete and type safety:
+The `type` parameter takes a typed array, for IDE autocomplete and type safety:
 
 ```js
 myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
 myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 ```
+
+Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#43][issue-43]).
 
 ### Address
 
@@ -140,13 +210,13 @@ myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 
 ### Social & Messaging
 
-| Method                            | Description                                                                                                                 |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `addSocial({ url, type, user? })` | Social profile — emits both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]) for cross-platform compatibility |
-| `addImpp({ uri, serviceType? })`  | Instant messaging ([RFC 4770][rfc4770]) — for protocols like XMPP, SIP                                                      |
+| Method                            | Description                                                                                                      |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `addSocial({ url, type, user? })` | Social profile. Writes both `X-SOCIALPROFILE` (iOS/macOS) and `IMPP` ([RFC 4770][rfc4770]), so more apps show it |
+| `addImpp({ uri, serviceType? })`  | Instant messaging ([RFC 4770][rfc4770]), for protocols such as XMPP and SIP                                      |
 
 ```js
-// Social profiles (dual output for iOS + Android)
+// Social profiles (writes X-SOCIALPROFILE and IMPP)
 myVCard.addSocial({
   url: 'https://x.com/desloovere_j',
   type: 'X',
@@ -159,23 +229,34 @@ myVCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })
 myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 ```
 
+`type`, `user` and `serviceType` are written as they are. Do not use `;`, `:` or `,` in them, because these characters break the line ([#106][issue-106]).
+
 ### Geographic
 
-| Method                            | Description                                                                             |
-| --------------------------------- | --------------------------------------------------------------------------------------- |
-| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Validates ranges.              |
-| `addTimezone(timezone)`           | UTC offset (`-05:00`) or IANA name (`America/New_York`) ([RFC 2426 §3.4.1][rfc2426-tz]) |
+| Method                            | Description                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Throws if a value is out of range              |
+| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`) |
+
+`addGeo()` does not reject `NaN` yet ([#105][issue-105]).
+
+For `addTimezone()`, the RFC form is a UTC offset, such as `-05:00`.
+An IANA name is written as it is (`TZ:America/New_York`). The RFC asks for `VALUE=text` in that case, and some apps may ignore the value ([#104][issue-104]).
 
 ### Media
 
-| Method                       | Description                                      |
-| ---------------------------- | ------------------------------------------------ |
-| `addPhoto({ url })`          | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])  |
-| `addPhoto({ image, mime? })` | Photo as base64 content. MIME defaults to `JPEG` |
-| `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])    |
-| `addLogo({ image, mime? })`  | Logo as base64 content. MIME defaults to `JPEG`  |
+| Method                       | Description                                        |
+| ---------------------------- | -------------------------------------------------- |
+| `addPhoto({ url })`          | Photo by URL ([RFC 2426 §3.1.4][rfc2426-photo])    |
+| `addPhoto({ image, mime? })` | Photo as base64 content. `mime` defaults to `JPEG` |
+| `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])      |
+| `addLogo({ image, mime? })`  | Logo as base64 content. `mime` defaults to `JPEG`  |
 
-Each method accepts either a `{ url }` or `{ image, mime? }` object. Multiple photos/logos are allowed (e.g., a base64 thumbnail and a URL fallback). See [IANA image MIME types][mime-types] for valid values.
+Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL.
+
+- `mime` is the image subtype only, such as `'png'` or `'jpeg'`. Do not use `'image/png'`, and use `'jpeg'`, not the file extension `'jpg'` ([#109][issue-109]).
+- `mime` must be an [IANA image type][mime-types], or the method throws a `VCardException`.
+- Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) is not removed and breaks the card.
 
 ```js
 import { readFileSync } from 'fs'
@@ -193,7 +274,9 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | Method                   | Description                                        |
 | ------------------------ | -------------------------------------------------- |
 | `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
-| `addKey({ key, mime? })` | Public key as base64. MIME defaults to `PGP`       |
+| `addKey({ key, mime? })` | Public key as base64. `mime` defaults to `PGP`     |
+
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. It is not checked. Pass raw base64 only, as for photos.
 
 ```js
 // PGP key by URL
@@ -205,17 +288,17 @@ vCard.addKey({ key: base64cert, mime: 'X509' })
 
 ### Other
 
-| Method                      | Description                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `addUid(uid)`               | Unique identifier                                                                   |
-| `addCategories(categories)` | Categories/tags — accepts `string[]`                                                |
-| `addNote(note)`             | Free-text note                                                                      |
-| `addSortString(sortString)` | Sort key for name ordering ([RFC 2426 §3.6.5][rfc2426-sort]) — useful for CJK names |
-| `addRevision(date)`         | Revision timestamp — accepts `Date`. Overrides auto-generated `REV`                 |
+| Method                      | Description                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `addUid(uid)`               | Unique identifier                                                               |
+| `addCategories(categories)` | Categories or tags. Accepts `string[]`                                          |
+| `addNote(note)`             | Free-text note                                                                  |
+| `addSortString(sortString)` | Sort key for name order ([RFC 2426 §3.6.5][rfc2426-sort]). Useful for CJK names |
+| `addRevision(date)`         | Revision timestamp. Accepts `Date`. Replaces the automatic `REV`                |
 
 ### Custom Properties
 
-For any property not covered by the built-in methods, use `addCustomProperty()`:
+For any property that has no built-in method, use `addCustomProperty()`:
 
 ```js
 myVCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
@@ -228,11 +311,11 @@ myVCard.addCustomProperty({
 })
 ```
 
-The property name is uppercased automatically. Values are **not** automatically escaped — you are responsible for escaping special characters (`;`, `,`, `\`, newlines) in custom property values.
+The property name is changed to upper case. Values and `params` are **not** escaped. You must escape special characters (`;`, `,`, `\`, newlines) in custom property values yourself.
 
 ### Property Grouping
 
-Apple Contacts uses property grouping for custom labels. Use the `group` option on `addCustomProperty()`:
+Apple Contacts uses property groups for custom labels. Use the `group` option of `addCustomProperty()`:
 
 ```js
 myVCard
@@ -257,18 +340,18 @@ item1.X-ABLABEL:Work Phone
 
 ### Text Escaping
 
-Built-in methods automatically escape special characters per [RFC 2426][rfc2426]:
+Built-in methods escape special characters per [RFC 2426][rfc2426]:
 
 - Backslash (`\`) → `\\`
 - Semicolon (`;`) → `\;`
 - Comma (`,`) → `\,`
 - Newlines → `\n`
 
-This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, and `addSortString`. Non-text values (URLs, emails, phone numbers, etc.) are passed through as-is.
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel` and `addSortString`. Other values (URLs, emails, phone numbers and so on) are written as they are.
 
 ### Error Handling
 
-`VCardException` is thrown for invalid operations (duplicate single-value properties, invalid MIME types, out-of-range coordinates). It's exported for catch blocks:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, or coordinates out of range. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
@@ -283,9 +366,17 @@ try {
 }
 ```
 
+### Single and Repeatable Properties
+
+You can call these methods more than once:
+`addAddress`, `addCustomProperty`, `addEmail`, `addImpp`, `addKey`, `addLabel`, `addLogo`, `addNickname`, `addNote`, `addPhoneNumber`, `addPhoto`, `addSocial`, `addUrl`.
+
+You can call these methods only once. A second call throws a `VCardException`:
+`addName`, `addFullName`, `addBirthday`, `addCompany`, `addJobtitle`, `addRole`, `addCategories`, `addGeo`, `addTimezone`, `addUid`, `addSortString`, `addRevision`.
+
 ### Multi-Contact Files
 
-Combine multiple vCards into a single `.vcf` file for address book exports. Follows the `Array.prototype.concat` pattern:
+Combine several vCards into one `.vcf` file, for example to export an address book. It works like `Array.prototype.concat`, but returns a `string`:
 
 ```js
 import VCard from 'vcard-creator'
@@ -298,14 +389,29 @@ const card2 = new VCard()
   .addName({ givenName: 'Bob', familyName: 'Jones' })
   .addEmail({ address: 'bob@example.com' })
 
-// Instance — "this" card appears first
+// Instance: "this" card comes first
 const output = card1.concat(card2)
 
-// Static — pure combination
+// Static: combines the cards in order
 const combined = VCard.concat(card1, card2)
 ```
 
-Each card retains its own `BEGIN:VCARD` / `END:VCARD` markers.
+Each card keeps its own `BEGIN:VCARD` and `END:VCARD` lines.
+
+### Advanced Methods
+
+Most users do not need these. Some of them may be deprecated in a future version ([#107][issue-107]).
+
+| Method                                 | Description                                                                                                                                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toString()`                           | Returns the vCard text. Use this in most cases                                                                                                                                                    |
+| `buildVCard()`                         | Same as `toString()`                                                                                                                                                                              |
+| `getProperties()`                      | Returns the properties as `{ key, value, group? }` objects. Values are already escaped                                                                                                            |
+| `hasProperty(key)`                     | Returns `true` if a property has this exact key. The key includes parameters: use `'TEL;TYPE=WORK'`, not `'TEL'`                                                                                  |
+| `getContentType()`                     | Returns `'text/vcard'`                                                                                                                                                                            |
+| `getFilename()` / `setFilename(name)`  | Gets or sets a stored file name (default `'vcard'`). It does not change the output                                                                                                                |
+| `getFileExtension()`                   | Returns `'vcf'`                                                                                                                                                                                   |
+| `getCharset()` / `setCharset(charset)` | Gets or sets the charset (default `'utf-8'`). Any other value adds `;CHARSET=<value>` to text properties. The check is case-sensitive, so `'UTF-8'` also adds it. It does not change the encoding |
 
 ## Migration from v0.x
 
@@ -313,39 +419,61 @@ For the previous API documentation, see the [v0.11.0 README][readme-v0.11].
 
 Key changes in v1.0:
 
-- **ESM only** — `require('vcard-creator')` is no longer supported
-- **Object params only** — positional arguments have been removed
-- **Merged media methods** — `addPhotoUrl()`/`addLogoUrl()` merged into `addPhoto({ url })`/`addLogo({ url })`
+- **ESM only**: `require('vcard-creator')` is no longer supported
+- **Object params only**: positional arguments have been removed
+- **Merged media methods**: `addPhotoUrl()`/`addLogoUrl()` merged into `addPhoto({ url })`/`addLogo({ url })`
 - **`addGeo(lat, lon)`** → `addGeo({ latitude, longitude })`
-- **`addFullName()`** — new method to set FN directly
-- **`addKey()`** — new method for public encryption keys (PGP, X.509)
-- **Multiple instances** — `photo`, `logo`, `note`, `nickname`, and `key` now allow multiple additions
-- **Content-Type** — `getContentType()` returns `text/vcard` (was `text/x-vcard`)
-- **`EmailType`** — added `'internet'` per RFC 2426
-- **vCalendar format removed** — use `new VCard()` (no format parameter)
-- **CHARSET removed** — `CHARSET=utf-8` is no longer added to properties (vCard 3.0 assumes UTF-8)
-- **Text escaping** — special characters are now properly escaped per RFC 2426
-- **`addBirthday`** — accepts `Date` or `'YYYY-MM-DD'` string (was `string` only)
-- **`getProperties()`** — returns pre-escaped wire-format values
-- **`concat()`** — new method for multi-contact `.vcf` files (static and instance)
+- **`addFullName()`**: new method to set FN directly. Call it before `addName()`
+- **`addKey()`**: new method for public encryption keys (PGP, X.509)
+- **Multiple instances**: `photo`, `logo`, `note`, `nickname` and `key` now allow more than one call
+- **Content-Type**: `getContentType()` returns `text/vcard` (was `text/x-vcard`)
+- **`EmailType`**: added `'internet'` per RFC 2426
+- **vCalendar format removed**: use `new VCard()` (no format parameter)
+- **CHARSET no longer added by default**: `CHARSET=utf-8` is not added to properties (vCard 3.0 uses UTF-8)
+- **Text escaping**: special characters are now escaped per RFC 2426
+- **`addBirthday`**: accepts a `Date` or a `'YYYY-MM-DD'` string (was `string` only)
+- **`getProperties()`**: returns values that are already escaped, as written to the file
+- **`concat()`**: new method for multi-contact `.vcf` files (static and instance)
 
 ## Forking / Contributing
 
-If you're interested in the development of this project, you can run some ready
-to use commands to compile and test your changes.
+Use the Node.js version in `.nvmrc`. Install [pnpm](https://pnpm.io/installation) (Node.js 25 and later no longer include Corepack). Then install the dependencies:
+
+```sh
+pnpm install
+```
+
+Build and test your changes:
 
 ```sh
 # Build
 pnpm build
 
-# Test
+# Unit tests
 pnpm test:unit
 
+# Functional test (uses dist/, so run pnpm build first)
 pnpm test:functional
+
+# Lint, type check and format check
+pnpm lint
+pnpm type-check
+pnpm pretty
 ```
+
+## License
+
+[MIT](LICENSE)
 
 <!-- References -->
 
+[issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
+[issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
+[issue-104]: https://github.com/joaocarmo/vcard-creator/issues/104
+[issue-105]: https://github.com/joaocarmo/vcard-creator/issues/105
+[issue-106]: https://github.com/joaocarmo/vcard-creator/issues/106
+[issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
+[issue-109]: https://github.com/joaocarmo/vcard-creator/issues/109
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
 [rfc2426]: https://tools.ietf.org/html/rfc2426
