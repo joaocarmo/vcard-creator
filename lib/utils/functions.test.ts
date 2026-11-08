@@ -1,6 +1,7 @@
 import {
   assertName,
   assertNoControlChars,
+  assertString,
   assertUri,
   escapeText,
   fold,
@@ -31,6 +32,9 @@ describe('quoteParamValue()', () => {
     expect(() => quoteParamValue(42 as unknown as string)).toThrow(
       VCardException,
     )
+    expect(() => quoteParamValue(null as unknown as string)).toThrow(
+      'Parameter values must be strings (got null)',
+    )
   })
 
   it('should throw on a double quote', () => {
@@ -51,7 +55,39 @@ describe('quoteParamValue()', () => {
   })
 })
 
+describe('assertString()', () => {
+  it('should accept a string', () => {
+    expect(() => assertString({ value: '', label: 'UID' })).not.toThrow()
+  })
+
+  it.each([
+    ['42', 42, 'number'],
+    ['null', null, 'null'],
+    ['undefined', undefined, 'undefined'],
+    ['{}', {}, 'object'],
+    ['42n', 42n, 'bigint'],
+    ["Symbol('x')", Symbol('x'), 'symbol'],
+  ])('should throw on %s', (_, value, shown) => {
+    expect(() => assertString({ value, label: 'UID' })).toThrow(VCardException)
+    expect(() => assertString({ value, label: 'UID' })).toThrow(
+      `UID values must be strings (got ${shown})`,
+    )
+  })
+})
+
 describe('assertNoControlChars()', () => {
+  it.each([undefined, null, 42, {}])(
+    'should throw on a non-string value (%s)',
+    (value) => {
+      expect(() =>
+        assertNoControlChars({
+          value: value as unknown as string,
+          label: 'UID',
+        }),
+      ).toThrow('UID values must be strings')
+    },
+  )
+
   it('should accept printable text', () => {
     expect(() =>
       assertNoControlChars({ value: 'a;b,c d', label: 'UID' }),
@@ -148,6 +184,15 @@ describe('formatFloat()', () => {
 })
 
 describe('escapeText()', () => {
+  it.each([undefined, null, 42, {}])(
+    'should throw on a non-string value (%s)',
+    (value) => {
+      expect(() => escapeText(value as unknown as string)).toThrow(
+        'Text values must be strings',
+      )
+    },
+  )
+
   it('should escape backslashes first', () => {
     expect(escapeText('C:\\Users')).toEqual('C:\\\\Users')
   })
@@ -347,6 +392,15 @@ describe('resolveType()', () => {
 
   it('should throw on an entry with a double quote', () => {
     expect(() => resolveType(['work', 'a"b'])).toThrow(VCardException)
+  })
+
+  it.each([
+    ['work', 'string'],
+    [null, 'null'],
+  ])('should throw on a non-array type (%j)', (type, shown) => {
+    expect(() => resolveType(type as unknown as string[])).toThrow(
+      `Type values must be an array (got ${shown})`,
+    )
   })
 
   it.each([undefined, 1])('should throw VCardException on entry %j', (t) => {

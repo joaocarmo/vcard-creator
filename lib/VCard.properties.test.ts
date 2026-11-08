@@ -972,6 +972,12 @@ describe.each([
     expect(vCard.toString()).toContain(`${property};ENCODING=b;TYPE=JPEG:data`)
   })
 
+  it('should default to TYPE=JPEG when mime is null', () => {
+    const vCard = new VCard()
+    vCard[method]({ image: 'data', mime: null as unknown as string })
+    expect(vCard.toString()).toContain(`${property};ENCODING=b;TYPE=JPEG:data`)
+  })
+
   const nonStringMimes: [string, unknown][] = [
     ['42', 42],
     ['{}', {}],
@@ -987,7 +993,7 @@ describe.each([
       const add = () =>
         vCard[method]({ image: 'data', mime: mime as unknown as string })
       expect(add).toThrow(VCardException)
-      expect(add).toThrow(/must be a string/)
+      expect(add).toThrow(/must be strings/)
     },
   )
 
@@ -1385,5 +1391,262 @@ describe('Property grouping', () => {
     const output = vCard.toString()
     expect(output).toContain('X-TEST:value')
     expect(output).not.toContain('.X-TEST')
+  })
+})
+
+describe('non-string input', () => {
+  // `v` replaces 1 string input. The other inputs are valid.
+  type Call = (card: VCard, v: never) => unknown
+
+  const url = 'https://example.com'
+
+  // Inputs without a default
+  const required: Record<string, Call[]> = {
+    addAddress: [],
+    addBirthday: [(c, v) => c.addBirthday(v)],
+    addCompany: [(c, v) => c.addCompany({ name: v })],
+    addEmail: [(c, v) => c.addEmail({ address: v })],
+    addKey: [(c, v) => c.addKey({ url: v }), (c, v) => c.addKey({ key: v })],
+    addJobtitle: [(c, v) => c.addJobtitle(v)],
+    addRole: [(c, v) => c.addRole(v)],
+    addFullName: [(c, v) => c.addFullName(v)],
+    addName: [],
+    addNickname: [
+      (c, v) => c.addNickname(v),
+      (c, v) => c.addNickname(['Jo', v]),
+    ],
+    addNote: [(c, v) => c.addNote(v)],
+    addCategories: [
+      (c, v) => c.addCategories(v),
+      (c, v) => c.addCategories(['Work', v]),
+    ],
+    // `number` also accepts a number, so it has its own test
+    addPhoneNumber: [],
+    addLogo: [
+      (c, v) => c.addLogo({ url: v }),
+      (c, v) => c.addLogo({ image: v }),
+    ],
+    addPhoto: [
+      (c, v) => c.addPhoto({ url: v }),
+      (c, v) => c.addPhoto({ image: v }),
+    ],
+    addUrl: [(c, v) => c.addUrl({ url: v })],
+    addSocial: [
+      (c, v) => c.addSocial({ url: v, type: 'x' }),
+      (c, v) => c.addSocial({ url, type: v }),
+    ],
+    addImpp: [(c, v) => c.addImpp({ uri: v })],
+    addUid: [(c, v) => c.addUid(v)],
+    // Covered by the addGeo() tests
+    addGeo: [],
+    addTimezone: [(c, v) => c.addTimezone(v)],
+    addSortString: [(c, v) => c.addSortString(v)],
+    addRevision: [(c, v) => c.addRevision(v)],
+    addLabel: [(c, v) => c.addLabel({ label: v })],
+    addCustomProperty: [
+      (c, v) => c.addCustomProperty({ name: v, value: 'v' }),
+      (c, v) => c.addCustomProperty({ name: 'X-A', value: v }),
+    ],
+  }
+
+  // Inputs with a default, which `undefined` selects
+  const optional: Record<string, Call[]> = {
+    addAddress: [
+      (c, v) => c.addAddress({ postOfficeBox: v }),
+      (c, v) => c.addAddress({ extended: v }),
+      (c, v) => c.addAddress({ street: v }),
+      (c, v) => c.addAddress({ locality: v }),
+      (c, v) => c.addAddress({ region: v }),
+      (c, v) => c.addAddress({ postalCode: v }),
+      (c, v) => c.addAddress({ country: v }),
+    ],
+    addCompany: [(c, v) => c.addCompany({ name: 'Acme', department: v })],
+    addName: [
+      (c, v) => c.addName({ familyName: v }),
+      (c, v) => c.addName({ givenName: v }),
+      (c, v) => c.addName({ additionalNames: v }),
+      (c, v) => c.addName({ honorificPrefix: v }),
+      (c, v) => c.addName({ honorificSuffix: v }),
+    ],
+    addSocial: [(c, v) => c.addSocial({ url, type: 'x', user: v })],
+    addImpp: [(c, v) => c.addImpp({ uri: url, serviceType: v })],
+    addCustomProperty: [
+      (c, v) => c.addCustomProperty({ name: 'X-A', value: 'v', params: v }),
+      (c, v) => c.addCustomProperty({ name: 'X-A', value: 'v', group: v }),
+    ],
+  }
+
+  // `null` selects the default, as `??` treats it as missing
+  const optionalMime: Call[] = [
+    (c, v) => c.addKey({ key: 'data', mime: v }),
+    (c, v) => c.addLogo({ image: 'data', mime: v }),
+    (c, v) => c.addPhoto({ image: 'data', mime: v }),
+  ]
+
+  const values: [string, unknown][] = [
+    ['42', 42],
+    ['null', null],
+    ['undefined', undefined],
+    ['{}', {}],
+  ]
+
+  const expectThrow = (call: Call, value: unknown) => {
+    const vCard = new VCard()
+    expect(() => call(vCard, value as never)).toThrow(VCardException)
+    expect(vCard.getProperties()).toEqual([])
+  }
+
+  it('should cover every public add*() method', () => {
+    const methods = Object.getOwnPropertyNames(VCard.prototype).filter(
+      (name) =>
+        name.startsWith('add') &&
+        name !== 'addMediaUrl' &&
+        name !== 'addMediaContent',
+    )
+
+    expect(Object.keys(required).sort()).toEqual(methods.sort())
+  })
+
+  describe.each(values)('with %s', (_, value) => {
+    it.each(Object.entries(required))(
+      'should throw in every required input of %s()',
+      (_, calls) => {
+        for (const call of calls) {
+          expectThrow(call, value)
+        }
+      },
+    )
+
+    it.each(Object.entries(optional))(
+      'should throw in every optional input of %s()',
+      (_, calls) => {
+        // Left-out inputs are tested below
+        if (value === undefined) {
+          return
+        }
+
+        for (const call of calls) {
+          expectThrow(call, value)
+        }
+      },
+    )
+  })
+
+  it.each([null, undefined, {}])(
+    'should throw on a phone number that is not a string or number (%j)',
+    (value) => {
+      expectThrow((c, v) => c.addPhoneNumber({ number: v }), value)
+    },
+  )
+
+  it.each([42, {}])('should throw on a non-string mime (%j)', (value) => {
+    for (const call of optionalMime) {
+      expectThrow(call, value)
+    }
+  })
+
+  it.each([
+    ['addAddress', (c: VCard) => c.addAddress({ type: 'work' as never })],
+    [
+      'addEmail',
+      (c: VCard) =>
+        c.addEmail({ address: 'a@example.com', type: 'work' as never }),
+    ],
+    [
+      'addPhoneNumber',
+      (c: VCard) => c.addPhoneNumber({ number: '1', type: 'work' as never }),
+    ],
+    ['addUrl', (c: VCard) => c.addUrl({ url, type: 'work' as never })],
+    [
+      'addLabel',
+      (c: VCard) => c.addLabel({ label: 'Street 1', type: 'work' as never }),
+    ],
+  ])('should throw on a non-array type in %s()', (_, call) => {
+    expect(() => call(new VCard())).toThrow(VCardException)
+  })
+
+  it('should throw on type: null', () => {
+    expect(() =>
+      new VCard().addEmail({ address: 'a@example.com', type: null as never }),
+    ).toThrow('Type values must be an array (got null)')
+  })
+
+  it('should throw on an invalid Date', () => {
+    expect(() => new VCard().addBirthday(new Date('x'))).toThrow(VCardException)
+    expect(() => new VCard().addRevision(new Date('x'))).toThrow(VCardException)
+  })
+
+  it('should throw on a date string in addRevision()', () => {
+    expect(() => new VCard().addRevision('2024-01-01' as never)).toThrow(
+      'Invalid revision: must be a Date (got string)',
+    )
+  })
+
+  it('should throw on a URL object in addUrl()', () => {
+    expect(() => new VCard().addUrl({ url: new URL(url) as never })).toThrow(
+      VCardException,
+    )
+  })
+
+  it('should throw on an object that converts to a UTC offset', () => {
+    expect(() =>
+      new VCard().addTimezone({ toString: () => '+01:00' } as never),
+    ).toThrow('Timezone values must be strings (got object)')
+  })
+
+  it('should name the method input in the message', () => {
+    expect(() => new VCard().addNote(42 as never)).toThrow(
+      'Text values must be strings (got number)',
+    )
+    expect(() => new VCard().addPhoneNumber({ number: null as never })).toThrow(
+      'Phone number values must be strings or numbers (got null)',
+    )
+  })
+
+  it('should throw in setCharset()', () => {
+    expect(() => new VCard().setCharset(42 as never)).toThrow(VCardException)
+  })
+
+  it('should throw at build time on a non-string charset field', () => {
+    const vCard = new VCard()
+    vCard.charset = 42 as never
+
+    expect(() => vCard.toString()).toThrow(VCardException)
+  })
+
+  it('should throw in setFilename() on a truthy non-string', () => {
+    expect(() => new VCard().setFilename(42 as never)).toThrow(VCardException)
+  })
+
+  it('should ignore a falsy value in setFilename()', () => {
+    const vCard = new VCard()
+    vCard.setFilename(null as never)
+
+    expect(vCard.getFilename()).toBe('vcard')
+  })
+
+  it('should keep the defaults of left-out optional inputs', () => {
+    const vCard = new VCard()
+    vCard
+      .addName({ givenName: 'Jo' })
+      .addAddress({ street: 'Main St' })
+      .addCompany({ name: 'Acme' })
+      .addImpp({ uri: 'xmpp:a@example.com' })
+      .addSocial({ url, type: 'x' })
+      .addCustomProperty({ name: 'X-A', value: 'v' })
+      .addKey({ key: 'data', mime: undefined })
+
+    const output = vCard.toString()
+    expect(output).toContain('N:;Jo;;;\r\n')
+    expect(output).toContain('FN:Jo\r\n')
+    expect(output).toContain(
+      'ADR;TYPE=INTL,POSTAL,PARCEL,WORK:;;Main St;;;;\r\n',
+    )
+    expect(output).toContain('ORG:Acme\r\n')
+    expect(output).toContain('IMPP:xmpp:a@example.com\r\n')
+    expect(output).toContain(`X-SOCIALPROFILE;type=x:${url}\r\n`)
+    expect(output).toContain('X-A:v\r\n')
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:data\r\n')
+    expect(output).not.toMatch(/undefined|null/)
   })
 })
