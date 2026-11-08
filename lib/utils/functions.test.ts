@@ -50,33 +50,43 @@ describe('quoteParamValue()', () => {
 
 describe('assertNoControlChars()', () => {
   it('should accept printable text', () => {
-    expect(() => assertNoControlChars('a;b,c d', 'UID')).not.toThrow()
+    expect(() =>
+      assertNoControlChars({ value: 'a;b,c d', label: 'UID' }),
+    ).not.toThrow()
   })
 
   it.each(['\n', '\r', '\r\n', '\t', '\x00', '\x7F'])(
     'should throw on control character %j',
     (char) => {
-      expect(() => assertNoControlChars(`a${char}b`, 'UID')).toThrow(
-        VCardException,
-      )
+      expect(() =>
+        assertNoControlChars({ value: `a${char}b`, label: 'UID' }),
+      ).toThrow(VCardException)
     },
   )
 
   it('should name the label in the message', () => {
-    expect(() => assertNoControlChars('a\nb', 'Email')).toThrow(
-      'Email values cannot contain control characters ("a\\nb")',
-    )
+    expect(() =>
+      assertNoControlChars({ value: 'a\nb', label: 'Email' }),
+    ).toThrow('Email values cannot contain control characters ("a\\nb")')
   })
 
   it('should accept a tab with allowTab', () => {
     expect(() =>
-      assertNoControlChars('a\tb', 'Property', { allowTab: true }),
+      assertNoControlChars({
+        value: 'a\tb',
+        label: 'Property',
+        allowTab: true,
+      }),
     ).not.toThrow()
   })
 
   it.each(['\n', '\r'])('should still throw on %j with allowTab', (char) => {
     expect(() =>
-      assertNoControlChars(`a${char}b`, 'Property', { allowTab: true }),
+      assertNoControlChars({
+        value: `a${char}b`,
+        label: 'Property',
+        allowTab: true,
+      }),
     ).toThrow(VCardException)
   })
 })

@@ -48,6 +48,12 @@ export interface CoordinateOptions {
   limit: number
 }
 
+export interface ControlCharsOptions {
+  value: string
+  label: string
+  allowTab?: boolean
+}
+
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =

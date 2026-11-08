@@ -1,5 +1,6 @@
 import VCardException from '../VCardException.js'
 import { MIME_TYPES } from './constants.js'
+import type { ControlCharsOptions } from '../types/VCard.js'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -14,7 +15,7 @@ const decoder = new TextDecoder()
 export function resolveType<T extends string>(type: T[]): string {
   // Plain JavaScript callers can pass any string
   for (const t of type) {
-    assertNoControlChars(t, 'Type')
+    assertNoControlChars({ value: t, label: 'Type' })
   }
 
   return type.length > 0
@@ -61,7 +62,7 @@ export function quoteParamValue(value: string): string {
   }
 
   // Horizontal tab is allowed as WSP
-  assertNoControlChars(value, 'Parameter', { allowTab: true })
+  assertNoControlChars({ value, label: 'Parameter', allowTab: true })
 
   return /[;:,]/.test(value) ? `"${value}"` : value
 }
@@ -72,11 +73,11 @@ export function quoteParamValue(value: string): string {
  *
  * @throws VCardException
  */
-export function assertNoControlChars(
-  value: string,
-  label: string,
-  { allowTab = false }: { allowTab?: boolean } = {},
-): void {
+export function assertNoControlChars({
+  value,
+  label,
+  allowTab = false,
+}: ControlCharsOptions): void {
   const pattern = allowTab
     ? // oxlint-disable-next-line no-control-regex
       /[\x00-\x08\x0A-\x1F\x7F]/
@@ -97,7 +98,7 @@ export function assertNoControlChars(
  * @throws VCardException
  */
 export function assertUri(value: string): void {
-  assertNoControlChars(value, 'URI')
+  assertNoControlChars({ value, label: 'URI' })
 }
 
 /**

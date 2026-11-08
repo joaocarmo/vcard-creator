@@ -124,7 +124,7 @@ export default class VCard {
    */
   public addBirthday(date: Date | DateString): this {
     const value = date instanceof Date ? date.toISOString().slice(0, 10) : date
-    assertNoControlChars(value, 'Birthday')
+    assertNoControlChars({ value, label: 'Birthday' })
 
     this.setProperty({ element: 'birthday', key: 'BDAY', value })
 
@@ -155,7 +155,7 @@ export default class VCard {
    * @throws VCardException
    */
   public addEmail({ address, type = [] }: EmailOptions): this {
-    assertNoControlChars(address, 'Email')
+    assertNoControlChars({ value: address, label: 'Email' })
 
     const resolved = resolveType(type)
     this.setProperty({
@@ -184,8 +184,8 @@ export default class VCard {
       })
     } else {
       const mime = options.mime ?? 'PGP'
-      assertNoControlChars(options.key, 'Key')
-      assertNoControlChars(mime, 'Key type')
+      assertNoControlChars({ value: options.key, label: 'Key' })
+      assertNoControlChars({ value: mime, label: 'Key type' })
 
       this.setProperty({
         element: 'key',
@@ -268,7 +268,7 @@ export default class VCard {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
     }
 
-    assertNoControlChars(content, 'Image')
+    assertNoControlChars({ value: content, label: 'Image' })
 
     this.setProperty({
       element,
@@ -403,7 +403,7 @@ export default class VCard {
    */
   public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
     const value = `${number}`
-    assertNoControlChars(value, 'Phone number')
+    assertNoControlChars({ value, label: 'Phone number' })
 
     const resolved = resolveType(type)
     this.setProperty({
@@ -531,7 +531,7 @@ export default class VCard {
    * @throws VCardException
    */
   public addUid(uid: string): this {
-    assertNoControlChars(uid, 'UID')
+    assertNoControlChars({ value: uid, label: 'UID' })
 
     this.setProperty({ element: 'uid', key: 'UID', value: uid })
 
@@ -684,11 +684,11 @@ export default class VCard {
     params = '',
     group,
   }: CustomPropertyOptions): this {
-    assertNoControlChars(name, 'Property name')
-    assertNoControlChars(value, 'Property', { allowTab: true })
-    assertNoControlChars(params, 'Parameter', { allowTab: true })
+    assertNoControlChars({ value: name, label: 'Property name' })
+    assertNoControlChars({ value, label: 'Property', allowTab: true })
+    assertNoControlChars({ value: params, label: 'Parameter', allowTab: true })
     if (group !== undefined) {
-      assertNoControlChars(group, 'Group')
+      assertNoControlChars({ value: group, label: 'Group' })
     }
 
     this.setProperty({
@@ -799,7 +799,7 @@ export default class VCard {
    */
   private charsetParam(): string {
     // `charset` is a public field, so it is checked here at build time
-    assertNoControlChars(this.charset, 'Charset')
+    assertNoControlChars({ value: this.charset, label: 'Charset' })
 
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
       return `;CHARSET=${this.charset}`
