@@ -485,9 +485,21 @@ export default class VCard {
    * @throws VCardException
    */
   public addGeo({ latitude, longitude }: GeoOptions): this {
+    if (!Number.isFinite(latitude)) {
+      throw new VCardException(
+        `Invalid latitude: ${String(latitude)}. Must be a finite number.`,
+      )
+    }
+
     if (latitude < -90 || latitude > 90) {
       throw new VCardException(
         `Invalid latitude: ${latitude}. Must be between -90 and 90.`,
+      )
+    }
+
+    if (!Number.isFinite(longitude)) {
+      throw new VCardException(
+        `Invalid longitude: ${String(longitude)}. Must be a finite number.`,
       )
     }
 

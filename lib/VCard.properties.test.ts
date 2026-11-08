@@ -423,6 +423,42 @@ describe('addGeo()', () => {
     )
   })
 
+  const nonFiniteValues: [string, unknown][] = [
+    ['NaN', NaN],
+    ['Infinity', Infinity],
+    ['-Infinity', -Infinity],
+    ["'abc'", 'abc'],
+    ["'45'", '45'],
+    ['null', null],
+    ['undefined', undefined],
+    ['{}', {}],
+    ["Symbol('x')", Symbol('x')],
+  ]
+
+  it.each(nonFiniteValues)('should throw on latitude %s', (_, value) => {
+    const vCard = new VCard()
+    const addGeo = () =>
+      vCard.addGeo({ latitude: value as unknown as number, longitude: 0 })
+    expect(addGeo).toThrow(VCardException)
+    expect(addGeo).toThrow(/finite number/)
+  })
+
+  it.each(nonFiniteValues)('should throw on longitude %s', (_, value) => {
+    const vCard = new VCard()
+    const addGeo = () =>
+      vCard.addGeo({ latitude: 0, longitude: value as unknown as number })
+    expect(addGeo).toThrow(VCardException)
+    expect(addGeo).toThrow(/finite number/)
+  })
+
+  it('should not write GEO when a value is NaN', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addGeo({ latitude: NaN, longitude: NaN })).toThrow(
+      VCardException,
+    )
+    expect(vCard.toString()).not.toContain('GEO:')
+  })
+
   it('should throw on duplicate addGeo', () => {
     const vCard = new VCard()
     vCard.addGeo({ latitude: 37, longitude: -122 })
