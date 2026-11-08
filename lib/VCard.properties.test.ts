@@ -639,6 +639,7 @@ describe('addTimezone()', () => {
     expect(lines.filter((line) => line.startsWith('X-INJECTED'))).toHaveLength(
       0,
     )
+    expect(lines.filter((line) => line.startsWith('TZ'))).toHaveLength(1)
   })
 
   it('should throw on duplicate addTimezone', () => {
