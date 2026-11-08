@@ -19,6 +19,15 @@ describe('quoteParamValue()', () => {
     expect(quoteParamValue('a,b')).toEqual('"a,b"')
   })
 
+  it('should throw on a non-string value', () => {
+    expect(() => quoteParamValue(undefined as unknown as string)).toThrow(
+      VCardException,
+    )
+    expect(() => quoteParamValue(42 as unknown as string)).toThrow(
+      VCardException,
+    )
+  })
+
   it('should throw on a double quote', () => {
     expect(() => quoteParamValue('a"b')).toThrow(VCardException)
   })

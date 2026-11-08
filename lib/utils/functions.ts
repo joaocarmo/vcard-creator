@@ -40,6 +40,13 @@ export function escapeText(text: string): string {
  * @throws VCardException
  */
 export function quoteParamValue(value: string): string {
+  // Plain JavaScript callers can pass undefined or other non-string values
+  if (typeof value !== 'string') {
+    throw new VCardException(
+      `Parameter values must be strings (got ${typeof value})`,
+    )
+  }
+
   if (value.includes('"')) {
     throw new VCardException(
       `Parameter values cannot contain a double quote (${value})`,

@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
+import type { SocialOptions } from './types/VCard'
 
 describe('addFullName()', () => {
   it('should set FN directly', () => {
@@ -330,6 +331,14 @@ describe('addSocial()', () => {
       'X-SOCIALPROFILE;type=X;x-user=jdoe:https://x.com/jdoe',
     )
     expect(output).toContain('IMPP;X-SERVICE-TYPE=X:https://x.com/jdoe')
+  })
+
+  it('should throw VCardException when type is missing', () => {
+    const vCard = new VCard()
+    expect(() =>
+      vCard.addSocial({ url: 'https://x.com/jdoe' } as SocialOptions),
+    ).toThrow(VCardException)
+    expect(vCard.toString()).not.toContain('X-SOCIALPROFILE')
   })
 
   it('should handle empty type and no user', () => {
