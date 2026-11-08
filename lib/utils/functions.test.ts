@@ -429,6 +429,12 @@ describe('assertName()', () => {
     },
   )
 
+  it('should name null in the message', () => {
+    expect(() =>
+      assertName({ value: null as unknown as string, label: 'Group' }),
+    ).toThrow('Group values can contain only letters, digits and "-" (null)')
+  })
+
   it('should throw VCardException on a BigInt', () => {
     expect(() =>
       assertName({ value: BigInt(1) as unknown as string, label: 'Group' }),

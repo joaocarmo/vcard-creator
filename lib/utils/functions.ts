@@ -152,7 +152,7 @@ export function assertName({ value, label }: PropertyNameOptions): void {
   if (typeof value !== 'string' || !/^[A-Za-z0-9-]+$/.test(value)) {
     // JSON.stringify() throws on a BigInt
     const shown =
-      typeof value === 'string' ? JSON.stringify(value) : typeof value
+      typeof value === 'string' ? JSON.stringify(value) : describeType(value)
     throw new VCardException(
       `${label} values can contain only letters, digits and "-" (${shown})`,
     )
