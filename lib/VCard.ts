@@ -764,8 +764,9 @@ export default class VCard {
   /**
    * Has property.
    *
-   * @deprecated Use `getProperties().some((p) => p.key.split(';')[0] === 'TEL')`,
-   * or another match. Removed in the next major version.
+   * @deprecated Use `getProperties().some((p) => p.key === key)` for the same
+   * exact match. To match the property name only, compare
+   * `p.key.split(';')[0]`. Removed in the next major version.
    */
   public hasProperty(key: string): boolean {
     return this.properties.some((property) => property.key === key)
