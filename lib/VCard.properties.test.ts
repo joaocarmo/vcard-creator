@@ -642,6 +642,32 @@ describe('addTimezone()', () => {
     expect(lines.filter((line) => line.startsWith('TZ'))).toHaveLength(1)
   })
 
+  it.each(['-05:00', '+00:00', '+14:00', '+23:59'])(
+    'should write offset %s as it is',
+    (offset) => {
+      const vCard = new VCard()
+      vCard.addTimezone(offset)
+      expect(vCard.toString()).toContain(`\r\nTZ:${offset}\r\n`)
+      expect(vCard.toString()).not.toContain('VALUE=text')
+    },
+  )
+
+  it.each(['+24:00', '-25:00', '+05:60', '+99:99'])(
+    'should throw on out-of-range offset %s',
+    (offset) => {
+      const vCard = new VCard()
+      expect(() => vCard.addTimezone(offset)).toThrow(VCardException)
+      expect(vCard.toString()).not.toContain('TZ')
+    },
+  )
+
+  it('should accept a valid offset after rejecting an invalid one', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addTimezone('+24:00')).toThrow(VCardException)
+    vCard.addTimezone('+01:00')
+    expect(vCard.toString()).toContain('TZ:+01:00')
+  })
+
   it('should throw on duplicate addTimezone', () => {
     const vCard = new VCard()
     vCard.addTimezone('-05:00')
