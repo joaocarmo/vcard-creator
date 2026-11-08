@@ -19,7 +19,7 @@ const decoder = new TextDecoder()
  * @throws VCardException
  */
 export function resolveType<T extends string>(type: T[]): string {
-  // Plain JavaScript callers can pass any value, so check it before
+  // Plain JavaScript callers can pass any entry value, so check it before
   // toUpperCase()
   return type.length > 0
     ? `TYPE=${type.map((t) => quoteParamValue(t).toUpperCase()).join(',')}`
@@ -103,8 +103,11 @@ export function assertNoControlChars({
 export function assertName({ value, label }: PropertyNameOptions): void {
   // Plain JavaScript callers can pass non-string values
   if (typeof value !== 'string' || !/^[A-Za-z0-9-]+$/.test(value)) {
+    // JSON.stringify() throws on a BigInt
+    const shown =
+      typeof value === 'string' ? JSON.stringify(value) : typeof value
     throw new VCardException(
-      `${label} values can contain only letters, digits and "-" (${JSON.stringify(value)})`,
+      `${label} values can contain only letters, digits and "-" (${shown})`,
     )
   }
 }

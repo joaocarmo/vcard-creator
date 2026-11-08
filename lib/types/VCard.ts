@@ -163,7 +163,7 @@ export type KeyOptions =
   | { url: string }
   | {
       /** Base64-encoded public key data */ key: string
-      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` throws */ mime?: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string
     }
 
 export interface GeoOptions {

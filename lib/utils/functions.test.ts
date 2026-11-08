@@ -328,6 +328,12 @@ describe('assertName()', () => {
     },
   )
 
+  it('should throw VCardException on a BigInt', () => {
+    expect(() =>
+      assertName({ value: BigInt(1) as unknown as string, label: 'Group' }),
+    ).toThrow('Group values can contain only letters, digits and "-" (bigint)')
+  })
+
   it.each([undefined, null, 1])('should throw on non-string %j', (v) => {
     expect(() =>
       assertName({ value: v as unknown as string, label: 'Group' }),

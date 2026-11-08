@@ -238,7 +238,7 @@ myVCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })
 myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 ```
 
-`type`, `user` and `serviceType` can contain `;`, `:` and `,`. A value with these characters is written in double quotes, such as `type="My Site;x"`. A value with a double quote (`"`) or a control character, such as a line break, throws a `VCardException`.
+`type`, `user` and `serviceType` can contain `;`, `:` and `,`. A value with these characters is written in double quotes, such as `type="My Site;x"`. A value with a double quote (`"`) or a control character other than tab, such as a line break, throws a `VCardException`.
 
 A `url` or `uri` with a control character also throws a `VCardException`.
 
