@@ -252,8 +252,8 @@ Any other value, such as an IANA name, is written with `VALUE=text` (`TZ;VALUE=t
 
 Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL.
 
-- `mime` is the image subtype only, such as `'png'` or `'jpeg'`. Do not use `'image/png'`, and use `'jpeg'`, not the file extension `'jpg'` ([#109][issue-109]).
-- `mime` must be an [IANA image type][mime-types], or the method throws a `VCardException`.
+- `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
+- After that, `mime` must be an [IANA image type][mime-types], or the method throws a `VCardException`.
 - Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) is not removed and breaks the card.
 
 ```js
@@ -468,7 +468,6 @@ pnpm pretty
 [issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
 [issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
-[issue-109]: https://github.com/joaocarmo/vcard-creator/issues/109
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
 [rfc2426]: https://tools.ietf.org/html/rfc2426

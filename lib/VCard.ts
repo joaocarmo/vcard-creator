@@ -235,13 +235,16 @@ export default class VCard {
     mime: string,
     element: Element,
   ): this {
-    if (!isValidMimeType(mime)) {
+    // Accepts a full MIME type (such as `File.type`) and the `jpg` extension
+    const subtype = mime.replace(/^image\//i, '').replace(/^jpg$/i, 'jpeg')
+
+    if (!isValidMimeType(subtype)) {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
     }
 
     this.setProperty({
       element,
-      key: `${property};ENCODING=b;TYPE=${mime.toUpperCase()}`,
+      key: `${property};ENCODING=b;TYPE=${subtype.toUpperCase()}`,
       value: content,
     })
 
