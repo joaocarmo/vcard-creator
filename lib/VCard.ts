@@ -2,6 +2,7 @@ import VCardException from './VCardException.js'
 import {
   AddressOptions,
   CompanyOptions,
+  CoordinateOptions,
   CustomPropertyOptions,
   DateString,
   DefinedElements,
@@ -486,8 +487,8 @@ export default class VCard {
    * @throws VCardException
    */
   public addGeo({ latitude, longitude }: GeoOptions): this {
-    this.assertCoordinate('latitude', latitude, 90)
-    this.assertCoordinate('longitude', longitude, 180)
+    this.assertCoordinate({ name: 'latitude', value: latitude, limit: 90 })
+    this.assertCoordinate({ name: 'longitude', value: longitude, limit: 180 })
 
     this.setProperty({
       element: 'geo',
@@ -503,7 +504,7 @@ export default class VCard {
    *
    * @throws VCardException
    */
-  private assertCoordinate(name: string, value: number, limit: number): void {
+  private assertCoordinate({ name, value, limit }: CoordinateOptions): void {
     if (!Number.isFinite(value)) {
       // String() throws on objects without a usable toString()
       const shown =
