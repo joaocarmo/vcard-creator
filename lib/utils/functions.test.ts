@@ -192,12 +192,12 @@ describe('isValidMimeType()', () => {
     expect(isValidMimeType('jpeg')).toBe(true)
   })
 
-  it.each([...MIME_TYPES])(
-    "should store '%s' in lower case in MIME_TYPES",
-    (mime) => {
-      expect(mime).toBe(mime.toLowerCase())
-    },
-  )
+  it('should store every MIME_TYPES entry in lower case', () => {
+    const notLowerCase = [...MIME_TYPES].filter(
+      (mime) => mime !== mime.toLowerCase(),
+    )
+    expect(notLowerCase).toEqual([])
+  })
 
   it('should return false for an invalid MIME type', () => {
     expect(isValidMimeType('foobar')).toBe(false)

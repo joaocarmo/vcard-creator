@@ -259,7 +259,7 @@ These text values are escaped like other text properties (see [Text Escaping](#t
 Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 - `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
-- After that, `mime` must be a string with an [IANA image type][mime-types], in any case, or the method throws a `VCardException`.
+- After that, `mime` must be a string with an [IANA image type][mime-types], or the method throws a `VCardException`. The match ignores case.
 - Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) is not removed and breaks the card.
 
 ```js
