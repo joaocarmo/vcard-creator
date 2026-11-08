@@ -238,20 +238,31 @@ describe('escapeText()', () => {
     expect(escapeText('')).toEqual('')
   })
 
-  it.each(['\x00', '\x08', '\x0B', '\x0C', '\x0E', '\x1C', '\x1E', '\x1F'])(
-    'should throw on C0 control character %j',
+  it.each(['\x00', '\x08', '\x0E', '\x1C', '\x1E', '\x1F', '\x7F'])(
+    'should throw on control character %j',
     (char) => {
       expect(() => escapeText(`a${char}b`)).toThrow(VCardException)
     },
   )
 
   it('should name the character in the message', () => {
-    expect(() => escapeText('a\x0Bb')).toThrow(
-      'Text values cannot contain control characters ("a\\u000bb")',
+    expect(() => escapeText('a\x01b')).toThrow(
+      'Text values cannot contain control characters ("a\\u0001b")',
     )
   })
 
-  it.each(['\t', '\x85', '\u{2028}', '\u{2029}'])(
+  it.each(['\x0B', '\x0C', '\x85', '\u{2028}', '\u{2029}'])(
+    'should escape %j as a line break',
+    (char) => {
+      expect(escapeText(`a${char}b`)).toEqual('a\\nb')
+    },
+  )
+
+  it('should count CRLF as one line break and VT as another', () => {
+    expect(escapeText('a\r\n\x0Bb')).toEqual('a\\n\\nb')
+  })
+
+  it.each(['\t', '\x80', '\x9F', 'é', '漢', '😀'])(
     'should pass through %j',
     (char) => {
       expect(escapeText(`a${char}b`)).toEqual(`a${char}b`)

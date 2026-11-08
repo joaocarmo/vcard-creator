@@ -9,10 +9,15 @@ import type {
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
-// C0 control characters except tab, CR and LF. escapeText() turns CR and LF
-// into `\n`.
+// C0 control characters except tab, CR, LF, VT and FF, plus DEL. escapeText()
+// turns the line-break characters into `\n`.
 // oxlint-disable-next-line no-control-regex
-const TEXT_CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F]/
+const TEXT_CONTROL_CHARS = /[\x00-\x08\x0E-\x1F\x7F]/
+
+// CRLF is one line break. VT, FF, NEL, U+2028 and U+2029 are line breaks for
+// some parsers and spreadsheet exports.
+// oxlint-disable-next-line no-control-regex
+const TEXT_LINE_BREAKS = /\r\n|[\r\n\x0B\x0C\x85\u{2028}\u{2029}]/gu
 
 // oxlint-disable-next-line no-control-regex
 const RAW_CONTROL_CHARS = /[\x00-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
@@ -50,8 +55,9 @@ export function resolveType<T extends string>(type: T[]): string {
  * Escape special characters in text values per RFC 2426.
  *
  * Backslashes are replaced first to avoid double-escaping. Line breaks
- * (`\r\n`, `\n` and a lone `\r`) become `\n`. Other C0 control characters,
- * except tab, cannot appear in text values.
+ * (`\r\n`, `\n`, a lone `\r`, VT, FF, NEL, U+2028 and U+2029) become `\n`.
+ * DEL and other C0 control characters, except tab, cannot appear in text
+ * values.
  *
  * @link   http://tools.ietf.org/html/rfc2426
  * @throws VCardException
@@ -69,7 +75,7 @@ export function escapeText(text: string): string {
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
-    .replace(/\r\n|\r|\n/g, '\\n')
+    .replace(TEXT_LINE_BREAKS, '\\n')
 }
 
 /**
