@@ -236,10 +236,10 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 | Method                            | Description                                                                                                                                                                                    |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Both values must be finite numbers. Latitude must be from -90 to 90 and longitude from -180 to 180. Throws `VCardException` otherwise |
-| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`)                                                                                        |
+| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`). An IANA name is written with `VALUE=text`                                             |
 
-For `addTimezone()`, the RFC form is a UTC offset, such as `-05:00`.
-An IANA name is written as it is (`TZ:America/New_York`). The RFC asks for `VALUE=text` in that case, and some apps may ignore the value ([#104][issue-104]).
+For `addTimezone()`, a UTC offset (`+HH:MM` or `-HH:MM`) is written as it is (`TZ:-05:00`).
+Any other value, such as an IANA name, is written with `VALUE=text` (`TZ;VALUE=text:America/New_York`), as the RFC asks.
 
 ### Media
 
@@ -467,7 +467,6 @@ pnpm pretty
 
 [issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
 [issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
-[issue-104]: https://github.com/joaocarmo/vcard-creator/issues/104
 [issue-106]: https://github.com/joaocarmo/vcard-creator/issues/106
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
 [issue-109]: https://github.com/joaocarmo/vcard-creator/issues/109

@@ -91,6 +91,7 @@ const checks = [
   ['PHOTO;ENCODING=b;TYPE=JPEG:', 'embedded photo'],
   ['LOGO;VALUE=uri:https://example.com/siesqo-logo.png', 'logo URL'],
   ['GEO:51.0543;3.7174', 'geographic position'],
+  ['TZ;VALUE=text:Europe/Brussels', 'IANA time zone'],
   ['END:VCARD', 'vCard footer'],
 ]
 
