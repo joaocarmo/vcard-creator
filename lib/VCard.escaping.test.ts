@@ -267,6 +267,68 @@ describe('Text escaping', () => {
       },
     )
 
+    it.each(Object.entries(calls))(
+      'should reject a C0 control character in %s()',
+      (_, methodCalls) => {
+        for (const call of methodCalls) {
+          const vCard = new VCard()
+
+          expect(() => call(vCard, 'a\x0Bb')).toThrow(VCardException)
+          expect(vCard.getProperties()).toEqual([])
+        }
+      },
+    )
+
+    // Built-in methods that escape text values
+    const textMethods = new Set([
+      'addAddress',
+      'addCategories',
+      'addCompany',
+      'addFullName',
+      'addJobtitle',
+      'addLabel',
+      'addName',
+      'addNickname',
+      'addNote',
+      'addRole',
+      'addSortString',
+      'addTimezone',
+    ])
+
+    it.each(
+      Object.entries(calls).flatMap(([method, methodCalls]) =>
+        ['\x85', '\u{2028}', '\u{2029}'].map(
+          (char) => [method, char, methodCalls] as const,
+        ),
+      ),
+    )(
+      'should reject or keep a line separator in %s(): %j',
+      (method, char, methodCalls) => {
+        for (const call of methodCalls) {
+          const vCard = new VCard()
+          const s = `a${char}b`
+
+          try {
+            call(vCard, s)
+          } catch (error) {
+            expect(error).toBeInstanceOf(VCardException)
+            expect(vCard.getProperties()).toEqual([])
+            continue
+          }
+
+          // Only text values may keep the character
+          expect(textMethods).toContain(method)
+          expect(vCard.toString().replace(/\r\n /g, '')).toContain(s)
+        }
+      },
+    )
+
+    it('should throw on U+2028 in a URL', () => {
+      expect(() =>
+        new VCard().addUrl({ url: 'https://a.com/\u{2028}x' }),
+      ).toThrow(VCardException)
+    })
+
     it('should write valid values as before', () => {
       const vCard = new VCard()
       vCard

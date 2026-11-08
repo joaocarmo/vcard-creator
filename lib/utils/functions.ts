@@ -30,11 +30,20 @@ export function resolveType<T extends string>(type: T[]): string {
  * Escape special characters in text values per RFC 2426.
  *
  * Backslashes are replaced first to avoid double-escaping. Line breaks
- * (`\r\n`, `\n` and a lone `\r`) become `\n`.
+ * (`\r\n`, `\n` and a lone `\r`) become `\n`. Other C0 control characters,
+ * except tab, cannot appear in text values.
  *
  * @link   http://tools.ietf.org/html/rfc2426
+ * @throws VCardException
  */
 export function escapeText(text: string): string {
+  // oxlint-disable-next-line no-control-regex
+  if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(text)) {
+    throw new VCardException(
+      `Text values cannot contain control characters (${JSON.stringify(text)})`,
+    )
+  }
+
   return text
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
@@ -72,7 +81,9 @@ export function quoteParamValue(value: string): string {
 
 /**
  * Check that a value written as it is has no control characters, such as a
- * line break. Tab is rejected unless `allowTab` is set.
+ * line break. Rejects C0 (`\x00`-`\x1F`), DEL (`\x7F`), C1 (`\x80`-`\x9F`),
+ * U+2028 and U+2029, which some parsers treat as line breaks. Tab is rejected
+ * unless `allowTab` is set.
  *
  * @throws VCardException
  */
@@ -83,9 +94,9 @@ export function assertNoControlChars({
 }: ControlCharsOptions): void {
   const pattern = allowTab
     ? // oxlint-disable-next-line no-control-regex
-      /[\x00-\x08\x0A-\x1F\x7F]/
+      /[\x00-\x08\x0A-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
     : // oxlint-disable-next-line no-control-regex
-      /[\x00-\x1F\x7F]/
+      /[\x00-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
 
   if (pattern.test(value)) {
     throw new VCardException(
@@ -113,7 +124,8 @@ export function assertName({ value, label }: PropertyNameOptions): void {
 }
 
 /**
- * Check that a URI value has no control characters, tab included.
+ * Check that a URI value has no control characters, tab, C1, U+2028 and U+2029
+ * included.
  *
  * @link   https://tools.ietf.org/html/rfc3986#section-2
  * @throws VCardException

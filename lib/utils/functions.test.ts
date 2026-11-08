@@ -42,6 +42,8 @@ describe('quoteParamValue()', () => {
     expect(() => quoteParamValue('a\nb')).toThrow(VCardException)
     expect(() => quoteParamValue('a\x00b')).toThrow(VCardException)
     expect(() => quoteParamValue('a\x7Fb')).toThrow(VCardException)
+    expect(() => quoteParamValue('a\x85b')).toThrow(VCardException)
+    expect(() => quoteParamValue('a\u{2028}b')).toThrow(VCardException)
   })
 
   it('should allow a horizontal tab', () => {
@@ -56,14 +58,23 @@ describe('assertNoControlChars()', () => {
     ).not.toThrow()
   })
 
-  it.each(['\n', '\r', '\r\n', '\t', '\x00', '\x7F'])(
-    'should throw on control character %j',
-    (char) => {
-      expect(() =>
-        assertNoControlChars({ value: `a${char}b`, label: 'UID' }),
-      ).toThrow(VCardException)
-    },
-  )
+  it.each([
+    '\n',
+    '\r',
+    '\r\n',
+    '\t',
+    '\x00',
+    '\x7F',
+    '\x80',
+    '\x85',
+    '\x9F',
+    '\u{2028}',
+    '\u{2029}',
+  ])('should throw on control character %j', (char) => {
+    expect(() =>
+      assertNoControlChars({ value: `a${char}b`, label: 'UID' }),
+    ).toThrow(VCardException)
+  })
 
   it('should name the label in the message', () => {
     expect(() =>
@@ -81,15 +92,18 @@ describe('assertNoControlChars()', () => {
     ).not.toThrow()
   })
 
-  it.each(['\n', '\r'])('should still throw on %j with allowTab', (char) => {
-    expect(() =>
-      assertNoControlChars({
-        value: `a${char}b`,
-        label: 'Property',
-        allowTab: true,
-      }),
-    ).toThrow(VCardException)
-  })
+  it.each(['\n', '\r', '\x85', '\u{2028}', '\u{2029}'])(
+    'should still throw on %j with allowTab',
+    (char) => {
+      expect(() =>
+        assertNoControlChars({
+          value: `a${char}b`,
+          label: 'Property',
+          allowTab: true,
+        }),
+      ).toThrow(VCardException)
+    },
+  )
 })
 
 describe('assertUri()', () => {
@@ -97,14 +111,27 @@ describe('assertUri()', () => {
     expect(() => assertUri('https://example.com/a;b?c=1,2')).not.toThrow()
   })
 
-  it.each(['\n', '\r', '\r\n', '\t', '\x00', '\x7F'])(
-    'should throw on control character %j',
-    (char) => {
-      expect(() => assertUri(`https://example.com/a${char}b`)).toThrow(
-        VCardException,
-      )
-    },
-  )
+  it('should accept a URI with other non-ASCII characters', () => {
+    expect(() => assertUri('https://müller.de')).not.toThrow()
+  })
+
+  it.each([
+    '\n',
+    '\r',
+    '\r\n',
+    '\t',
+    '\x00',
+    '\x7F',
+    '\x80',
+    '\x85',
+    '\x9F',
+    '\u{2028}',
+    '\u{2029}',
+  ])('should throw on control character %j', (char) => {
+    expect(() => assertUri(`https://example.com/a${char}b`)).toThrow(
+      VCardException,
+    )
+  })
 })
 
 describe('formatFloat()', () => {
@@ -165,6 +192,26 @@ describe('escapeText()', () => {
   it('should pass through empty string', () => {
     expect(escapeText('')).toEqual('')
   })
+
+  it.each(['\x00', '\x08', '\x0B', '\x0C', '\x0E', '\x1C', '\x1E', '\x1F'])(
+    'should throw on C0 control character %j',
+    (char) => {
+      expect(() => escapeText(`a${char}b`)).toThrow(VCardException)
+    },
+  )
+
+  it('should name the character in the message', () => {
+    expect(() => escapeText('a\x0Bb')).toThrow(
+      'Text values cannot contain control characters ("a\\u000bb")',
+    )
+  })
+
+  it.each(['\t', '\x85', '\u{2028}', '\u{2029}'])(
+    'should pass through %j',
+    (char) => {
+      expect(escapeText(`a${char}b`)).toEqual(`a${char}b`)
+    },
+  )
 })
 
 describe('fold()', () => {
