@@ -543,11 +543,20 @@ export default class VCard {
    *
    * A UTC offset (`+HH:MM` or `-HH:MM`) is written as it is. Any other value,
    * such as an IANA name, is escaped and written with `VALUE=text`.
+   * An offset's hours must be `00` to `23` and its minutes `00` to `59`.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.1
+   * @throws VCardException
    */
   public addTimezone(timezone: string): this {
-    const isUtcOffset = /^[+-]\d{2}:\d{2}$/.test(timezone)
+    const offset = /^[+-](\d{2}):(\d{2})$/.exec(timezone)
+    const isUtcOffset = offset !== null
+
+    if (isUtcOffset && (Number(offset[1]) > 23 || Number(offset[2]) > 59)) {
+      throw new VCardException(
+        `Invalid timezone offset: ${timezone}. Hours must be 00 to 23 and minutes 00 to 59.`,
+      )
+    }
 
     this.setProperty({
       element: 'timezone',

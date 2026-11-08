@@ -233,12 +233,13 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 
 ### Geographic
 
-| Method                            | Description                                                                                                                                                                                    |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Both values must be finite numbers. Latitude must be from -90 to 90 and longitude from -180 to 180. Throws `VCardException` otherwise |
-| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`). Any value that is not a UTC offset is written with `VALUE=text` and escaped           |
+| Method                            | Description                                                                                                                                                                                                                                                                                  |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Both values must be finite numbers. Latitude must be from -90 to 90 and longitude from -180 to 180. Throws `VCardException` otherwise                                                                                               |
+| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`). Any value that is not a UTC offset is written with `VALUE=text` and escaped. An offset's hours must be `00` to `23` and its minutes `00` to `59`. Throws `VCardException` otherwise |
 
 For `addTimezone()`, a UTC offset (`+HH:MM` or `-HH:MM`) is written as it is (`TZ:-05:00`).
+Its hours must be `00` to `23` and its minutes `00` to `59`, so `+24:00` and `+05:60` throw `VCardException`.
 Any other value, such as an IANA name, is written with `VALUE=text` (`TZ;VALUE=text:America/New_York`), as the RFC asks.
 These text values are escaped like other text properties (see [Text Escaping](#text-escaping)).
 
@@ -350,7 +351,7 @@ This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompa
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
