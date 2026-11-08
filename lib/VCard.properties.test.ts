@@ -597,6 +597,51 @@ describe('addTimezone()', () => {
     expect(vCard.toString()).not.toContain('\r\nTZ:America/New_York')
   })
 
+  it('should escape a newline in a text value', () => {
+    const vCard = new VCard()
+    vCard.addTimezone('UTC\nX-INJECTED:1')
+    const lines = vCard.toString().split('\r\n')
+    expect(lines).toContain('TZ;VALUE=text:UTC\\nX-INJECTED:1')
+    expect(lines.filter((line) => line.startsWith('X-INJECTED'))).toHaveLength(
+      0,
+    )
+    expect(lines.filter((line) => line.startsWith('TZ'))).toHaveLength(1)
+  })
+
+  it('should escape a CRLF in a text value', () => {
+    const vCard = new VCard()
+    vCard.addTimezone('UTC\r\nX-INJECTED:1')
+    const lines = vCard.toString().split('\r\n')
+    expect(lines).toContain('TZ;VALUE=text:UTC\\nX-INJECTED:1')
+    expect(lines.filter((line) => line.startsWith('X-INJECTED'))).toHaveLength(
+      0,
+    )
+    expect(lines.filter((line) => line.startsWith('TZ'))).toHaveLength(1)
+  })
+
+  it('should escape semicolons and commas in a text value', () => {
+    const vCard = new VCard()
+    vCard.addTimezone('-05:00; EST, Raleigh')
+    expect(vCard.toString()).toContain('TZ;VALUE=text:-05:00\\; EST\\, Raleigh')
+  })
+
+  it('should escape a backslash in a text value', () => {
+    const vCard = new VCard()
+    vCard.addTimezone('a\\b')
+    expect(vCard.toString()).toContain('TZ;VALUE=text:a\\\\b')
+  })
+
+  it('should escape a value that starts like a UTC offset', () => {
+    const vCard = new VCard()
+    vCard.addTimezone('+01:00\nX-INJECTED:1')
+    const lines = vCard.toString().split('\r\n')
+    expect(lines).toContain('TZ;VALUE=text:+01:00\\nX-INJECTED:1')
+    expect(lines.filter((line) => line.startsWith('X-INJECTED'))).toHaveLength(
+      0,
+    )
+    expect(lines.filter((line) => line.startsWith('TZ'))).toHaveLength(1)
+  })
+
   it('should throw on duplicate addTimezone', () => {
     const vCard = new VCard()
     vCard.addTimezone('-05:00')

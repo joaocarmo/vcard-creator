@@ -236,10 +236,11 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 | Method                            | Description                                                                                                                                                                                    |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `addGeo({ latitude, longitude })` | Geographic coordinates ([RFC 2426 §3.4.2][rfc2426-geo]). Both values must be finite numbers. Latitude must be from -90 to 90 and longitude from -180 to 180. Throws `VCardException` otherwise |
-| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`). An IANA name is written with `VALUE=text`                                             |
+| `addTimezone(timezone)`           | Time zone ([RFC 2426 §3.4.1][rfc2426-tz]). A UTC offset (`-05:00`) or an IANA name (`America/New_York`). Any value that is not a UTC offset is written with `VALUE=text` and escaped           |
 
 For `addTimezone()`, a UTC offset (`+HH:MM` or `-HH:MM`) is written as it is (`TZ:-05:00`).
 Any other value, such as an IANA name, is written with `VALUE=text` (`TZ;VALUE=text:America/New_York`), as the RFC asks.
+These text values are escaped like other text properties (see [Text Escaping](#text-escaping)).
 
 ### Media
 
@@ -345,7 +346,7 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Comma (`,`) → `\,`
 - Newlines → `\n`
 
-This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel` and `addSortString`. Other values (URLs, emails, phone numbers and so on) are written as they are.
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only). Other values (URLs, emails, phone numbers and so on) are written as they are.
 
 ### Error Handling
 
