@@ -413,6 +413,52 @@ describe('isRfcDateOrDateTime()', () => {
   ])('should reject %j', (value) => {
     expect(isRfcDateOrDateTime(value)).toBe(false)
   })
+
+  // Temporal checks the calendar only. The RFC 2425 grammar is covered by the
+  // cases above.
+  it('should agree with Temporal on which dates exist', () => {
+    if (typeof Temporal === 'undefined') {
+      throw new Error(
+        'Temporal is missing. Run the tests with the Node.js version in .nvmrc.',
+      )
+    }
+
+    const pad = (value: number, length: number) =>
+      String(value).padStart(length, '0')
+    // A full 400-year leap cycle, plus the century years and the last year
+    const years = [
+      ...Array.from({ length: 401 }, (_, year) => year),
+      1900,
+      2000,
+      2100,
+      9999,
+    ]
+    const dateExists = (value: string) => {
+      try {
+        Temporal.PlainDate.from(value, { overflow: 'reject' })
+        return true
+      } catch (error) {
+        if (error instanceof RangeError) {
+          return false
+        }
+        throw error
+      }
+    }
+
+    const mismatches: string[] = []
+    for (const year of years) {
+      for (let month = 0; month <= 13; month++) {
+        for (let day = 0; day <= 32; day++) {
+          const value = `${pad(year, 4)}-${pad(month, 2)}-${pad(day, 2)}`
+          if (isRfcDateOrDateTime(value) !== dateExists(value)) {
+            mismatches.push(value)
+          }
+        }
+      }
+    }
+
+    expect(mismatches).toEqual([])
+  })
 })
 
 describe('isValidMimeType()', () => {
