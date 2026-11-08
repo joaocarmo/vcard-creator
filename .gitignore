@@ -11,12 +11,10 @@ npm-debug.log*
 
 # Dependency directories
 node_modules/
+.pnpm-store/
 
 # Optional npm cache directory
 .npm
-
-# Optional eslint cache
-.eslintcache
 
 # Optional REPL history
 .node_repl_history

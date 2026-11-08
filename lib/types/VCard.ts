@@ -45,13 +45,7 @@ export interface SetPropertyOptions {
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =
-  | 'dom'
-  | 'intl'
-  | 'postal'
-  | 'parcel'
-  | 'home'
-  | 'work'
-  | 'pref'
+  'dom' | 'intl' | 'postal' | 'parcel' | 'home' | 'work' | 'pref'
 
 export type PhoneType =
   | 'pref'

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write # Required for OIDC
+  id-token: write # Required for npm trusted publishing (OIDC)
   contents: read
 
 jobs:
@@ -13,28 +13,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.GH_PAT }}
           ref: 'main'
+          persist-credentials: false
 
-      - name: Enable corepack
-        run: corepack enable pnpm
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+      # No cache: a restored store could inject poisoned packages into the release
+      - name: Set up pnpm, Node.js and dependencies
+        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-          registry-url: https://registry.npmjs.org/
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          require-lockfile: true
 
       - name: Build
         run: pnpm build
 
-      - name: Publish to NPM
+      - name: Publish to npm
         run: pnpm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
