@@ -327,6 +327,7 @@ myVCard.addCustomProperty({
 The property name is changed to upper case. Values and `params` are **not** escaped. You must escape special characters (`;`, `,`, `\`) in custom property values yourself. Write a line break as `\n`.
 `name` and `group` may contain only ASCII letters, digits and `-`, as [RFC 2425][rfc2425] requires. Any other character throws a `VCardException`.
 A control character, such as a raw line break, in `value` or `params` throws a `VCardException`. A tab is allowed in `value` and `params`.
+The names `BEGIN`, `END`, `VERSION`, `PRODID` and `REV` throw a `VCardException`. The check ignores case. Use `addRevision()` with a `Date` to set `REV`.
 
 ### Property Grouping
 
@@ -382,7 +383,7 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with a C0 control character other than tab, CR or LF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, or a property name or group with a character other than a letter, digit or `-`. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with a C0 control character other than tab, CR or LF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

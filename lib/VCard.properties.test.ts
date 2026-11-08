@@ -1336,6 +1336,46 @@ describe('addCustomProperty()', () => {
     },
   )
 
+  const reservedNames = ['BEGIN', 'END', 'VERSION', 'PRODID', 'REV']
+
+  it.each([
+    ...reservedNames,
+    ...reservedNames.map((n) => n.toLowerCase()),
+    'Version',
+  ])('should throw and store nothing on reserved name %j', (name) => {
+    const vCard = new VCard()
+    expect(() => vCard.addCustomProperty({ name, value: 'a' })).toThrow(
+      VCardException,
+    )
+    expect(vCard.getProperties()).toEqual([])
+  })
+
+  it.each(reservedNames)(
+    'should throw and store nothing on reserved name %j with a group',
+    (name) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addCustomProperty({ name, value: 'a', group: 'item1' }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it.each(['REV', 'rev'])('should point %j to addRevision()', (name) => {
+    expect(() =>
+      new VCard().addCustomProperty({ name, value: '2024-01-01' }),
+    ).toThrow('addRevision()')
+  })
+
+  it.each(['X-END', 'ENDX', 'X-REV', 'REVISION'])(
+    'should accept name %j',
+    (name) => {
+      const vCard = new VCard()
+      vCard.addCustomProperty({ name, value: 'a' })
+      expect(vCard.toString()).toContain(`\r\n${name}:a\r\n`)
+    },
+  )
+
   it.each(['item.1', 'a:b'])(
     'should throw and store nothing on group %j',
     (group) => {

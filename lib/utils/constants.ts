@@ -32,6 +32,16 @@ export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
   'sortString',
 ])
 
+// Written by the library, so a custom property must not use them. Each value
+// is a hint appended to the error message.
+export const RESERVED_PROPERTY_NAMES: ReadonlyMap<string, string> = new Map([
+  ['BEGIN', ''],
+  ['END', ''],
+  ['VERSION', ''],
+  ['PRODID', ''],
+  ['REV', '. Use addRevision() with a Date'],
+])
+
 // Updated automatically during the release action
 export const LIB_VERSION = '1.0.0'
 

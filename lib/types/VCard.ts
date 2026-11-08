@@ -191,7 +191,7 @@ export interface StoredProperty extends Property {
 }
 
 export interface CustomPropertyOptions {
-  /** Property name (automatically uppercased). Only letters, digits and `-` */
+  /** Property name (automatically uppercased). Only letters, digits and `-`. `BEGIN`, `END`, `VERSION`, `PRODID` and `REV` throw (the check ignores case) */
   name: string
   /** Property value (NOT automatically escaped: the caller is responsible for escaping). A control character other than tab throws */
   value: string
