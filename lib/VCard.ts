@@ -4,6 +4,7 @@ import {
   CompanyOptions,
   CoordinateOptions,
   CustomPropertyOptions,
+  DateCheckOptions,
   DateString,
   DefinedElements,
   Element,
@@ -25,7 +26,9 @@ import {
 import {
   assertName,
   assertNoControlChars,
+  assertString,
   assertUri,
+  describeType,
   escapeText,
   fold,
   formatFloat,
@@ -124,6 +127,10 @@ export default class VCard {
    * vCard.addBirthday('1990-05-15')
    */
   public addBirthday(date: Date | DateString): this {
+    if (date instanceof Date) {
+      this.assertValidDate({ date, label: 'birthday' })
+    }
+
     const value = date instanceof Date ? date.toISOString().slice(0, 10) : date
     assertNoControlChars({ value, label: 'Birthday' })
 
@@ -260,12 +267,7 @@ export default class VCard {
     mime: string,
     element: Element,
   ): this {
-    // Plain JavaScript callers can pass non-string values
-    if (typeof mime !== 'string') {
-      throw new VCardException(
-        `The MIME Media Type must be a string (got ${typeof mime})`,
-      )
-    }
+    assertString({ value: mime, label: 'MIME Media Type' })
 
     const subtype = toImageSubtype(mime)
 
@@ -396,6 +398,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addCategories(categories: string[]): this {
+    // Plain JavaScript callers can pass a string
+    if (!Array.isArray(categories)) {
+      throw new VCardException(
+        `Categories must be an array (got ${describeType(categories)})`,
+      )
+    }
+
     this.setProperty({
       element: 'categories',
       key: `CATEGORIES`,
@@ -412,6 +421,14 @@ export default class VCard {
    * @throws VCardException
    */
   public addPhoneNumber({ number, type = [] }: PhoneOptions): this {
+    // Plain JavaScript callers can pass null or undefined, which would be
+    // written as text
+    if (typeof number !== 'string' && typeof number !== 'number') {
+      throw new VCardException(
+        `Phone number values must be strings or numbers (got ${describeType(number)})`,
+      )
+    }
+
     const value = `${number}`
     assertNoControlChars({ value, label: 'Phone number' })
 
@@ -592,6 +609,24 @@ export default class VCard {
   }
 
   /**
+   * Check that a date is a valid `Date` object.
+   *
+   * @throws VCardException
+   */
+  private assertValidDate({ date, label }: DateCheckOptions): void {
+    // Plain JavaScript callers can pass a string or other values
+    if (!(date instanceof Date)) {
+      throw new VCardException(
+        `Invalid ${label}: must be a Date (got ${describeType(date)})`,
+      )
+    }
+
+    if (Number.isNaN(date.getTime())) {
+      throw new VCardException(`Invalid ${label}: the Date is invalid`)
+    }
+  }
+
+  /**
    * Add timezone.
    *
    * A UTC offset (`+HH:MM` or `-HH:MM`) is written as it is. Any other value,
@@ -602,6 +637,9 @@ export default class VCard {
    * @throws VCardException
    */
   public addTimezone(timezone: string): this {
+    // exec() would turn an object into a string and match it
+    assertString({ value: timezone, label: 'Timezone' })
+
     const offset = /^[+-](\d{2}):(\d{2})$/.exec(timezone)
     const isUtcOffset = offset !== null
 
@@ -642,8 +680,11 @@ export default class VCard {
    * When set, overrides the auto-generated REV timestamp.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.4
+   * @throws VCardException
    */
   public addRevision(date: Date): this {
+    this.assertValidDate({ date, label: 'revision' })
+
     this.setProperty({
       element: 'revision',
       key: 'REV',
@@ -874,8 +915,11 @@ export default class VCard {
    *
    * @deprecated The output is always a UTF-8 string. Encode the file yourself
    * if you need another charset. Removed in the next major version.
+   * @throws VCardException
    */
   public setCharset(charset: string): void {
+    assertString({ value: charset, label: 'Charset' })
+
     this.charset = charset
   }
 
@@ -884,11 +928,14 @@ export default class VCard {
    *
    * @deprecated Choose the file name in your code. The library never saves
    * files. Removed in the next major version.
+   * @throws VCardException
    */
   public setFilename(value: string): void {
     if (!value) {
       return
     }
+
+    assertString({ value, label: 'Filename' })
 
     this.filename = value
   }

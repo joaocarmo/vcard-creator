@@ -204,6 +204,8 @@ Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#
 
 A `url` must not contain control characters, such as a line break. Such a value throws a `VCardException`. Percent-encode them (`%0A`).
 
+A `url` must be a string. Pass a `URL` object as `url.href`.
+
 An `address` or a `number` with a control character also throws a `VCardException`.
 
 A `type` entry can contain `;`, `:` and `,`. An entry with these characters is written in double quotes, such as `TYPE="A;B"`. An entry with a double quote (`"`) or a control character other than tab, such as a line break, throws a `VCardException`.
@@ -380,7 +382,7 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with a C0 control character other than tab, CR or LF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, or a property name or group with a character other than a letter, digit or `-`. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with a C0 control character other than tab, CR or LF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, or a property name or group with a character other than a letter, digit or `-`. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

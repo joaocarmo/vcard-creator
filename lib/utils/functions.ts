@@ -3,6 +3,7 @@ import { MIME_TYPES } from './constants.js'
 import type {
   ControlCharsOptions,
   PropertyNameOptions,
+  StringCheckOptions,
 } from '../types/VCard.js'
 
 const encoder = new TextEncoder()
@@ -31,6 +32,13 @@ const RAW_CONTROL_CHARS_EXCEPT_TAB =
  * @throws VCardException
  */
 export function resolveType<T extends string>(type: T[]): string {
+  // Plain JavaScript callers can pass a string or null
+  if (!Array.isArray(type)) {
+    throw new VCardException(
+      `Type values must be an array (got ${describeType(type)})`,
+    )
+  }
+
   // Plain JavaScript callers can pass any entry value, so check it before
   // toUpperCase()
   return type.length > 0
@@ -49,6 +57,8 @@ export function resolveType<T extends string>(type: T[]): string {
  * @throws VCardException
  */
 export function escapeText(text: string): string {
+  assertString({ value: text, label: 'Text' })
+
   if (TEXT_CONTROL_CHARS.test(text)) {
     throw new VCardException(
       `Text values cannot contain control characters (${JSON.stringify(text)})`,
@@ -71,12 +81,7 @@ export function escapeText(text: string): string {
  * @throws VCardException
  */
 export function quoteParamValue(value: string): string {
-  // Plain JavaScript callers can pass undefined or other non-string values
-  if (typeof value !== 'string') {
-    throw new VCardException(
-      `Parameter values must be strings (got ${typeof value})`,
-    )
-  }
+  assertString({ value, label: 'Parameter' })
 
   if (value.includes('"')) {
     throw new VCardException(
@@ -103,6 +108,9 @@ export function assertNoControlChars({
   label,
   allowTab = false,
 }: ControlCharsOptions): void {
+  // RegExp.test() turns undefined into "undefined", which would pass
+  assertString({ value, label })
+
   const pattern = allowTab ? RAW_CONTROL_CHARS_EXCEPT_TAB : RAW_CONTROL_CHARS
 
   if (pattern.test(value)) {
@@ -110,6 +118,27 @@ export function assertNoControlChars({
       `${label} values cannot contain control characters (${JSON.stringify(value)})`,
     )
   }
+}
+
+/**
+ * Check that a value is a string. Plain JavaScript callers can pass any value.
+ *
+ * @throws VCardException
+ */
+export function assertString({ value, label }: StringCheckOptions): void {
+  if (typeof value !== 'string') {
+    throw new VCardException(
+      `${label} values must be strings (got ${describeType(value)})`,
+    )
+  }
+}
+
+/**
+ * Name the type of a value for an error message. `typeof null` is `object`,
+ * so `null` is named on its own.
+ */
+export function describeType(value: unknown): string {
+  return value === null ? 'null' : typeof value
 }
 
 /**
@@ -123,7 +152,7 @@ export function assertName({ value, label }: PropertyNameOptions): void {
   if (typeof value !== 'string' || !/^[A-Za-z0-9-]+$/.test(value)) {
     // JSON.stringify() throws on a BigInt
     const shown =
-      typeof value === 'string' ? JSON.stringify(value) : typeof value
+      typeof value === 'string' ? JSON.stringify(value) : describeType(value)
     throw new VCardException(
       `${label} values can contain only letters, digits and "-" (${shown})`,
     )

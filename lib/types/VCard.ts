@@ -59,6 +59,16 @@ export interface PropertyNameOptions {
   label: string
 }
 
+export interface DateCheckOptions {
+  date: unknown
+  label: string
+}
+
+export interface StringCheckOptions {
+  value: unknown
+  label: string
+}
+
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =
