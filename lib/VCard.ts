@@ -27,6 +27,7 @@ import {
   fold,
   formatFloat,
   isValidMimeType,
+  quoteParamValue,
   resolveType,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
@@ -436,10 +437,11 @@ export default class VCard {
    * Emits both X-SOCIALPROFILE (iOS/macOS) and IMPP (RFC 4770) for cross-platform compatibility.
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
+   * @throws VCardException
    */
   public addSocial({ url, type, user = '' }: SocialOptions): this {
-    const socialUser = user !== '' ? `;x-user=${user}` : ''
-    const socialProfile = type !== '' ? `;type=${type}` : ''
+    const socialUser = user !== '' ? `;x-user=${quoteParamValue(user)}` : ''
+    const socialProfile = type !== '' ? `;type=${quoteParamValue(type)}` : ''
 
     this.setProperty({
       element: 'social',
@@ -456,9 +458,13 @@ export default class VCard {
    * Add IMPP (Instant Messaging and Presence Protocol) entry.
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
+   * @throws VCardException
    */
   public addImpp({ uri, serviceType = '' }: ImppOptions): this {
-    const type = serviceType !== '' ? `;X-SERVICE-TYPE=${serviceType}` : ''
+    const type =
+      serviceType !== ''
+        ? `;X-SERVICE-TYPE=${quoteParamValue(serviceType)}`
+        : ''
 
     this.setProperty({
       element: 'impp',

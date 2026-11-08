@@ -1,3 +1,4 @@
+import VCardException from '../VCardException.js'
 import { MIME_TYPES } from './constants.js'
 
 const encoder = new TextEncoder()
@@ -28,6 +29,39 @@ export function escapeText(text: string): string {
     .replace(/,/g, '\\,')
     .replace(/\r\n/g, '\\n')
     .replace(/\n/g, '\\n')
+}
+
+/**
+ * Prepare a property parameter value. A value with `;`, `:` or `,` is put in
+ * double quotes. A double quote or a control character (such as a line break)
+ * cannot appear in any parameter value, quoted or not.
+ *
+ * @link   https://tools.ietf.org/html/rfc2426#section-4
+ * @throws VCardException
+ */
+export function quoteParamValue(value: string): string {
+  // Plain JavaScript callers can pass undefined or other non-string values
+  if (typeof value !== 'string') {
+    throw new VCardException(
+      `Parameter values must be strings (got ${typeof value})`,
+    )
+  }
+
+  if (value.includes('"')) {
+    throw new VCardException(
+      `Parameter values cannot contain a double quote (${value})`,
+    )
+  }
+
+  // CTL characters, except horizontal tab (allowed as WSP)
+  // oxlint-disable-next-line no-control-regex
+  if (/[\x00-\x08\x0A-\x1F\x7F]/.test(value)) {
+    throw new VCardException(
+      `Parameter values cannot contain control characters (${JSON.stringify(value)})`,
+    )
+  }
+
+  return /[;:,]/.test(value) ? `"${value}"` : value
 }
 
 /**

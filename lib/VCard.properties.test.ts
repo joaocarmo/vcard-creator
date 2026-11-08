@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
+import type { SocialOptions } from './types/VCard'
 
 describe('addFullName()', () => {
   it('should set FN directly', () => {
@@ -332,6 +333,14 @@ describe('addSocial()', () => {
     expect(output).toContain('IMPP;X-SERVICE-TYPE=X:https://x.com/jdoe')
   })
 
+  it('should throw VCardException when type is missing', () => {
+    const vCard = new VCard()
+    expect(() =>
+      vCard.addSocial({ url: 'https://x.com/jdoe' } as SocialOptions),
+    ).toThrow(VCardException)
+    expect(vCard.toString()).not.toContain('X-SOCIALPROFILE')
+  })
+
   it('should handle empty type and no user', () => {
     const vCard = new VCard()
     vCard.addSocial({ url: 'https://example.com/profile', type: '' })
@@ -356,6 +365,62 @@ describe('addSocial()', () => {
     expect(output).toContain(
       'IMPP;X-SERVICE-TYPE=LinkedIn:https://linkedin.com/in/jdoe',
     )
+  })
+
+  it('should quote a type with a semicolon', () => {
+    const vCard = new VCard()
+    vCard.addSocial({ url: 'u', type: 'My Site;x' })
+
+    const output = vCard.toString()
+    expect(output).toContain('X-SOCIALPROFILE;type="My Site;x":u')
+    expect(output).toContain('IMPP;X-SERVICE-TYPE="My Site;x":u')
+  })
+
+  it('should quote a user with a comma', () => {
+    const vCard = new VCard()
+    vCard.addSocial({ url: 'u', type: 'X', user: 'a,b' })
+
+    expect(vCard.toString()).toContain('X-SOCIALPROFILE;type=X;x-user="a,b":u')
+  })
+
+  it('should throw on a double quote in type or user', () => {
+    expect(() => new VCard().addSocial({ url: 'u', type: 'a"b' })).toThrow(
+      VCardException,
+    )
+    expect(() =>
+      new VCard().addSocial({ url: 'u', type: 'X', user: 'a"b' }),
+    ).toThrow(VCardException)
+  })
+
+  it('should store nothing when user has a double quote', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addSocial({ url: 'u', type: 'X', user: 'a"b' })).toThrow(
+      VCardException,
+    )
+
+    const output = vCard.toString()
+    expect(output).not.toContain('X-SOCIALPROFILE')
+    expect(output).not.toContain('IMPP')
+  })
+
+  it('should store nothing when type has a double quote', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addSocial({ url: 'u', type: 'a"b' })).toThrow(
+      VCardException,
+    )
+
+    const output = vCard.toString()
+    expect(output).not.toContain('X-SOCIALPROFILE')
+    expect(output).not.toContain('IMPP')
+  })
+
+  it('should throw on a line break in type or user', () => {
+    expect(() =>
+      new VCard().addSocial({ url: 'u', type: 'X\r\nEMAIL:x@example.com' }),
+    ).toThrow(VCardException)
+    expect(() =>
+      new VCard().addSocial({ url: 'u', type: 'X', user: 'a\nb' }),
+    ).toThrow(VCardException)
   })
 })
 
@@ -387,6 +452,21 @@ describe('addImpp()', () => {
     const output = vCard.toString()
     expect(output).toContain('IMPP;X-SERVICE-TYPE=XMPP:xmpp:user@example.com')
     expect(output).toContain('IMPP;X-SERVICE-TYPE=SIP:sip:user@example.com')
+  })
+
+  it('should quote a service type with a colon', () => {
+    const vCard = new VCard()
+    vCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'a:b' })
+
+    expect(vCard.toString()).toContain(
+      'IMPP;X-SERVICE-TYPE="a:b":xmpp:user@example.com',
+    )
+  })
+
+  it('should throw on a double quote in service type', () => {
+    expect(() =>
+      new VCard().addImpp({ uri: 'sip:user@example.com', serviceType: 'a"b' }),
+    ).toThrow(VCardException)
   })
 })
 
