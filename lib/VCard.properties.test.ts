@@ -451,6 +451,23 @@ describe('addGeo()', () => {
     expect(addGeo).toThrow(/finite number/)
   })
 
+  it('should throw VCardException for an object without a prototype', () => {
+    const vCard = new VCard()
+    const addGeo = () =>
+      vCard.addGeo({
+        latitude: Object.create(null) as unknown as number,
+        longitude: 0,
+      })
+    expect(addGeo).toThrow(VCardException)
+    expect(addGeo).toThrow(/finite number/)
+  })
+
+  it('should write very small values without exponent notation', () => {
+    const vCard = new VCard()
+    vCard.addGeo({ latitude: 1e-7, longitude: -5e-7 })
+    expect(vCard.toString()).toContain('GEO:0.0000001;-0.0000005')
+  })
+
   it('should not write GEO when a value is NaN', () => {
     const vCard = new VCard()
     expect(() => vCard.addGeo({ latitude: NaN, longitude: NaN })).toThrow(

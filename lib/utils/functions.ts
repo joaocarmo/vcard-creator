@@ -86,6 +86,19 @@ export function fold(text: string): string {
 }
 
 /**
+ * Format a finite number as a vCard float: digits with an optional decimal
+ * part. JavaScript writes values below 1e-6 in exponent form (`1e-7`), which
+ * the grammar does not allow.
+ *
+ * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
+ */
+export function formatFloat(value: number): string {
+  const text = String(value)
+
+  return text.includes('e') ? value.toFixed(20).replace(/\.?0+$/, '') : text
+}
+
+/**
  * Determines whether the given MIME Media Type is one of the IANA registered
  * image formats.
  *
