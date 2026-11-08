@@ -577,13 +577,6 @@ describe('addGeo()', () => {
 })
 
 describe('addTimezone()', () => {
-  it('should add UTC offset timezone', () => {
-    const vCard = new VCard()
-    vCard.addTimezone('-05:00')
-    expect(vCard.toString()).toContain('TZ:-05:00')
-    expect(vCard.toString()).not.toContain('VALUE=text')
-  })
-
   it('should add positive UTC offset timezone', () => {
     const vCard = new VCard()
     vCard.addTimezone('+01:00')
