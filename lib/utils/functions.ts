@@ -31,6 +31,57 @@ const RAW_CONTROL_CHARS_EXCEPT_TAB =
 // oxlint-disable-next-line no-control-regex
 const CONTROL_CHARS_KEPT_BY_JSON = /[\x7F-\x9F\u{2028}\u{2029}]/gu
 
+// RFC 2425 §5.8.4: the dashes and colons are optional, and a fraction of a
+// second uses a comma
+const RFC_DATE_TIME =
+  /^(\d{4})-?(\d{2})-?(\d{2})(?:T(\d{2}):?(\d{2}):?(\d{2})(?:,\d+)?(?:Z|[+-](\d{2}):?(\d{2}))?)?$/
+
+/**
+ * Check that a value is a date or a date-time in the RFC 2425 format, such as
+ * `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`, and that the date exists.
+ *
+ * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
+ */
+export function isRfcDateOrDateTime(value: string): boolean {
+  const match = RFC_DATE_TIME.exec(value)
+  if (!match) {
+    return false
+  }
+
+  const [year, month, day, hour, minute, second, zoneHour, zoneMinute] = match
+    .slice(1)
+    .map((part) => (part === undefined ? 0 : Number(part)))
+  // Date.UTC() reads years 0 to 99 as 1900 to 1999, so count leap years here
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
+  const daysInMonth = [
+    31,
+    isLeapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ][month - 1]
+
+  return (
+    month >= 1 &&
+    month <= 12 &&
+    day >= 1 &&
+    day <= daysInMonth &&
+    hour <= 23 &&
+    minute <= 59 &&
+    // 60 is a leap second
+    second <= 60 &&
+    zoneHour <= 23 &&
+    zoneMinute <= 59
+  )
+}
+
 /**
  * Quote a value for an error message, with every control character written
  * as a `\uXXXX` escape.

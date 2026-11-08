@@ -7,6 +7,7 @@ import {
   escapeText,
   fold,
   formatFloat,
+  isRfcDateOrDateTime,
   isValidMimeType,
   quoteParamValue,
   resolveType,
@@ -380,6 +381,37 @@ describe('fold()', () => {
     const cjkCount = (result.match(/漢/g) || []).length
     expect(aCount).toBe(60)
     expect(cjkCount).toBe(6)
+  })
+})
+
+describe('isRfcDateOrDateTime()', () => {
+  it.each([
+    '1990-05-15',
+    '19900515',
+    '1990-0515',
+    '1953-10-15T23:10:00Z',
+    '19531015T231000Z',
+    '1953-10-15T23:10:00,123+01:00',
+    '1953-10-15T23:10:00-0500',
+    '2000-02-29',
+    '0000-02-29',
+  ])('should accept %j', (value) => {
+    expect(isRfcDateOrDateTime(value)).toBe(true)
+  })
+
+  it.each([
+    '1990-5-15',
+    '90-05-15',
+    '1990-05-15T23:10',
+    '1990-05-15T23:10:00.5Z',
+    '1990-05-15T23:10:00+01',
+    '1900-02-29',
+    '1990-04-31',
+    '1990-13-01',
+    '1990-05-15T24:00:00Z',
+    '1990-05-15\n',
+  ])('should reject %j', (value) => {
+    expect(isRfcDateOrDateTime(value)).toBe(false)
   })
 })
 

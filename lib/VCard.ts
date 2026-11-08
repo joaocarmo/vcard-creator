@@ -5,7 +5,6 @@ import {
   CoordinateOptions,
   CustomPropertyOptions,
   DateCheckOptions,
-  DateString,
   DefinedElements,
   Element,
   EmailOptions,
@@ -33,6 +32,7 @@ import {
   escapeText,
   fold,
   formatFloat,
+  isRfcDateOrDateTime,
   isValidMimeType,
   quoteParamValue,
   resolveType,
@@ -125,36 +125,28 @@ export default class VCard {
    * Add birthday.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
-   * @param  date A Date object with a UTC year from 0000 to 9999, or a string
-   *              in YYYY-MM-DD format
+   * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
+   * @param  date A Date object with a UTC year from 0000 to 9999, or a date or
+   *              date-time string in the RFC 2425 format
    * @throws VCardException
    * @example
    * vCard.addBirthday(new Date('1990-05-15'))
    * vCard.addBirthday('1990-05-15')
+   * vCard.addBirthday('19900515')
+   * vCard.addBirthday('1953-10-15T23:10:00Z')
    */
-  public addBirthday(date: Date | DateString): this {
+  public addBirthday(date: Date | string): this {
     let value: string
 
     if (date instanceof Date) {
       this.assertValidDate({ date, label: 'birthday' })
-
-      // toISOString() writes other years with a sign and 6 digits
-      const year = date.getUTCFullYear()
-      if (year < 0 || year > 9999) {
-        throw new VCardException(
-          `Invalid birthday: the year must be 0000 to 9999 (got ${year})`,
-        )
-      }
-
       value = date.toISOString().slice(0, 10)
     } else {
       assertString({ value: date, label: 'Birthday' })
 
-      // Without the m flag, $ matches only at the end of the input, so this
-      // also rejects control characters
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      if (!isRfcDateOrDateTime(date)) {
         throw new VCardException(
-          `Invalid birthday: must be YYYY-MM-DD (got ${showValue(date)})`,
+          `Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(date)})`,
         )
       }
 
@@ -687,6 +679,14 @@ export default class VCard {
     if (Number.isNaN(date.getTime())) {
       throw new VCardException(`Invalid ${label}: the Date is invalid`)
     }
+
+    // toISOString() writes other years with a sign and 6 digits
+    const year = date.getUTCFullYear()
+    if (year < 0 || year > 9999) {
+      throw new VCardException(
+        `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,
+      )
+    }
   }
 
   /**
@@ -743,6 +743,7 @@ export default class VCard {
    * When set, overrides the auto-generated REV timestamp.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.4
+   * @param  date A Date object with a UTC year from 0000 to 9999
    * @throws VCardException
    */
   public addRevision(date: Date): this {
