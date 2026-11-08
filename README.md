@@ -81,7 +81,7 @@ myVCard
   })
   .addUrl({ url: 'https://www.jeroendesloovere.be' })
   .addGeo({ latitude: 51.0543, longitude: 3.7174 })
-  .addTimezone('Europe/Brussels')
+  .addTimezone('+01:00')
 
 console.log(myVCard.toString())
 ```
@@ -106,7 +106,7 @@ X-SOCIALPROFILE;type=X;x-user=desloovere_j:https://x.com/desloovere_j
 IMPP;X-SERVICE-TYPE=X:https://x.com/desloovere_j
 URL:https://www.jeroendesloovere.be
 GEO:51.0543;3.7174
-TZ:Europe/Brussels
+TZ:+01:00
 END:VCARD
 ```
 
@@ -125,10 +125,12 @@ const url = URL.createObjectURL(blob)
 const link = document.createElement('a')
 link.href = url
 link.download = 'contact.vcf'
+document.body.append(link)
 link.click()
+link.remove()
 
-// revoke later, so the download can start first
-setTimeout(() => URL.revokeObjectURL(url), 0)
+// revoke later, so slow downloads (Safari, WebViews) can finish first
+setTimeout(() => URL.revokeObjectURL(url), 40_000)
 ```
 
 Use `getContentType()` (`text/vcard`) as the type. With `text/plain`, Safari on iOS saves the file as `.vcf.txt` ([#41][issue-41]).
@@ -161,7 +163,7 @@ All `add*` methods return `this`, so you can chain them.
 | `addBirthday(date)`                                                                          | Birthday. Accepts `'YYYY-MM-DD'` or `Date` (read in UTC, see the note below) |
 
 `addName()` creates FN from the name parts. To set FN yourself, call `addFullName()` **before** `addName()`. `addName()` then keeps your FN.
-Calling `addFullName()` after `addName()` throws a `VCardException`, because FN already exists.
+If `addName()` already created an FN, calling `addFullName()` after it throws a `VCardException`.
 Use `addFullName()` for single names, a company as the contact, or a custom format.
 
 `addBirthday()` writes a `'YYYY-MM-DD'` string as it is. Use a string for an exact date.
@@ -252,7 +254,7 @@ An IANA name is written as it is (`TZ:America/New_York`). The RFC asks for `VALU
 
 Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL.
 
-- `mime` is the image subtype only, such as `'png'` or `'JPEG'`. Do not use `'image/png'`.
+- `mime` is the image subtype only, such as `'png'` or `'jpeg'`. Do not use `'image/png'`, and use `'jpeg'`, not the file extension `'jpg'`.
 - `mime` must be an [IANA image type][mime-types], or the method throws a `VCardException`.
 - Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) is not removed and breaks the card.
 
@@ -400,16 +402,16 @@ Each card keeps its own `BEGIN:VCARD` and `END:VCARD` lines.
 
 Most users do not need these. Some of them may be deprecated in a future version ([#107][issue-107]).
 
-| Method                                 | Description                                                                                                                             |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `toString()`                           | Returns the vCard text. Use this in most cases                                                                                          |
-| `buildVCard()`                         | Same as `toString()`                                                                                                                    |
-| `getProperties()`                      | Returns the properties as `{ key, value, group? }` objects. Values are already escaped                                                  |
-| `hasProperty(key)`                     | Returns `true` if a property has this exact key. The key includes parameters: use `'TEL;TYPE=WORK'`, not `'TEL'`                        |
-| `getContentType()`                     | Returns `'text/vcard'`                                                                                                                  |
-| `getFilename()` / `setFilename(name)`  | Gets or sets a stored file name (default `'vcard'`). It does not change the output                                                      |
-| `getFileExtension()`                   | Returns `'vcf'`                                                                                                                         |
-| `getCharset()` / `setCharset(charset)` | Gets or sets the charset (default `'utf-8'`). Another value adds `;CHARSET=<value>` to text properties. It does not change the encoding |
+| Method                                 | Description                                                                                                                                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toString()`                           | Returns the vCard text. Use this in most cases                                                                                                                                                    |
+| `buildVCard()`                         | Same as `toString()`                                                                                                                                                                              |
+| `getProperties()`                      | Returns the properties as `{ key, value, group? }` objects. Values are already escaped                                                                                                            |
+| `hasProperty(key)`                     | Returns `true` if a property has this exact key. The key includes parameters: use `'TEL;TYPE=WORK'`, not `'TEL'`                                                                                  |
+| `getContentType()`                     | Returns `'text/vcard'`                                                                                                                                                                            |
+| `getFilename()` / `setFilename(name)`  | Gets or sets a stored file name (default `'vcard'`). It does not change the output                                                                                                                |
+| `getFileExtension()`                   | Returns `'vcf'`                                                                                                                                                                                   |
+| `getCharset()` / `setCharset(charset)` | Gets or sets the charset (default `'utf-8'`). Any other value adds `;CHARSET=<value>` to text properties. The check is case-sensitive, so `'UTF-8'` also adds it. It does not change the encoding |
 
 ## Migration from v0.x
 
@@ -435,7 +437,7 @@ Key changes in v1.0:
 
 ## Forking / Contributing
 
-Use the Node.js version in `.nvmrc`, then install the dependencies:
+Use the Node.js version in `.nvmrc`. Install [pnpm](https://pnpm.io/installation) (Node.js 25 and later no longer include Corepack). Then install the dependencies:
 
 ```sh
 pnpm install
