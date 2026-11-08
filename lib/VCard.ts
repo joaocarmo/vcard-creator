@@ -23,6 +23,7 @@ import {
   UrlOptions,
 } from './types/VCard.js'
 import {
+  assertName,
   assertNoControlChars,
   assertUri,
   escapeText,
@@ -185,11 +186,12 @@ export default class VCard {
     } else {
       const mime = options.mime ?? 'PGP'
       assertNoControlChars({ value: options.key, label: 'Key' })
-      assertNoControlChars({ value: mime, label: 'Key type' })
+      // Checks a non-string value before toUpperCase()
+      const type = quoteParamValue(mime).toUpperCase()
 
       this.setProperty({
         element: 'key',
-        key: `KEY;ENCODING=b;TYPE=${mime.toUpperCase()}`,
+        key: `KEY;ENCODING=b;TYPE=${type}`,
         value: options.key,
       })
     }
@@ -669,7 +671,8 @@ export default class VCard {
    * NOTE: Values are NOT automatically escaped. If your value contains
    * special characters (semicolons, commas, backslashes), you are
    * responsible for escaping them. A control character other than tab,
-   * such as a line break, throws.
+   * such as a line break, throws. `name` and `group` may contain only
+   * letters, digits and `-`.
    *
    * @throws VCardException
    * @example
@@ -684,11 +687,12 @@ export default class VCard {
     params = '',
     group,
   }: CustomPropertyOptions): this {
-    assertNoControlChars({ value: name, label: 'Property name' })
+    assertName({ value: name, label: 'Property name' })
     assertNoControlChars({ value, label: 'Property', allowTab: true })
     assertNoControlChars({ value: params, label: 'Parameter', allowTab: true })
-    if (group !== undefined) {
-      assertNoControlChars({ value: group, label: 'Group' })
+    // An empty group writes no prefix
+    if (group !== undefined && group !== '') {
+      assertName({ value: group, label: 'Group' })
     }
 
     this.setProperty({

@@ -1,6 +1,9 @@
 import VCardException from '../VCardException.js'
 import { MIME_TYPES } from './constants.js'
-import type { ControlCharsOptions } from '../types/VCard.js'
+import type {
+  ControlCharsOptions,
+  PropertyNameOptions,
+} from '../types/VCard.js'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -9,17 +12,17 @@ const decoder = new TextDecoder()
  * Convert a type array to the vCard TYPE= wire format.
  * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
  * []                 → ''
+ * ['work', 'a,b']     → 'TYPE=WORK,"A,B"'
+ *
+ * An entry with `;`, `:` or `,` is quoted.
  *
  * @throws VCardException
  */
 export function resolveType<T extends string>(type: T[]): string {
-  // Plain JavaScript callers can pass any string
-  for (const t of type) {
-    assertNoControlChars({ value: t, label: 'Type' })
-  }
-
+  // Plain JavaScript callers can pass any entry value, so check it before
+  // toUpperCase()
   return type.length > 0
-    ? `TYPE=${type.map((t) => t.toUpperCase()).join(',')}`
+    ? `TYPE=${type.map((t) => quoteParamValue(t).toUpperCase()).join(',')}`
     : ''
 }
 
@@ -87,6 +90,24 @@ export function assertNoControlChars({
   if (pattern.test(value)) {
     throw new VCardException(
       `${label} values cannot contain control characters (${JSON.stringify(value)})`,
+    )
+  }
+}
+
+/**
+ * Check that a property name or group has only ASCII letters, digits and `-`.
+ *
+ * @link   https://tools.ietf.org/html/rfc2425#section-5.8.2
+ * @throws VCardException
+ */
+export function assertName({ value, label }: PropertyNameOptions): void {
+  // Plain JavaScript callers can pass non-string values
+  if (typeof value !== 'string' || !/^[A-Za-z0-9-]+$/.test(value)) {
+    // JSON.stringify() throws on a BigInt
+    const shown =
+      typeof value === 'string' ? JSON.stringify(value) : typeof value
+    throw new VCardException(
+      `${label} values can contain only letters, digits and "-" (${shown})`,
     )
   }
 }

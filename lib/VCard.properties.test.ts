@@ -375,6 +375,57 @@ describe('addLabel()', () => {
   })
 })
 
+describe('type entries', () => {
+  const methods: [string, string, (c: VCard, t: string) => VCard][] = [
+    [
+      'addEmail',
+      'EMAIL',
+      (c, t) =>
+        c.addEmail({ address: 'a@example.com', type: [t as EmailType] }),
+    ],
+    [
+      'addPhoneNumber',
+      'TEL',
+      (c, t) =>
+        c.addPhoneNumber({ number: '1', type: [t as unknown as 'cell'] }),
+    ],
+    [
+      'addUrl',
+      'URL',
+      (c, t) =>
+        c.addUrl({ url: 'https://a.example', type: [t as unknown as 'work'] }),
+    ],
+    [
+      'addAddress',
+      'ADR',
+      (c, t) => c.addAddress({ type: [t as unknown as 'work'] }),
+    ],
+    [
+      'addLabel',
+      'LABEL',
+      (c, t) => c.addLabel({ label: 'x', type: [t as unknown as 'work'] }),
+    ],
+  ]
+
+  it.each(methods)(
+    '%s should quote an entry with a semicolon',
+    (_, key, add) => {
+      const vCard = new VCard()
+      add(vCard, 'a;b')
+      expect(vCard.toString()).toContain(`${key};TYPE="A;B":`)
+    },
+  )
+
+  it.each(methods)(
+    '%s should throw and store nothing on a double quote',
+    (_, __, add) => {
+      const vCard = new VCard()
+      expect(() => add(vCard, 'a"b')).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+})
+
 describe('addSocial()', () => {
   it('should output both X-SOCIALPROFILE and IMPP', () => {
     const vCard = new VCard()
@@ -1053,6 +1104,27 @@ describe('addKey()', () => {
       expect(vCard.getProperties()).toEqual([])
     },
   )
+
+  it('should quote a mime with a semicolon', () => {
+    const vCard = new VCard()
+    vCard.addKey({ key: 'AAAA', mime: 'PGP;X=1' })
+    expect(vCard.toString()).toContain('KEY;ENCODING=b;TYPE="PGP;X=1":AAAA')
+  })
+
+  it('should throw and store nothing on a double quote in mime', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addKey({ key: 'AAAA', mime: 'a"b' })).toThrow(
+      VCardException,
+    )
+    expect(vCard.getProperties()).toEqual([])
+  })
+
+  it('should throw VCardException on a non-string mime', () => {
+    const vCard = new VCard()
+    expect(() =>
+      vCard.addKey({ key: 'AAAA', mime: 5 as unknown as string }),
+    ).toThrow(VCardException)
+  })
 })
 
 describe('addUid()', () => {
@@ -1246,9 +1318,39 @@ describe('addCustomProperty()', () => {
       ).toThrow(VCardException)
     },
   )
+
+  it.each(['X:A', '', 'X.A'])(
+    'should throw and store nothing on name %j',
+    (name) => {
+      const vCard = new VCard()
+      expect(() => vCard.addCustomProperty({ name, value: 'a' })).toThrow(
+        VCardException,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it.each(['item.1', 'a:b'])(
+    'should throw and store nothing on group %j',
+    (group) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addCustomProperty({ name: 'TEL', value: 'a', group }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('Property grouping', () => {
+  it('should write no prefix for an empty group', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'X-TEST', value: 'value', group: '' })
+    const output = vCard.toString()
+    expect(output).toContain('\r\nX-TEST:value')
+    expect(output).not.toContain('.X-TEST')
+  })
+
   it('should prefix grouped custom properties', () => {
     const vCard = new VCard()
     vCard.addCustomProperty({
