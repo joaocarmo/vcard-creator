@@ -254,7 +254,7 @@ An IANA name is written as it is (`TZ:America/New_York`). The RFC asks for `VALU
 
 Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL.
 
-- `mime` is the image subtype only, such as `'png'` or `'jpeg'`. Do not use `'image/png'`, and use `'jpeg'`, not the file extension `'jpg'`.
+- `mime` is the image subtype only, such as `'png'` or `'jpeg'`. Do not use `'image/png'`, and use `'jpeg'`, not the file extension `'jpg'` ([#109][issue-109]).
 - `mime` must be an [IANA image type][mime-types], or the method throws a `VCardException`.
 - Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) is not removed and breaks the card.
 
@@ -473,6 +473,7 @@ pnpm pretty
 [issue-105]: https://github.com/joaocarmo/vcard-creator/issues/105
 [issue-106]: https://github.com/joaocarmo/vcard-creator/issues/106
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
+[issue-109]: https://github.com/joaocarmo/vcard-creator/issues/109
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
 [rfc2426]: https://tools.ietf.org/html/rfc2426
