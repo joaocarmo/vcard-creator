@@ -32,6 +32,15 @@ export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
   'sortString',
 ])
 
+// Written by the library, so a custom property must not use them
+export const RESERVED_PROPERTY_NAMES: ReadonlySet<string> = new Set([
+  'BEGIN',
+  'END',
+  'VERSION',
+  'PRODID',
+  'REV',
+])
+
 // Updated automatically during the release action
 export const LIB_VERSION = '1.0.0'
 

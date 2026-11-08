@@ -722,7 +722,8 @@ export default class VCard {
    * special characters (semicolons, commas, backslashes), you are
    * responsible for escaping them. A control character other than tab,
    * such as a line break, throws. `name` and `group` may contain only
-   * letters, digits and `-`.
+   * letters, digits and `-`. The names `BEGIN`, `END`, `VERSION`, `PRODID`
+   * and `REV` throw in any case. Use `addRevision()` to set `REV`.
    *
    * @throws VCardException
    * @example
@@ -738,6 +739,13 @@ export default class VCard {
     group,
   }: CustomPropertyOptions): this {
     assertName({ value: name, label: 'Property name' })
+    const upperName = name.toUpperCase()
+    if (constants.RESERVED_PROPERTY_NAMES.has(upperName)) {
+      const hint = upperName === 'REV' ? '. Use addRevision()' : ''
+      throw new VCardException(
+        `Property name ${JSON.stringify(name)} is reserved${hint}`,
+      )
+    }
     assertNoControlChars({ value, label: 'Property', allowTab: true })
     assertNoControlChars({ value: params, label: 'Parameter', allowTab: true })
     // An empty group writes no prefix
@@ -747,7 +755,7 @@ export default class VCard {
 
     this.setProperty({
       element: 'custom',
-      key: `${name.toUpperCase()}${params !== '' ? `;${params}` : ''}`,
+      key: `${upperName}${params !== '' ? `;${params}` : ''}`,
       value,
       group,
     })
