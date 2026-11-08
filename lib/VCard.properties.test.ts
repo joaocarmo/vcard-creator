@@ -241,6 +241,17 @@ describe('addUrl()', () => {
     expect(output).toContain('URL;TYPE=WORK:https://work.example.com')
     expect(output).toContain('URL;TYPE=HOME:https://home.example.com')
   })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in url',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addUrl({ url: `https://example.com/a${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addAddress()', () => {
@@ -433,6 +444,37 @@ describe('addSocial()', () => {
       new VCard().addSocial({ url: 'u', type: 'X', user: 'a\nb' }),
     ).toThrow(VCardException)
   })
+
+  it('should write a URL with a comma and a semicolon as it is', () => {
+    const vCard = new VCard()
+    vCard.addSocial({ url: 'https://example.com/a;b?c=1,2', type: 'X' })
+
+    const output = vCard.toString()
+    expect(output).toContain(
+      'X-SOCIALPROFILE;type=X:https://example.com/a;b?c=1,2',
+    )
+    expect(output).toContain(
+      'IMPP;X-SERVICE-TYPE=X:https://example.com/a;b?c=1,2',
+    )
+  })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in url',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addSocial({
+          url: `https://x.com/a${char}X-INJECTED:1`,
+          type: 'X',
+        }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+
+      const output = vCard.toString()
+      expect(output).not.toContain('X-SOCIALPROFILE')
+      expect(output).not.toContain('IMPP')
+    },
+  )
 })
 
 describe('addImpp()', () => {
@@ -479,6 +521,24 @@ describe('addImpp()', () => {
       new VCard().addImpp({ uri: 'sip:user@example.com', serviceType: 'a"b' }),
     ).toThrow(VCardException)
   })
+
+  it('should write a URI with a comma and a semicolon as it is', () => {
+    const vCard = new VCard()
+    vCard.addImpp({ uri: 'https://example.com/a;b?c=1,2' })
+
+    expect(vCard.toString()).toContain('IMPP:https://example.com/a;b?c=1,2')
+  })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in uri',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addImpp({ uri: `sip:user@example.com${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addGeo()', () => {
@@ -711,6 +771,26 @@ describe('addPhoto()', () => {
     expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:thumb64')
     expect(output).toContain('PHOTO;ENCODING=b;TYPE=PNG:hires64')
   })
+
+  it('should write a URL with a comma and a semicolon as it is', () => {
+    const vCard = new VCard()
+    vCard.addPhoto({ url: 'https://example.com/a;b?c=1,2' })
+
+    expect(vCard.toString()).toContain(
+      'PHOTO;VALUE=uri:https://example.com/a;b?c=1,2',
+    )
+  })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in url',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addPhoto({ url: `https://example.com/a${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addLogo()', () => {
@@ -738,6 +818,26 @@ describe('addLogo()', () => {
     expect(output).toContain('LOGO;ENCODING=b;TYPE=PNG:base64logo')
     expect(output).toContain('LOGO;VALUE=uri:https://example.com/logo.png')
   })
+
+  it('should write a URL with a comma and a semicolon as it is', () => {
+    const vCard = new VCard()
+    vCard.addLogo({ url: 'https://example.com/a;b?c=1,2' })
+
+    expect(vCard.toString()).toContain(
+      'LOGO;VALUE=uri:https://example.com/a;b?c=1,2',
+    )
+  })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in url',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addLogo({ url: `https://example.com/a${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe.each([
@@ -828,6 +928,26 @@ describe('addKey()', () => {
     expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
     expect(output).toContain('KEY;ENCODING=b;TYPE=X509:certdata')
   })
+
+  it('should write a URL with a comma and a semicolon as it is', () => {
+    const vCard = new VCard()
+    vCard.addKey({ url: 'https://example.com/a;b?c=1,2' })
+
+    expect(vCard.toString()).toContain(
+      'KEY;VALUE=uri:https://example.com/a;b?c=1,2',
+    )
+  })
+
+  it.each(['\n', '\r'])(
+    'should throw and store nothing on control character %j in url',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addKey({ url: `https://example.com/k${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addUid()', () => {
