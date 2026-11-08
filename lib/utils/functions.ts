@@ -8,6 +8,18 @@ import type {
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
+// C0 control characters except tab, CR and LF. escapeText() turns CR and LF
+// into `\n`.
+// oxlint-disable-next-line no-control-regex
+const TEXT_CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F]/
+
+// oxlint-disable-next-line no-control-regex
+const RAW_CONTROL_CHARS = /[\x00-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
+
+const RAW_CONTROL_CHARS_EXCEPT_TAB =
+  // oxlint-disable-next-line no-control-regex
+  /[\x00-\x08\x0A-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
+
 /**
  * Convert a type array to the vCard TYPE= wire format.
  * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
@@ -37,8 +49,7 @@ export function resolveType<T extends string>(type: T[]): string {
  * @throws VCardException
  */
 export function escapeText(text: string): string {
-  // oxlint-disable-next-line no-control-regex
-  if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(text)) {
+  if (TEXT_CONTROL_CHARS.test(text)) {
     throw new VCardException(
       `Text values cannot contain control characters (${JSON.stringify(text)})`,
     )
@@ -92,11 +103,7 @@ export function assertNoControlChars({
   label,
   allowTab = false,
 }: ControlCharsOptions): void {
-  const pattern = allowTab
-    ? // oxlint-disable-next-line no-control-regex
-      /[\x00-\x08\x0A-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
-    : // oxlint-disable-next-line no-control-regex
-      /[\x00-\x1F\x7F-\x9F\u{2028}\u{2029}]/u
+  const pattern = allowTab ? RAW_CONTROL_CHARS_EXCEPT_TAB : RAW_CONTROL_CHARS
 
   if (pattern.test(value)) {
     throw new VCardException(
