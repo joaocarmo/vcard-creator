@@ -69,6 +69,11 @@ export interface StringCheckOptions {
   label: string
 }
 
+export interface OptionsCheckOptions {
+  value: unknown
+  label: string
+}
+
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =

@@ -2,6 +2,7 @@ import VCardException from '../VCardException.js'
 import { MIME_TYPES } from './constants.js'
 import type {
   ControlCharsOptions,
+  OptionsCheckOptions,
   PropertyNameOptions,
   StringCheckOptions,
 } from '../types/VCard.js'
@@ -34,7 +35,7 @@ const CONTROL_CHARS_KEPT_BY_JSON = /[\x7F-\x9F\u{2028}\u{2029}]/gu
  * Quote a value for an error message, with every control character written
  * as a `\uXXXX` escape.
  */
-function showValue(value: string): string {
+export function showValue(value: string): string {
   return JSON.stringify(value).replace(
     CONTROL_CHARS_KEPT_BY_JSON,
     (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`,
@@ -149,6 +150,22 @@ export function assertString({ value, label }: StringCheckOptions): void {
   if (typeof value !== 'string') {
     throw new VCardException(
       `${label} values must be strings (got ${describeType(value)})`,
+    )
+  }
+}
+
+/**
+ * Check that an options argument is an object. Plain JavaScript callers can
+ * leave it out or pass any value, which would throw a `TypeError` when the
+ * method reads its fields.
+ *
+ * @throws VCardException
+ */
+export function assertOptions({ value, label }: OptionsCheckOptions): void {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    const shown = Array.isArray(value) ? 'array' : describeType(value)
+    throw new VCardException(
+      `${label} options must be an object (got ${shown})`,
     )
   }
 }

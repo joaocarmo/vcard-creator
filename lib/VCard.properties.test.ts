@@ -153,6 +153,45 @@ describe('addBirthday()', () => {
       expect(vCard.getProperties()).toEqual([])
     },
   )
+
+  it.each([
+    'not-a-date',
+    '1990-5-15',
+    '19900515',
+    '1990-05-15T00:00:00Z',
+    ' 1990-05-15',
+    '',
+  ])('should throw and store nothing on string %j', (value) => {
+    const vCard = new VCard()
+    expect(() => vCard.addBirthday(value as DateString)).toThrow(VCardException)
+    expect(vCard.getProperties()).toEqual([])
+  })
+
+  it('should show the rejected string with escapes in the message', () => {
+    expect(() => new VCard().addBirthday('1990-05-15\n' as DateString)).toThrow(
+      'Invalid birthday: must be YYYY-MM-DD (got "1990-05-15\\n")',
+    )
+  })
+
+  it.each([
+    ['+010000-01-01T00:00:00Z', 10000],
+    ['-000001-01-01T00:00:00Z', -1],
+  ])('should throw and store nothing on a Date in year %s', (iso, year) => {
+    const vCard = new VCard()
+    expect(() => vCard.addBirthday(new Date(iso))).toThrow(
+      `Invalid birthday: the year must be 0000 to 9999 (got ${year})`,
+    )
+    expect(vCard.getProperties()).toEqual([])
+  })
+
+  it.each([
+    ['0000-01-01T00:00:00Z', '0000-01-01'],
+    ['9999-12-31T00:00:00Z', '9999-12-31'],
+  ])('should accept a Date at the year limit (%s)', (iso, expected) => {
+    const vCard = new VCard()
+    vCard.addBirthday(new Date(iso))
+    expect(vCard.toString()).toContain(`BDAY:${expected}\r\n`)
+  })
 })
 
 describe('addCompany()', () => {
@@ -254,6 +293,26 @@ describe('addPhoneNumber()', () => {
     const output = vCard.toString()
     expect(output).toContain('TEL;TYPE=WORK:+1-555-0001')
     expect(output).toContain('TEL;TYPE=CELL:+1-555-0002')
+  })
+
+  it.each([NaN, Infinity, -Infinity])(
+    'should throw and store nothing on number %s',
+    (number) => {
+      const vCard = new VCard()
+      expect(() => vCard.addPhoneNumber({ number })).toThrow(
+        `Phone number values must be finite numbers (got ${number})`,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it.each([
+    [0, 'TEL:0'],
+    [-1, 'TEL:-1'],
+  ])('should accept the finite number %s', (number, expected) => {
+    const vCard = new VCard()
+    vCard.addPhoneNumber({ number })
+    expect(vCard.toString()).toContain(`${expected}\r\n`)
   })
 
   it.each(['\n', '\r', '\r\n'])(
@@ -1569,6 +1628,60 @@ describe('non-string input', () => {
           expectThrow(call, value)
         }
       },
+    )
+  })
+
+  // `v` replaces the whole options argument
+  const options: Record<string, Call> = {
+    addAddress: (c, v) => c.addAddress(v),
+    addCompany: (c, v) => c.addCompany(v),
+    addEmail: (c, v) => c.addEmail(v),
+    addKey: (c, v) => c.addKey(v),
+    addName: (c, v) => c.addName(v),
+    addPhoneNumber: (c, v) => c.addPhoneNumber(v),
+    addLogo: (c, v) => c.addLogo(v),
+    addPhoto: (c, v) => c.addPhoto(v),
+    addUrl: (c, v) => c.addUrl(v),
+    addSocial: (c, v) => c.addSocial(v),
+    addImpp: (c, v) => c.addImpp(v),
+    addGeo: (c, v) => c.addGeo(v),
+    addLabel: (c, v) => c.addLabel(v),
+    addCustomProperty: (c, v) => c.addCustomProperty(v),
+  }
+
+  // `undefined` selects the `{}` default of these methods
+  const optionalOptions = new Set(['addAddress', 'addName'])
+
+  describe.each([
+    ['undefined', undefined],
+    ['null', null],
+    ["'x'", 'x'],
+    ['[]', []],
+  ])('with %s as the options argument', (_, value) => {
+    it.each(Object.entries(options))('should throw in %s()', (name, call) => {
+      if (value === undefined && optionalOptions.has(name)) {
+        return
+      }
+
+      expectThrow(call, value)
+    })
+  })
+
+  it('should accept no argument in addAddress() and addName()', () => {
+    const vCard = new VCard()
+    vCard.addAddress().addName()
+
+    const output = vCard.toString()
+    expect(output).toContain('ADR;TYPE=INTL,POSTAL,PARCEL,WORK:;;;;;;\r\n')
+    expect(output).toContain('N:;;;;\r\n')
+  })
+
+  it('should name the method and the type in the options message', () => {
+    expect(() => new VCard().addEmail(null as never)).toThrow(
+      'addEmail() options must be an object (got null)',
+    )
+    expect(() => new VCard().addEmail([] as never)).toThrow(
+      'addEmail() options must be an object (got array)',
     )
   })
 

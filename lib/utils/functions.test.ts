@@ -1,6 +1,7 @@
 import {
   assertName,
   assertNoControlChars,
+  assertOptions,
   assertString,
   assertUri,
   escapeText,
@@ -71,6 +72,31 @@ describe('assertString()', () => {
     expect(() => assertString({ value, label: 'UID' })).toThrow(VCardException)
     expect(() => assertString({ value, label: 'UID' })).toThrow(
       `UID values must be strings (got ${shown})`,
+    )
+  })
+})
+
+describe('assertOptions()', () => {
+  it.each([
+    ['{}', {}],
+    ['Object.create(null)', Object.create(null)],
+  ])('should accept %s', (_, value) => {
+    expect(() => assertOptions({ value, label: 'addX()' })).not.toThrow()
+  })
+
+  it.each([
+    ['undefined', undefined, 'undefined'],
+    ['null', null, 'null'],
+    ["'x'", 'x', 'string'],
+    ['42', 42, 'number'],
+    ['[]', [], 'array'],
+    ['a function', () => ({}), 'function'],
+  ])('should throw on %s', (_, value, shown) => {
+    expect(() => assertOptions({ value, label: 'addX()' })).toThrow(
+      VCardException,
+    )
+    expect(() => assertOptions({ value, label: 'addX()' })).toThrow(
+      `addX() options must be an object (got ${shown})`,
     )
   })
 })
