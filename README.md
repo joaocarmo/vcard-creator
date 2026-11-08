@@ -201,6 +201,8 @@ myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 
 Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#43][issue-43]).
 
+A `url` must not contain control characters, such as a line break. Such a value throws a `VCardException`. Percent-encode them (`%0A`).
+
 ### Address
 
 | Method                                                                                                 | Description                                                                                                         |
@@ -231,6 +233,8 @@ myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 
 `type`, `user` and `serviceType` can contain `;`, `:` and `,`. A value with these characters is written in double quotes, such as `type="My Site;x"`. A value with a double quote (`"`) or a control character, such as a line break, throws a `VCardException`.
 
+A `url` or `uri` with a control character also throws a `VCardException`.
+
 ### Geographic
 
 | Method                            | Description                                                                                                                                                                                                                                                                                  |
@@ -252,7 +256,7 @@ These text values are escaped like other text properties (see [Text Escaping](#t
 | `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])      |
 | `addLogo({ image, mime? })`  | Logo as base64 content. `mime` defaults to `JPEG`  |
 
-Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL.
+Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 - `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
 - After that, `mime` must be an [IANA image type][mime-types], or the method throws a `VCardException`.
@@ -347,11 +351,11 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Comma (`,`) → `\,`
 - Newlines → `\n`
 
-This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only). Other values (URLs, emails, phone numbers and so on) are written as they are.
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only). Other values (URLs, emails, phone numbers and so on) are written as they are. URI values must not contain control characters.
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a URI with a control character, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

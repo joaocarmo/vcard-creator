@@ -1,4 +1,5 @@
 import {
+  assertUri,
   escapeText,
   fold,
   formatFloat,
@@ -43,6 +44,21 @@ describe('quoteParamValue()', () => {
   it('should allow a horizontal tab', () => {
     expect(quoteParamValue('a\tb')).toEqual('a\tb')
   })
+})
+
+describe('assertUri()', () => {
+  it('should accept a URI with a comma and a semicolon', () => {
+    expect(() => assertUri('https://example.com/a;b?c=1,2')).not.toThrow()
+  })
+
+  it.each(['\n', '\r', '\r\n', '\t', '\x00', '\x7F'])(
+    'should throw on control character %j',
+    (char) => {
+      expect(() => assertUri(`https://example.com/a${char}b`)).toThrow(
+        VCardException,
+      )
+    },
+  )
 })
 
 describe('formatFloat()', () => {

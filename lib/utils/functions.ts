@@ -65,6 +65,21 @@ export function quoteParamValue(value: string): string {
 }
 
 /**
+ * Check that a URI value has no control characters, tab included.
+ *
+ * @link   https://tools.ietf.org/html/rfc3986#section-2
+ * @throws VCardException
+ */
+export function assertUri(value: string): void {
+  // oxlint-disable-next-line no-control-regex
+  if (/[\x00-\x1F\x7F]/.test(value)) {
+    throw new VCardException(
+      `URI values cannot contain control characters (${JSON.stringify(value)})`,
+    )
+  }
+}
+
+/**
  * Fold a line according to RFC2425 section 5.8.1.
  *
  * Lines MUST be no longer than 75 octets, excluding the line break. Multi-byte

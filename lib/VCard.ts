@@ -23,6 +23,7 @@ import {
   UrlOptions,
 } from './types/VCard.js'
 import {
+  assertUri,
   escapeText,
   fold,
   formatFloat,
@@ -214,8 +215,12 @@ export default class VCard {
 
   /**
    * Add a photo or logo by URL.
+   *
+   * @throws VCardException
    */
   private addMediaUrl(property: string, url: string, element: Element): this {
+    assertUri(url)
+
     this.setProperty({
       element,
       key: `${property};VALUE=uri`,
@@ -429,8 +434,11 @@ export default class VCard {
    * Add URL.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.8
+   * @throws VCardException
    */
   public addUrl({ url, type = [] }: UrlOptions): this {
+    assertUri(url)
+
     const resolved = resolveType(type)
     this.setProperty({
       element: 'url',
@@ -449,6 +457,9 @@ export default class VCard {
    * @throws VCardException
    */
   public addSocial({ url, type, user = '' }: SocialOptions): this {
+    // addImpp() checks too, but only after X-SOCIALPROFILE is stored
+    assertUri(url)
+
     const socialUser = user !== '' ? `;x-user=${quoteParamValue(user)}` : ''
     const socialProfile = type !== '' ? `;type=${quoteParamValue(type)}` : ''
 
@@ -470,6 +481,8 @@ export default class VCard {
    * @throws VCardException
    */
   public addImpp({ uri, serviceType = '' }: ImppOptions): this {
+    assertUri(uri)
+
     const type =
       serviceType !== ''
         ? `;X-SERVICE-TYPE=${quoteParamValue(serviceType)}`
