@@ -490,12 +490,20 @@ describe('addTimezone()', () => {
     const vCard = new VCard()
     vCard.addTimezone('-05:00')
     expect(vCard.toString()).toContain('TZ:-05:00')
+    expect(vCard.toString()).not.toContain('VALUE=text')
   })
 
-  it('should add IANA timezone name', () => {
+  it('should add positive UTC offset timezone', () => {
+    const vCard = new VCard()
+    vCard.addTimezone('+01:00')
+    expect(vCard.toString()).toContain('TZ:+01:00')
+  })
+
+  it('should add IANA timezone name with VALUE=text', () => {
     const vCard = new VCard()
     vCard.addTimezone('America/New_York')
-    expect(vCard.toString()).toContain('TZ:America/New_York')
+    expect(vCard.toString()).toContain('TZ;VALUE=text:America/New_York')
+    expect(vCard.toString()).not.toContain('\r\nTZ:America/New_York')
   })
 
   it('should throw on duplicate addTimezone', () => {

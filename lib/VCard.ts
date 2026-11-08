@@ -526,10 +526,19 @@ export default class VCard {
   /**
    * Add timezone.
    *
+   * A UTC offset (`+HH:MM` or `-HH:MM`) is written as it is. Any other value,
+   * such as an IANA name, is written with `VALUE=text`.
+   *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.1
    */
   public addTimezone(timezone: string): this {
-    this.setProperty({ element: 'timezone', key: 'TZ', value: timezone })
+    const isUtcOffset = /^[+-]\d{2}:\d{2}$/.test(timezone)
+
+    this.setProperty({
+      element: 'timezone',
+      key: isUtcOffset ? 'TZ' : 'TZ;VALUE=text',
+      value: timezone,
+    })
 
     return this
   }
