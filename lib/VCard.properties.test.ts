@@ -82,6 +82,17 @@ describe('addName()', () => {
     expect(vCard.toString()).toContain('FN:John')
   })
 
+  it('should not generate FN when a custom FN property exists', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'fn', value: 'Custom' })
+    vCard.addName({ givenName: 'John' })
+    const fnLines = vCard
+      .toString()
+      .split('\r\n')
+      .filter((line) => line.startsWith('FN'))
+    expect(fnLines).toEqual(['FN:Custom'])
+  })
+
   it('should throw on duplicate addName', () => {
     const vCard = new VCard()
     vCard.addName({ familyName: 'Desloovere', givenName: 'Jeroen' })

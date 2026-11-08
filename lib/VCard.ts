@@ -35,6 +35,9 @@ import * as constants from './utils/constants.js'
 export default class VCard {
   /**
    * Default Charset.
+   *
+   * @deprecated The output is always a UTF-8 string. Encode the file yourself
+   * if you need another charset. Removed in the next major version.
    */
   public charset: string = constants.DEFAULT_CHARACTER_SET
 
@@ -299,7 +302,10 @@ export default class VCard {
     })
 
     const fnValue = escapeText(values.join(' ').trim())
-    if (!this.hasProperty('FN') && fnValue !== '') {
+    const hasFullName = this.properties.some(
+      (property) => property.key === 'FN',
+    )
+    if (!hasFullName && fnValue !== '') {
       this.setProperty({
         element: 'fullname',
         key: `FN`,
@@ -632,6 +638,8 @@ export default class VCard {
 
   /**
    * Build vCard (.vcf).
+   *
+   * @deprecated Use `toString()`. Removed in the next major version.
    */
   public buildVCard(): string {
     const parts: string[] = [
@@ -697,6 +705,9 @@ export default class VCard {
 
   /**
    * Get charset.
+   *
+   * @deprecated The output is always a UTF-8 string. Encode the file yourself
+   * if you need another charset. Removed in the next major version.
    */
   public getCharset(): string {
     return this.charset
@@ -722,6 +733,9 @@ export default class VCard {
 
   /**
    * Get filename.
+   *
+   * @deprecated Choose the file name in your code. The library never saves
+   * files. Removed in the next major version.
    */
   public getFilename(): string {
     return this.filename
@@ -729,6 +743,8 @@ export default class VCard {
 
   /**
    * Get file extension.
+   *
+   * @deprecated Use the literal `'vcf'`. Removed in the next major version.
    */
   public getFileExtension(): string {
     return this.fileExtension
@@ -747,6 +763,9 @@ export default class VCard {
 
   /**
    * Has property.
+   *
+   * @deprecated Use `getProperties().some((p) => p.key.split(';')[0] === 'TEL')`,
+   * or another match. Removed in the next major version.
    */
   public hasProperty(key: string): boolean {
     return this.properties.some((property) => property.key === key)
@@ -754,6 +773,9 @@ export default class VCard {
 
   /**
    * Set charset.
+   *
+   * @deprecated The output is always a UTF-8 string. Encode the file yourself
+   * if you need another charset. Removed in the next major version.
    */
   public setCharset(charset: string): void {
     this.charset = charset
@@ -761,6 +783,9 @@ export default class VCard {
 
   /**
    * Set filename.
+   *
+   * @deprecated Choose the file name in your code. The library never saves
+   * files. Removed in the next major version.
    */
   public setFilename(value: string): void {
     if (!value) {
