@@ -229,7 +229,7 @@ myVCard.addImpp({ uri: 'xmpp:user@example.com', serviceType: 'XMPP' })
 myVCard.addImpp({ uri: 'sip:user@example.com', serviceType: 'SIP' })
 ```
 
-`type`, `user` and `serviceType` can contain `;`, `:` and `,`. A value with these characters is written in double quotes, such as `type="My Site;x"`. A value with a double quote (`"`) throws a `VCardException`.
+`type`, `user` and `serviceType` can contain `;`, `:` and `,`. A value with these characters is written in double quotes, such as `type="My Site;x"`. A value with a double quote (`"`) or a control character, such as a line break, throws a `VCardException`.
 
 ### Geographic
 
@@ -349,7 +349,7 @@ This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompa
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, or a `type`, `user` or `serviceType` with a double quote. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

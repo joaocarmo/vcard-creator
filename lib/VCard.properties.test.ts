@@ -393,6 +393,26 @@ describe('addSocial()', () => {
     expect(output).not.toContain('X-SOCIALPROFILE')
     expect(output).not.toContain('IMPP')
   })
+
+  it('should store nothing when type has a double quote', () => {
+    const vCard = new VCard()
+    expect(() => vCard.addSocial({ url: 'u', type: 'a"b' })).toThrow(
+      VCardException,
+    )
+
+    const output = vCard.toString()
+    expect(output).not.toContain('X-SOCIALPROFILE')
+    expect(output).not.toContain('IMPP')
+  })
+
+  it('should throw on a line break in type or user', () => {
+    expect(() =>
+      new VCard().addSocial({ url: 'u', type: 'X\r\nEMAIL:x@example.com' }),
+    ).toThrow(VCardException)
+    expect(() =>
+      new VCard().addSocial({ url: 'u', type: 'X', user: 'a\nb' }),
+    ).toThrow(VCardException)
+  })
 })
 
 describe('addImpp()', () => {

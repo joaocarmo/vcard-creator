@@ -33,7 +33,8 @@ export function escapeText(text: string): string {
 
 /**
  * Prepare a property parameter value. A value with `;`, `:` or `,` is put in
- * double quotes. A double quote cannot appear in any parameter value.
+ * double quotes. A double quote or a control character (such as a line break)
+ * cannot appear in any parameter value, quoted or not.
  *
  * @link   https://tools.ietf.org/html/rfc2426#section-4
  * @throws VCardException
@@ -42,6 +43,14 @@ export function quoteParamValue(value: string): string {
   if (value.includes('"')) {
     throw new VCardException(
       `Parameter values cannot contain a double quote (${value})`,
+    )
+  }
+
+  // CTL characters, except horizontal tab (allowed as WSP)
+  // oxlint-disable-next-line no-control-regex
+  if (/[\x00-\x08\x0A-\x1F\x7F]/.test(value)) {
+    throw new VCardException(
+      `Parameter values cannot contain control characters (${JSON.stringify(value)})`,
     )
   }
 

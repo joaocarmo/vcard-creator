@@ -22,6 +22,17 @@ describe('quoteParamValue()', () => {
   it('should throw on a double quote', () => {
     expect(() => quoteParamValue('a"b')).toThrow(VCardException)
   })
+
+  it('should throw on a control character', () => {
+    expect(() => quoteParamValue('a\r\nEMAIL:x')).toThrow(VCardException)
+    expect(() => quoteParamValue('a\nb')).toThrow(VCardException)
+    expect(() => quoteParamValue('a\x00b')).toThrow(VCardException)
+    expect(() => quoteParamValue('a\x7Fb')).toThrow(VCardException)
+  })
+
+  it('should allow a horizontal tab', () => {
+    expect(quoteParamValue('a\tb')).toEqual('a\tb')
+  })
 })
 
 describe('formatFloat()', () => {
