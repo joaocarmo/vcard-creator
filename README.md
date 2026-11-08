@@ -369,6 +369,7 @@ Other values are written as they are. They throw a `VCardException` if they cont
 - `addCustomProperty` name, value, `params` and `group` (a tab is allowed in value and `params`)
 - `type` entries
 - URLs and URIs
+- the deprecated `charset` (checked by `toString()`)
 
 ### Error Handling
 

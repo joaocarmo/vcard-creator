@@ -281,5 +281,16 @@ describe('Text escaping', () => {
       expect(output).toContain('item1.X-A:a;b\r\n')
       expect(output).toContain('UID:urn:uuid:1234\r\n')
     })
+
+    it.each(['\r', '\n', '\r\n'])(
+      'should throw on line break %j in the charset',
+      (lineBreak) => {
+        const vCard = new VCard()
+        vCard.addNote('Call me')
+        vCard.setCharset(`utf-16${lineBreak}X-INJECTED:1`)
+
+        expect(() => vCard.toString()).toThrow(VCardException)
+      },
+    )
   })
 })

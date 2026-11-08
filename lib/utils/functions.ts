@@ -60,13 +60,8 @@ export function quoteParamValue(value: string): string {
     )
   }
 
-  // CTL characters, except horizontal tab (allowed as WSP)
-  // oxlint-disable-next-line no-control-regex
-  if (/[\x00-\x08\x0A-\x1F\x7F]/.test(value)) {
-    throw new VCardException(
-      `Parameter values cannot contain control characters (${JSON.stringify(value)})`,
-    )
-  }
+  // Horizontal tab is allowed as WSP
+  assertNoControlChars(value, 'Parameter', { allowTab: true })
 
   return /[;:,]/.test(value) ? `"${value}"` : value
 }

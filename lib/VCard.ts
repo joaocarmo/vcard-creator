@@ -794,7 +794,13 @@ export default class VCard {
     return this.charsetParam()
   }
 
+  /**
+   * @throws VCardException
+   */
   private charsetParam(): string {
+    // `charset` is a public field, so it is checked here at build time
+    assertNoControlChars(this.charset, 'Charset')
+
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
       return `;CHARSET=${this.charset}`
     }
