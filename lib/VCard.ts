@@ -542,7 +542,7 @@ export default class VCard {
    * Add timezone.
    *
    * A UTC offset (`+HH:MM` or `-HH:MM`) is written as it is. Any other value,
-   * such as an IANA name, is written with `VALUE=text`.
+   * such as an IANA name, is escaped and written with `VALUE=text`.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.4.1
    */
@@ -552,7 +552,7 @@ export default class VCard {
     this.setProperty({
       element: 'timezone',
       key: isUtcOffset ? 'TZ' : 'TZ;VALUE=text',
-      value: timezone,
+      value: isUtcOffset ? timezone : escapeText(timezone),
     })
 
     return this
