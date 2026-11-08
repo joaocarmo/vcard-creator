@@ -723,7 +723,7 @@ export default class VCard {
    * responsible for escaping them. A control character other than tab,
    * such as a line break, throws. `name` and `group` may contain only
    * letters, digits and `-`. The names `BEGIN`, `END`, `VERSION`, `PRODID`
-   * and `REV` throw in any case. Use `addRevision()` to set `REV`.
+   * and `REV` throw. The check ignores case. Use `addRevision()` to set `REV`.
    *
    * @throws VCardException
    * @example
@@ -740,8 +740,8 @@ export default class VCard {
   }: CustomPropertyOptions): this {
     assertName({ value: name, label: 'Property name' })
     const upperName = name.toUpperCase()
-    if (constants.RESERVED_PROPERTY_NAMES.has(upperName)) {
-      const hint = upperName === 'REV' ? '. Use addRevision()' : ''
+    const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)
+    if (hint !== undefined) {
       throw new VCardException(
         `Property name ${JSON.stringify(name)} is reserved${hint}`,
       )

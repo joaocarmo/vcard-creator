@@ -327,7 +327,7 @@ myVCard.addCustomProperty({
 The property name is changed to upper case. Values and `params` are **not** escaped. You must escape special characters (`;`, `,`, `\`) in custom property values yourself. Write a line break as `\n`.
 `name` and `group` may contain only ASCII letters, digits and `-`, as [RFC 2425][rfc2425] requires. Any other character throws a `VCardException`.
 A control character, such as a raw line break, in `value` or `params` throws a `VCardException`. A tab is allowed in `value` and `params`.
-The names `BEGIN`, `END`, `VERSION`, `PRODID` and `REV` (in any case) throw a `VCardException`. Use `addRevision()` to set `REV`.
+The names `BEGIN`, `END`, `VERSION`, `PRODID` and `REV` throw a `VCardException`. The check ignores case. Use `addRevision()` with a `Date` to set `REV`.
 
 ### Property Grouping
 
