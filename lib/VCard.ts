@@ -29,6 +29,7 @@ import {
   isValidMimeType,
   quoteParamValue,
   resolveType,
+  toImageSubtype,
 } from './utils/functions.js'
 import * as constants from './utils/constants.js'
 
@@ -235,8 +236,7 @@ export default class VCard {
     mime: string,
     element: Element,
   ): this {
-    // Accepts a full MIME type (such as `File.type`) and the `jpg` extension
-    const subtype = mime.replace(/^image\//i, '').replace(/^jpg$/i, 'jpeg')
+    const subtype = toImageSubtype(mime)
 
     if (!isValidMimeType(subtype)) {
       throw new VCardException(`The MIME Media Type is invalid (${mime})`)
