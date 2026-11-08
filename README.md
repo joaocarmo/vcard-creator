@@ -471,7 +471,7 @@ Key changes in v1.0:
 
 ## Forking / Contributing
 
-Use the Node.js version in `.nvmrc`. Install [pnpm](https://pnpm.io/installation) (Node.js 25 and later no longer include Corepack). Then install the dependencies:
+Use the Node.js version in `.nvmrc`: the unit tests use its built-in `Temporal`. Install [pnpm](https://pnpm.io/installation) (Node.js 25 and later no longer include Corepack). Then install the dependencies:
 
 ```sh
 pnpm install
