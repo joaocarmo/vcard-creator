@@ -167,6 +167,7 @@ If `addName()` already created an FN, calling `addFullName()` after it throws a 
 Use `addFullName()` for single names, a company as the contact, or a custom format.
 
 `addBirthday()` writes a `'YYYY-MM-DD'` string as it is. Use a string for an exact date.
+A string with a control character, such as a line break, throws a `VCardException`.
 A `Date` is read in UTC:
 
 - `new Date('1990-05-15')` and the `valueAsDate` of a date input are UTC midnight, so they give the right day.
@@ -203,12 +204,16 @@ Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#
 
 A `url` must not contain control characters, such as a line break. Such a value throws a `VCardException`. Percent-encode them (`%0A`).
 
+An `address`, a `number` or a `type` entry with a control character also throws a `VCardException`.
+
 ### Address
 
 | Method                                                                                                 | Description                                                                                                         |
 | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `addAddress({ street?, locality?, region?, postalCode?, country?, postOfficeBox?, extended?, type? })` | Structured address ([RFC 2426 §3.2.1][rfc2426-adr]). Type defaults to `['intl', 'postal', 'parcel', 'work']`        |
 | `addLabel({ label, type? })`                                                                           | Formatted address label ([RFC 2426 §3.2.2][rfc2426-label]). Type defaults to `['intl', 'postal', 'parcel', 'work']` |
+
+A `type` entry with a control character, such as a line break, throws a `VCardException`.
 
 ### Social & Messaging
 
@@ -256,7 +261,7 @@ These text values are escaped like other text properties (see [Text Escaping](#t
 | `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])      |
 | `addLogo({ image, mime? })`  | Logo as base64 content. `mime` defaults to `JPEG`  |
 
-Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
+Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` or an `image` with a control character, such as a line break, throws a `VCardException`.
 
 - `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
 - After that, `mime` must be a string with an [IANA image type][mime-types], or the method throws a `VCardException`. The match ignores case.
@@ -280,7 +285,7 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
 | `addKey({ key, mime? })` | Public key as base64. `mime` defaults to `PGP`     |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. It is not checked. Pass raw base64 only, as for photos. A `url` with a control character, such as a line break, throws a `VCardException`.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. It is only checked for control characters. Pass raw base64 only, as for photos. A `url`, `key` or `mime` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL
@@ -294,7 +299,7 @@ vCard.addKey({ key: base64cert, mime: 'X509' })
 
 | Method                      | Description                                                                     |
 | --------------------------- | ------------------------------------------------------------------------------- |
-| `addUid(uid)`               | Unique identifier                                                               |
+| `addUid(uid)`               | Unique identifier. Throws `VCardException` on a control character               |
 | `addCategories(categories)` | Categories or tags. Accepts `string[]`                                          |
 | `addNote(note)`             | Free-text note                                                                  |
 | `addSortString(sortString)` | Sort key for name order ([RFC 2426 §3.6.5][rfc2426-sort]). Useful for CJK names |
@@ -315,7 +320,8 @@ myVCard.addCustomProperty({
 })
 ```
 
-The property name is changed to upper case. Values and `params` are **not** escaped. You must escape special characters (`;`, `,`, `\`, newlines) in custom property values yourself.
+The property name is changed to upper case. Values and `params` are **not** escaped. You must escape special characters (`;`, `,`, `\`) in custom property values yourself. Write a line break as `\n`.
+A control character, such as a raw line break, in `name`, `value`, `params` or `group` throws a `VCardException`. A tab is allowed in `value` and `params`.
 
 ### Property Grouping
 
@@ -349,13 +355,25 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Backslash (`\`) → `\\`
 - Semicolon (`;`) → `\;`
 - Comma (`,`) → `\,`
-- Newlines → `\n`
+- Line breaks (`\r\n`, `\n` and a lone `\r`) → `\n`
 
-This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only). Other values (URLs, emails, phone numbers and so on) are written as they are. URI values must not contain control characters.
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only).
+
+Other values are written as they are. They throw a `VCardException` if they contain a control character, such as a line break:
+
+- `addUid` uid
+- `addEmail` address and `addPhoneNumber` number
+- `addBirthday` string
+- `addKey` key and `mime`
+- `addPhoto` and `addLogo` image
+- `addCustomProperty` name, value, `params` and `group` (a tab is allowed in value and `params`)
+- `type` entries
+- URLs and URIs
+- the deprecated `charset` (checked by `toString()`)
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a URI with a control character, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a value that is written as it is and contains a control character, or a `type`, `user` or `serviceType` with a double quote or a control character. It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

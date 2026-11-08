@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
-import type { SocialOptions } from './types/VCard'
+import type { DateString, EmailType, SocialOptions } from './types/VCard'
 
 describe('addFullName()', () => {
   it('should set FN directly', () => {
@@ -142,6 +142,17 @@ describe('addBirthday()', () => {
     vCard.addBirthday('1990-05-15')
     expect(() => vCard.addBirthday('1991-06-20')).toThrow(VCardException)
   })
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in a string',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addBirthday(`1990-05-15${char}X-INJECTED:1` as DateString),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addCompany()', () => {
@@ -197,6 +208,28 @@ describe('addEmail()', () => {
     expect(output).toContain('EMAIL;TYPE=WORK:work@example.com')
     expect(output).toContain('EMAIL;TYPE=HOME:home@example.com')
   })
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in address',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addEmail({ address: `a@example.com${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it('should throw and store nothing on a type entry with a line break', () => {
+    const vCard = new VCard()
+    expect(() =>
+      vCard.addEmail({
+        address: 'a@example.com',
+        type: ['work\nX-INJECTED:1' as EmailType],
+      }),
+    ).toThrow(VCardException)
+    expect(vCard.getProperties()).toEqual([])
+  })
 })
 
 describe('addPhoneNumber()', () => {
@@ -222,6 +255,17 @@ describe('addPhoneNumber()', () => {
     expect(output).toContain('TEL;TYPE=WORK:+1-555-0001')
     expect(output).toContain('TEL;TYPE=CELL:+1-555-0002')
   })
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in number',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addPhoneNumber({ number: `+1-555-0100${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addUrl()', () => {
@@ -912,6 +956,17 @@ describe.each([
       '(image/foo)',
     )
   })
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in image',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard[method]({ image: `data${char}X-INJECTED:1`, mime: 'png' }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addKey()', () => {
@@ -976,6 +1031,28 @@ describe('addKey()', () => {
       expect(vCard.getProperties()).toEqual([])
     },
   )
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in key',
+    (char) => {
+      const vCard = new VCard()
+      expect(() => vCard.addKey({ key: `data${char}X-INJECTED:1` })).toThrow(
+        VCardException,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in mime',
+    (char) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addKey({ key: 'data', mime: `PGP${char}X-INJECTED:1` }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addUid()', () => {
@@ -984,6 +1061,15 @@ describe('addUid()', () => {
     vCard.addUid('uid-001')
     expect(() => vCard.addUid('uid-002')).toThrow(VCardException)
   })
+
+  it.each(['\n', '\r', '\r\n'])(
+    'should throw and store nothing on control character %j in uid',
+    (char) => {
+      const vCard = new VCard()
+      expect(() => vCard.addUid(`x${char}X-INJECTED:1`)).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 })
 
 describe('addCategories()', () => {
@@ -1118,6 +1204,48 @@ describe('addCustomProperty()', () => {
     vCard.addCustomProperty({ name: 'X-TEST', value: 'a;b,c\\d' })
     expect(vCard.toString()).toContain('X-TEST:a;b,c\\d')
   })
+
+  it('should write a tab in value and params as it is', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({
+      name: 'X-TEST',
+      value: 'a\tb',
+      params: 'X-P="c\td"',
+    })
+    expect(vCard.toString()).toContain('X-TEST;X-P="c\td":a\tb')
+  })
+
+  it.each(['name', 'value', 'params', 'group'] as const)(
+    'should throw and store nothing on a line break in %s',
+    (field) => {
+      for (const char of ['\n', '\r', '\r\n']) {
+        const vCard = new VCard()
+        const options = {
+          name: 'X-TEST',
+          value: 'value',
+          params: 'TYPE=work',
+          group: 'item1',
+          [field]: `x${char}X-INJECTED:1`,
+        }
+        expect(() => vCard.addCustomProperty(options)).toThrow(VCardException)
+        expect(vCard.getProperties()).toEqual([])
+      }
+    },
+  )
+
+  it.each(['name', 'group'] as const)(
+    'should throw on a tab in %s',
+    (field) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addCustomProperty({
+          name: 'X-TEST',
+          value: 'v',
+          [field]: 'a\tb',
+        }),
+      ).toThrow(VCardException)
+    },
+  )
 })
 
 describe('Property grouping', () => {

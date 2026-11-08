@@ -48,6 +48,12 @@ export interface CoordinateOptions {
   limit: number
 }
 
+export interface ControlCharsOptions {
+  value: string
+  label: string
+  allowTab?: boolean
+}
+
 export type DateString = `${number}-${number}-${number}`
 
 export type AddressType =
@@ -172,7 +178,7 @@ export interface StoredProperty extends Property {
 export interface CustomPropertyOptions {
   /** Property name (automatically uppercased) */
   name: string
-  /** Property value (NOT automatically escaped — caller is responsible for escaping) */
+  /** Property value (NOT automatically escaped: the caller is responsible for escaping). A control character other than tab throws */
   value: string
   /** Optional parameters (e.g., 'TYPE=work') */
   params?: string

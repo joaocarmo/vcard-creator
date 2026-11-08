@@ -1,4 +1,5 @@
 import {
+  assertNoControlChars,
   assertUri,
   escapeText,
   fold,
@@ -44,6 +45,49 @@ describe('quoteParamValue()', () => {
 
   it('should allow a horizontal tab', () => {
     expect(quoteParamValue('a\tb')).toEqual('a\tb')
+  })
+})
+
+describe('assertNoControlChars()', () => {
+  it('should accept printable text', () => {
+    expect(() =>
+      assertNoControlChars({ value: 'a;b,c d', label: 'UID' }),
+    ).not.toThrow()
+  })
+
+  it.each(['\n', '\r', '\r\n', '\t', '\x00', '\x7F'])(
+    'should throw on control character %j',
+    (char) => {
+      expect(() =>
+        assertNoControlChars({ value: `a${char}b`, label: 'UID' }),
+      ).toThrow(VCardException)
+    },
+  )
+
+  it('should name the label in the message', () => {
+    expect(() =>
+      assertNoControlChars({ value: 'a\nb', label: 'Email' }),
+    ).toThrow('Email values cannot contain control characters ("a\\nb")')
+  })
+
+  it('should accept a tab with allowTab', () => {
+    expect(() =>
+      assertNoControlChars({
+        value: 'a\tb',
+        label: 'Property',
+        allowTab: true,
+      }),
+    ).not.toThrow()
+  })
+
+  it.each(['\n', '\r'])('should still throw on %j with allowTab', (char) => {
+    expect(() =>
+      assertNoControlChars({
+        value: `a${char}b`,
+        label: 'Property',
+        allowTab: true,
+      }),
+    ).toThrow(VCardException)
   })
 })
 
@@ -94,6 +138,15 @@ describe('escapeText()', () => {
 
   it('should escape LF newlines', () => {
     expect(escapeText('\n')).toEqual('\\n')
+  })
+
+  it('should escape a lone CR', () => {
+    expect(escapeText('a\rb')).toEqual('a\\nb')
+  })
+
+  it('should escape each line break in a sequence', () => {
+    expect(escapeText('\n\r')).toEqual('\\n\\n')
+    expect(escapeText('\r\n\r\n')).toEqual('\\n\\n')
   })
 
   it('should handle combined special characters', () => {
@@ -231,5 +284,11 @@ describe('resolveType()', () => {
 
   it('should return empty string from empty array', () => {
     expect(resolveType([])).toBe('')
+  })
+
+  it('should throw on an entry with a control character', () => {
+    expect(() => resolveType(['work', 'home\nX-INJECTED:1'])).toThrow(
+      VCardException,
+    )
   })
 })
