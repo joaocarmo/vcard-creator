@@ -98,6 +98,10 @@ describe('isValidMimeType()', () => {
     )
     expect(notLowerCase).toEqual([])
   })
+
+  it('should store MIME_TYPES sorted', () => {
+    expect([...MIME_TYPES]).toEqual([...MIME_TYPES].sort())
+  })
 })
 
 describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
