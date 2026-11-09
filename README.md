@@ -301,7 +301,7 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | `addKey({ key, mime? })`  | Public key as base64. `mime` defaults to `PGP`                                                             |
 | `addKey({ text, mime? })` | Public key as text, such as an ASCII-armoured PGP key. Written with `VALUE=text`. `mime` defaults to `PGP` |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. An empty `mime` writes no `TYPE`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. `text` is escaped like other text values (see [Text Escaping](#text-escaping)), so line breaks are written as `\n`. A `url` with a control character, such as a line break, throws a `VCardException`.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. Leading and trailing whitespace (space, tab, CR, LF) is removed. An empty `mime`, or one with only whitespace, writes no `TYPE`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab inside the value throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. `text` is escaped like other text values (see [Text Escaping](#text-escaping)), so line breaks are written as `\n`. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL

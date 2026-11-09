@@ -4,11 +4,29 @@ import {
   toImageSubtype,
   toMediaInput,
   toMimeEssence,
+  trimHttpWhitespace,
 } from './mime'
 
 // Built from code points so the source stays ASCII
 const NO_BREAK_SPACE = String.fromCharCode(0xa0)
 const KELVIN_SIGN = String.fromCharCode(0x212a)
+
+describe('trimHttpWhitespace()', () => {
+  it.each(['\t', '\n', '\r', ' '])('should trim %j at both ends', (char) => {
+    expect(trimHttpWhitespace(`${char}${char}a${char}`)).toBe('a')
+  })
+
+  it.each([
+    ['a b\tc', 'a b\tc'],
+    ['\va\f', '\va\f'],
+    [
+      `${NO_BREAK_SPACE}a${NO_BREAK_SPACE}`,
+      `${NO_BREAK_SPACE}a${NO_BREAK_SPACE}`,
+    ],
+  ])('should keep %j as %j', (value, expected) => {
+    expect(trimHttpWhitespace(value)).toBe(expected)
+  })
+})
 
 describe('toMimeEssence()', () => {
   it.each([
@@ -94,6 +112,14 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
       element,
       valueType: 'uri',
       value: 'https://example.com/a',
+    })
+  })
+
+  it('should map an image with `url: undefined` to the image', () => {
+    expect(toMediaInput(element, { image: 'data', url: undefined })).toEqual({
+      element,
+      value: 'data',
+      params: [{ kind: 'single', name: 'TYPE', value: 'JPEG', upper: true }],
     })
   })
 

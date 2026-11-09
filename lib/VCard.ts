@@ -17,7 +17,7 @@ import {
   UrlOptions,
 } from './types/VCard.js'
 import { buildKey, fold, formatDateTime, quoteParamValue } from './format.js'
-import { toMediaInput } from './mime.js'
+import { toMediaInput, trimHttpWhitespace } from './mime.js'
 import {
   DefinedElements,
   ParamSpec,
@@ -207,8 +207,11 @@ export default class VCard {
           return { element: 'key', valueType: 'uri', value: options.url }
         }
 
-        const mime = options.mime ?? 'PGP'
-        // RFC 2426 allows no empty key type, so an empty mime writes no TYPE
+        const rawMime = options.mime ?? 'PGP'
+        assertString({ value: rawMime, label: `${PROPERTIES.key.label} TYPE` })
+        const mime = trimHttpWhitespace(rawMime)
+        // RFC 2426 allows no empty key type, so a mime that is empty after
+        // trimming writes no TYPE
         const params: ParamSpec[] =
           mime === ''
             ? []

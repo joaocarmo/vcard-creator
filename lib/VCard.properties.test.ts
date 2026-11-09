@@ -187,6 +187,46 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
   ['addKey', (c) => c.addKey({ text: 'abc', mime: '' }), 'KEY;VALUE=text:abc'],
   [
     'addKey',
+    (c) => c.addKey({ key: 'AAAA', mime: ' PGP ' }),
+    'KEY;ENCODING=b;TYPE=PGP:AAAA',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'abc', mime: ' PGP ' }),
+    'KEY;VALUE=text;TYPE=PGP:abc',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ key: 'AAAA', mime: '\tx509\r\n' }),
+    'KEY;ENCODING=b;TYPE=X509:AAAA',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'abc', mime: '\tx509\r\n' }),
+    'KEY;VALUE=text;TYPE=X509:abc',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ key: 'AAAA', mime: '   ' }),
+    'KEY;ENCODING=b:AAAA',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'abc', mime: '   ' }),
+    'KEY;VALUE=text:abc',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ key: 'AAAA', mime: ' PGP;X=1 ' }),
+    'KEY;ENCODING=b;TYPE="PGP;X=1":AAAA',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'abc', mime: ' PGP;X=1 ' }),
+    'KEY;VALUE=text;TYPE="PGP;X=1":abc',
+  ],
+  [
+    'addKey',
     (c) => c.addKey({ text: '-----BEGIN PGP PUBLIC KEY BLOCK-----\nAB\r\nCD' }),
     'KEY;VALUE=text;TYPE=PGP:-----BEGIN PGP PUBLIC KEY BLOCK-----\\nAB\\nCD',
   ],

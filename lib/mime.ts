@@ -93,13 +93,22 @@ export const MIME_TYPES: ReadonlySet<string> = new Set([
 ])
 
 /**
+ * Remove leading and trailing HTTP whitespace (tab, LF, CR and space).
+ *
+ * @link https://fetch.spec.whatwg.org/#http-whitespace
+ */
+export function trimHttpWhitespace(value: string): string {
+  return value.replace(/^[\t\n\r ]+|[\t\n\r ]+$/g, '')
+}
+
+/**
  * Get the essence of a MIME type value: the part before the first `;`, without
- * leading or trailing HTTP whitespace (tab, LF, CR and space).
+ * leading or trailing HTTP whitespace.
  *
  * @link https://mimesniff.spec.whatwg.org/#parse-a-mime-type
  */
 export function toMimeEssence(mime: string): string {
-  return mime.split(';')[0].replace(/^[\t\n\r ]+|[\t\n\r ]+$/g, '')
+  return trimHttpWhitespace(mime.split(';')[0])
 }
 
 /**
@@ -139,7 +148,8 @@ export function toMediaInput(
   element: 'logo' | 'photo',
   options: LogoOptions | PhotoOptions,
 ): PropertyInput {
-  if ('url' in options) {
+  // An undefined form key, such as `url: undefined`, selects no form
+  if (options.url !== undefined) {
     return { element, valueType: 'uri', value: options.url }
   }
 
