@@ -98,7 +98,7 @@ export interface EmailOptions {
 
 export interface PhoneOptions {
   /**
-   * Phone number as a string, such as '+1-555-0100' (E.164 numbers are strings).
+   * Phone number as a string, such as '+1-555-0100' or the E.164 form '+15550100'.
    * Passing a `number` is deprecated and removed in the next major version: it
    * loses leading zeros and the `+` sign, `1e21` is written as `1e+21`, and
    * integers above `Number.MAX_SAFE_INTEGER` change their last digits.

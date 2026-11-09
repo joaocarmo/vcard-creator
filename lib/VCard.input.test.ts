@@ -1,13 +1,7 @@
 import { runInNewContext } from 'node:vm'
 import VCard from './VCard'
 import VCardException from './VCardException'
-import type {
-  AddressType,
-  DateString,
-  EmailType,
-  PhoneType,
-  UrlType,
-} from './types/VCard'
+import type { AddressType, EmailType, PhoneType, UrlType } from './types/VCard'
 import { addMethods } from '../test/helpers'
 
 type AddMethod = Extract<keyof VCard, `add${string}`>
@@ -57,7 +51,7 @@ const cases: Record<AddMethod, MethodCases> = {
     text: true,
   },
   addBirthday: {
-    strings: [(c, s) => c.addBirthday(`1990-05-15${s}` as DateString)],
+    strings: [(c, s) => c.addBirthday(`1990-05-15${s}`)],
     required: [(c, v) => c.addBirthday(v)],
   },
   addCompany: {

@@ -389,9 +389,19 @@ export default class VCard {
   /**
    * Add phone number.
    *
+   * @deprecated Pass `number` as a string. A number loses leading zeros and
+   * the `+` sign. Removed in the next major version.
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
    * @throws VCardException
    */
+  public addPhoneNumber(options: PhoneOptions & { number: number }): this
+  /**
+   * Add phone number.
+   *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
+   * @throws VCardException
+   */
+  public addPhoneNumber(options: PhoneOptions): this
   public addPhoneNumber(options: PhoneOptions): this {
     return this.storeProperties({
       options,

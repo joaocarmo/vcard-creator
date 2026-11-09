@@ -1,6 +1,6 @@
 import VCard from './VCard'
 import VCardException from './VCardException'
-import type { DateString, SocialOptions } from './types/VCard'
+import type { SocialOptions } from './types/VCard'
 import { sampleImage } from '../test/fixtures'
 import { addMethods, freezeTime } from '../test/helpers'
 
@@ -372,7 +372,7 @@ describe('addName()', () => {
 describe('addBirthday()', () => {
   it('should throw and store nothing on an invalid date string', () => {
     const vCard = new VCard()
-    expect(() => vCard.addBirthday('1990-02-30' as DateString)).toThrow(
+    expect(() => vCard.addBirthday('1990-02-30')).toThrow(
       'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-02-30")',
     )
     expect(vCard.getProperties()).toEqual([])
