@@ -120,21 +120,21 @@ export interface ImppOptions {
 export type PhotoOptions =
   | { url: string }
   | {
-      /** Base64-encoded image data */ image: string
+      /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
       /** Image MIME type, such as 'png', 'jpg' or 'image/png' (defaults to 'JPEG') */ mime?: string
     }
 
 export type LogoOptions =
   | { url: string }
   | {
-      /** Base64-encoded image data */ image: string
+      /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
       /** Image MIME type, such as 'png', 'jpg' or 'image/png' (defaults to 'JPEG') */ mime?: string
     }
 
 export type KeyOptions =
   | { url: string }
   | {
-      /** Base64-encoded public key data */ key: string
+      /** Base64-encoded public key data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ key: string
       /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string
     }
 

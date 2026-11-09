@@ -9,17 +9,13 @@ import {
   assertUri,
   assertValidDate,
   describeType,
+  isBase64,
   isRfcDateOrDateTime,
   showValue,
   UTC_OFFSET,
 } from './validate.js'
 
 type ValuePipeline = (value: unknown, label: string) => string
-
-const rawPipeline: ValuePipeline = (value, label) => {
-  assertNoControlChars({ value: value as string, label })
-  return value as string
-}
 
 /**
  * Check a property value by its value type and return the string to store.
@@ -42,12 +38,29 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     assertUri(value as string)
     return value as string
   },
-  raw: rawPipeline,
+  raw: (value, label) => {
+    assertNoControlChars({ value: value as string, label })
+    return value as string
+  },
   'raw-tab': (value, label) => {
     assertNoControlChars({ value: value as string, label, allowTab: true })
     return value as string
   },
-  binary: rawPipeline,
+  binary: (value, label) => {
+    assertString({ value, label })
+
+    // Wrapped base64, such as GNU `base64` output, is valid. `\s` would also
+    // remove VT, FF, U+2028 and U+2029, which some parsers read as line breaks.
+    const base64 = (value as string).replace(/[ \t\r\n]/g, '')
+
+    if (!isBase64(base64)) {
+      throw new VCardException(
+        `${label} values must be base64 (got ${showValue(value as string)})`,
+      )
+    }
+
+    return base64
+  },
   'date-or-date-time': (value, label) => {
     const name = label.toLowerCase()
 

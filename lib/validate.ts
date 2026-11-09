@@ -48,6 +48,18 @@ const RFC_DATE_TIME =
 // `+HH:MM` or `-HH:MM`. Ranges are checked separately.
 export const UTC_OFFSET = /^[+-](\d{2}):(\d{2})$/
 
+// A flat pattern: a repeated 4-character group overflows the regex stack on
+// values of a few MB.
+const BASE64_CHARS = /^[A-Za-z0-9+/]*={0,2}$/
+
+/**
+ * Check a value against RFC 2045 §6.8 base64: the base64 alphabet, padded
+ * with `=` to a multiple of 4 characters.
+ */
+export function isBase64(value: string): boolean {
+  return value.length % 4 === 0 && BASE64_CHARS.test(value)
+}
+
 /**
  * Check that a value is a date or a date-time in the RFC 2425 format, such as
  * `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`, and that the date exists.
