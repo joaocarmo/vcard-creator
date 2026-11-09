@@ -6,6 +6,14 @@ Use the Node.js version in `.nvmrc`: the unit tests use its built-in `Temporal`.
 pnpm install
 ```
 
+## Node.js versions in CI
+
+- Lint, unit tests and the functional test run on the `.nvmrc` version (Node.js 26).
+- The `smoke` job builds `dist/` on Node.js 26. It then runs `test/smoke/node.mjs` on Node.js 18 and 20: the oldest version `engines` allows, and the next major's minimum. The script uses no Vitest, because Vitest needs a newer Node.js.
+- `tsconfig.build.json` sets `target: "ES2022"`, so `dist/` runs on Node.js 18.
+
+## Build and test
+
 Build and test your changes:
 
 ```sh
@@ -21,6 +29,9 @@ pnpm test:coverage
 # Functional test: type checks and runs it against dist/, so run pnpm build first
 pnpm test:functional
 
+# Smoke test: runs dist/ with plain node, so run pnpm build first
+pnpm test:smoke
+
 # Lint, type check and format check
 pnpm lint
 pnpm type-check
@@ -31,7 +42,7 @@ pnpm pretty
 
 `pnpm test:unit` runs without coverage, so a filtered run such as `pnpm test:unit lib/index.test.ts` passes when its tests pass.
 
-Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm test:functional`, `pnpm lint`, `pnpm type-check` and `pnpm pretty`.
+Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm test:functional`, `pnpm test:smoke`, `pnpm lint`, `pnpm type-check` and `pnpm pretty`.
 
 ## Documentation
 
