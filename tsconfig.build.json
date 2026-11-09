@@ -2,13 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationMap": false,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "noEmit": false,
-    "types": ["node"],
     "outDir": "dist",
-    "rootDir": "lib"
+    "rootDir": "lib",
+    "types": ["node"]
   },
   "include": ["lib/**/*.ts"],
   "exclude": ["lib/**/*.test.ts"]

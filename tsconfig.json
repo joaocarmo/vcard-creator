@@ -1,20 +1,16 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
     "noImplicitAny": true,
-    "outDir": "dist",
     "resolveJsonModule": true,
     "strict": true,
     "target": "esnext",
     "types": ["vitest/globals", "node"]
   },
-  "include": ["lib/**/*.ts", "test/**/*.ts"],
-  "exclude": ["node_modules", "dist/**/*"]
+  "include": ["lib/**/*.ts", "test/**/*.ts", "vitest*.ts"],
+  "exclude": ["node_modules", "dist/**/*", "test/functional"]
 }
