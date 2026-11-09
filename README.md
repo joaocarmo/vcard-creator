@@ -198,7 +198,7 @@ myVCard.addBirthday('1953-10-15T23:10:00Z')
 | Method                              | Description                                                                                                                                |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`. The address is escaped as RFC 2426 text (see [Text Escaping](#text-escaping)) |
-| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`                                                                |
+| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`. Pass `number` as a string. A `number` is **deprecated**       |
 | `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                                                                                              |
 
 The `type` parameter takes a typed array, for IDE autocomplete and type safety:
@@ -208,7 +208,7 @@ myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
 myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 ```
 
-Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#43][issue-43]).
+Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#43][issue-43]). `1e21` is written as `1e+21`, and integers above `Number.MAX_SAFE_INTEGER` change their last digits. A `number` is deprecated and is removed in the next major version ([#156][issue-156]).
 
 A `url` must not contain control characters, such as a line break. Such a value throws a `VCardException`. Percent-encode them (`%0A`).
 
@@ -466,6 +466,11 @@ Most users do not need these. The members marked **Deprecated** are removed in t
 | `getCharset()` / `setCharset(charset)` / `charset` | **Deprecated**: the output is always a UTF-8 string. Encode the file yourself if you need another charset. Gets or sets the charset (default `'utf-8'`). Any other value adds `;CHARSET=<value>` to `N`, `FN`, `NICKNAME`, `ORG`, `TITLE`, `ROLE`, `NOTE`, `CATEGORIES`, `SORT-STRING`, `ADR` and `LABEL`. `EMAIL`, `UID` and `TZ` never get it. RFC 2426 has no `CHARSET` parameter. The check is case-sensitive, so `'UTF-8'` also adds it. It does not change the encoding. A value with `;`, `:` or `,` is written in double quotes. A double quote makes `toString()` and `getCharsetString()` throw. `setCharset()` does not check it, because `charset` is a public field |
 | `getCharsetString()`                               | **Deprecated**: no replacement. Returns `;CHARSET=<value>` when the charset is not `'utf-8'`, and an empty string otherwise. The value is in double quotes when it contains `;`, `:` or `,`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
+Also deprecated, and removed in the next major version ([#156][issue-156]):
+
+- a `number` as the `addPhoneNumber()` `number`. Pass a string.
+- the `DateString` type. Use `string`.
+
 ## Migration from v0.x
 
 For the previous API documentation, see the [v0.11.0 README][readme-v0.11].
@@ -501,6 +506,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests, and [ARCHITEC
 [issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
 [issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
+[issue-156]: https://github.com/joaocarmo/vcard-creator/issues/156
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
 [rfc2045-base64]: https://tools.ietf.org/html/rfc2045#section-6.8
