@@ -108,8 +108,8 @@ export default class VCard {
    */
   public addAddress(options: AddressOptions = {}): this {
     return this.storeProperties({
+      options,
       methodName: 'addAddress()',
-      value: options,
       map: (options) => {
         const {
           postOfficeBox = '',
@@ -171,8 +171,8 @@ export default class VCard {
    */
   public addCompany(options: CompanyOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addCompany()',
-      value: options,
       map: (options) => {
         const { name, department = '' } = options
 
@@ -192,8 +192,8 @@ export default class VCard {
    */
   public addEmail(options: EmailOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addEmail()',
-      value: options,
       map: (options) => {
         const { address, type = [] } = options
 
@@ -214,8 +214,8 @@ export default class VCard {
    */
   public addKey(options: KeyOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addKey()',
-      value: options,
       map: (options) => {
         if ('url' in options) {
           return { element: 'key', valueType: 'uri', value: options.url }
@@ -296,8 +296,8 @@ export default class VCard {
    */
   public addName(options: NameOptions = {}): this {
     return this.storeProperties({
+      options,
       methodName: 'addName()',
-      value: options,
       map: (options) => {
         const {
           familyName = '',
@@ -403,8 +403,8 @@ export default class VCard {
    */
   public addPhoneNumber(options: PhoneOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addPhoneNumber()',
-      value: options,
       map: (options) => {
         const { number, type = [] } = options
 
@@ -439,8 +439,8 @@ export default class VCard {
    */
   public addLogo(options: LogoOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addLogo()',
-      value: options,
       map: (options) => toMediaInput('logo', options),
     })
   }
@@ -453,8 +453,8 @@ export default class VCard {
    */
   public addPhoto(options: PhotoOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addPhoto()',
-      value: options,
       map: (options) => toMediaInput('photo', options),
     })
   }
@@ -467,8 +467,8 @@ export default class VCard {
    */
   public addUrl(options: UrlOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addUrl()',
-      value: options,
       map: (options) => {
         const { url, type = [] } = options
 
@@ -490,8 +490,8 @@ export default class VCard {
    */
   public addSocial(options: SocialOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addSocial()',
-      value: options,
       map: (options) => {
         const { url, type, user = '' } = options
 
@@ -527,8 +527,8 @@ export default class VCard {
    */
   public addImpp(options: ImppOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addImpp()',
-      value: options,
       map: (options) => {
         const { uri, serviceType = '' } = options
 
@@ -568,8 +568,8 @@ export default class VCard {
    */
   public addGeo(options: GeoOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addGeo()',
-      value: options,
       map: (value) => ({
         element: 'geo',
         value,
@@ -646,8 +646,8 @@ export default class VCard {
    */
   public addLabel(options: LabelOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addLabel()',
-      value: options,
       map: (options) => {
         const { label, type = ['intl', 'postal', 'parcel', 'work'] } = options
 
@@ -680,8 +680,8 @@ export default class VCard {
    */
   public addCustomProperty(options: CustomPropertyOptions): this {
     return this.storeProperties({
+      options,
       methodName: 'addCustomProperty()',
-      value: options,
       map: (options) => {
         const { name, value, params = '', group } = options
 
@@ -710,21 +710,18 @@ export default class VCard {
    * and build the key of each input, then store them. Nothing is stored when
    * an input throws.
    *
-   * @param  methodName The calling method, such as `'addAddress()'`. When
-   *                    set, `value` must be an options object, and the error
-   *                    message names this method.
    * @throws VCardException
    */
-  private storeProperties<T>({
-    methodName,
-    value,
-    map,
-  }: StorePropertiesOptions<T>): this {
-    if (methodName !== undefined) {
-      assertOptions({ value, label: methodName })
+  private storeProperties<T>(args: StorePropertiesOptions<T>): this {
+    let value: T
+    if ('options' in args) {
+      assertOptions({ value: args.options, label: args.methodName })
+      value = args.options
+    } else {
+      value = args.value
     }
 
-    const mapped = map(value)
+    const mapped = args.map(value)
     const inputs = Array.isArray(mapped) ? mapped : [mapped]
 
     const properties: StoredProperty[] = inputs.map((input) => {
