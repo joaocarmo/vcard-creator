@@ -26,7 +26,7 @@ export interface PropertySpec {
   /** Whether the deprecated `CHARSET` parameter is written */
   charset: boolean
   /** Error label of the value */
-  label?: string
+  label: string
 }
 
 export type ParamSpec =
@@ -53,6 +53,8 @@ export interface PropertyInput {
   group?: string
   /** Defaults to the name of the element */
   name?: string
+  /** Defaults to the error label of the element */
+  label?: string
 }
 
 type MapProperties<T> = (value: T) => PropertyInput | PropertyInput[]
@@ -105,8 +107,8 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     charset: true,
     label: 'Full name',
   },
-  geo: { ...single, name: 'GEO', valueType: 'float-pair' },
-  impp: { ...repeatable, name: 'IMPP', valueType: 'uri' },
+  geo: { ...single, name: 'GEO', valueType: 'float-pair', label: 'Geo' },
+  impp: { ...repeatable, name: 'IMPP', valueType: 'uri', label: 'IMPP' },
   jobtitle: {
     ...single,
     name: 'TITLE',
@@ -164,7 +166,12 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     charset: true,
     label: 'Role',
   },
-  social: { ...repeatable, name: 'X-SOCIALPROFILE', valueType: 'uri' },
+  social: {
+    ...repeatable,
+    name: 'X-SOCIALPROFILE',
+    valueType: 'uri',
+    label: 'Social profile',
+  },
   sortString: {
     ...single,
     name: 'SORT-STRING',
@@ -179,7 +186,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     label: 'Timezone',
   },
   uid: { ...single, name: 'UID', valueType: 'text', label: 'UID' },
-  url: { ...repeatable, name: 'URL', valueType: 'uri' },
+  url: { ...repeatable, name: 'URL', valueType: 'uri', label: 'URL' },
 }
 
 // Written by the library, so a custom property must not use them. Each value

@@ -593,7 +593,7 @@ export default class VCard {
       value: timezone,
       map: (value) => {
         // test() would turn an object into a string and match it
-        assertString({ value, label: 'Timezone' })
+        assertString({ value, label: PROPERTIES.timezone.label })
 
         return {
           element: 'timezone',
@@ -710,6 +710,7 @@ export default class VCard {
           value,
           rawParams: params,
           group,
+          label: upperName,
         }
       },
     })
@@ -737,14 +738,16 @@ export default class VCard {
     const properties: StoredProperty[] = inputs.map((input) => {
       const spec = PROPERTIES[input.element]
       const valueType = input.valueType ?? spec.valueType
+      const label = input.label ?? spec.label
 
-      const value = VALUE_PIPELINES[valueType](input.value, spec.label ?? '')
+      const value = VALUE_PIPELINES[valueType](input.value, label)
       const key = buildKey({
         name: input.name ?? spec.name,
         valueType,
         defaultType: spec.valueType,
         params: input.params,
         rawParams: input.rawParams,
+        label,
       })
 
       // An empty group writes no prefix
@@ -875,7 +878,7 @@ export default class VCard {
     })
 
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
-      return `;CHARSET=${quoteParamValue(this.charset)}`
+      return `;CHARSET=${quoteParamValue({ value: this.charset, label: 'Charset' })}`
     }
 
     return ''

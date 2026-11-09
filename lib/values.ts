@@ -56,8 +56,8 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     // RFC 2426 text values can start and end with spaces
     return value.map((entry) => escapeText({ value: entry, label })).join(',')
   },
-  uri: (value) => {
-    assertUri(value as string)
+  uri: (value, label) => {
+    assertUri({ value: value as string, label })
     return value as string
   },
   raw: (value, label) => {
@@ -70,6 +70,14 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
   },
   binary: (value, label) => {
     assertString({ value, label })
+
+    // A data URL, such as canvas.toDataURL() output. RFC 2397 schemes ignore
+    // case.
+    if (/^data:/i.test(value as string)) {
+      throw new VCardException(
+        `${label} values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got ${showValue(value as string)})`,
+      )
+    }
 
     // Wrapped base64, such as GNU `base64` output, is valid. `\s` would also
     // remove VT, FF, U+2028 and U+2029, which some parsers read as line breaks.
@@ -87,6 +95,12 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     if (isDate(value)) {
       assertValidDate({ date: value, label: label.toLowerCase() })
       return Date.prototype.toISOString.call(value).slice(0, 10)
+    }
+
+    if (typeof value !== 'string') {
+      throw new VCardException(
+        `${label} values must be strings or Dates (got ${describeType(value)})`,
+      )
     }
 
     return checkDateString(value, label)
