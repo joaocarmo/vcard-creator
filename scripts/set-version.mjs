@@ -22,7 +22,7 @@ function fail(message) {
 const tag = process.argv[2]
 
 if (tag === undefined) {
-  fail('Usage: node scripts/sync-version.mjs <tag>, such as v1.2.3')
+  fail('Usage: node scripts/set-version.mjs <tag>, such as v1.2.3')
 }
 
 const version = tag.replace(/^v/, '')

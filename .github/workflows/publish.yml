@@ -20,11 +20,20 @@ jobs:
       contents: read
 
     steps:
-      # Checks out the commit the release tag points to
+      # Checks out the commit the release tag points to, with the history of
+      # main for the check below
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Check that the tagged commit is on main
+        run: |
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::The release tag must point to a commit on main"
+            exit 1
+          fi
 
       # No cache: a restored store could inject poisoned packages into the release
       - name: Set up pnpm, Node.js and dependencies
@@ -42,4 +51,6 @@ jobs:
 
       # The checkout is a detached HEAD with the version change uncommitted
       - name: Publish to npm
-        run: pnpm publish --no-git-checks
+        env:
+          DIST_TAG: ${{ github.event.release.prerelease && 'next' || 'latest' }}
+        run: pnpm publish --no-git-checks --tag "$DIST_TAG"

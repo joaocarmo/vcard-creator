@@ -12,7 +12,7 @@ import { join, resolve } from 'node:path'
 import { check, resolveConfig } from 'prettier'
 
 const repoRoot = resolve(import.meta.dirname, '..')
-const files = ['scripts/sync-version.mjs', 'package.json', 'lib/constants.ts']
+const files = ['scripts/set-version.mjs', 'package.json', 'lib/constants.ts']
 
 let root: string
 
@@ -20,12 +20,12 @@ const read = (file: string) => readFileSync(join(root, file), 'utf8')
 const run = (...args: string[]) =>
   spawnSync(
     process.execPath,
-    [join(root, 'scripts/sync-version.mjs'), ...args],
+    [join(root, 'scripts/set-version.mjs'), ...args],
     { encoding: 'utf8' },
   )
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), 'sync-version-'))
+  root = mkdtempSync(join(tmpdir(), 'set-version-'))
   mkdirSync(join(root, 'scripts'))
   mkdirSync(join(root, 'lib'))
   for (const file of files) {
@@ -37,7 +37,7 @@ afterEach(() => {
   rmSync(root, { recursive: true, force: true })
 })
 
-describe('sync-version', () => {
+describe('set-version', () => {
   it.each([
     ['v1.2.3', '1.2.3'],
     ['1.2.3', '1.2.3'],

@@ -47,7 +47,7 @@ Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm test:functio
 ## Release
 
 1. Open a PR that sets the new version on `main` with `pnpm version:set vX.Y.Z`. Merge it.
-2. Create a GitHub release on `main` with tag `vX.Y.Z` and publish it.
+2. Create a GitHub release on `main` with tag `vX.Y.Z` and publish it. A tag on another branch fails the workflow. A pre-release publishes with the npm dist-tag `next`, a release with `latest`.
 3. The `Publish` workflow runs all checks on the tagged commit, sets the version from the tag and publishes to npm.
 4. Check the workflow run and the version on npm. If the publish step fails for an external reason, use "Re-run failed jobs": it runs on the same commit. If a check fails, fix it on `main` and release a new version.
 
