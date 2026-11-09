@@ -7,8 +7,7 @@ export const DEFAULT_MIME_TYPE = 'JPEG'
 
 /**
  * IANA registered image MIME types, from
- * https://www.iana.org/assignments/media-types/image.csv on 2026-11-09,
- * without `example`, which RFC 4735 reserves for documentation.
+ * https://www.iana.org/assignments/media-types/image.csv on 2026-11-09.
  * Entries are lower case, because the lookup lower-cases its input, and sorted,
  * so a refresh is easy to diff.
  *
