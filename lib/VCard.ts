@@ -33,6 +33,7 @@ import {
   assertOptions,
   assertString,
   describeType,
+  showValue,
   UTC_OFFSET,
 } from './validate.js'
 import { VALUE_PIPELINES } from './values.js'
@@ -662,7 +663,7 @@ export default class VCard {
         const hint = RESERVED_PROPERTY_NAMES.get(upperName)
         if (hint !== undefined) {
           throw new VCardException(
-            `Property name ${JSON.stringify(name)} is reserved${hint}`,
+            `Property name ${showValue(name)} is reserved${hint}`,
           )
         }
 

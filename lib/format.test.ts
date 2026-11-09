@@ -33,7 +33,9 @@ describe('quoteParamValue()', () => {
   })
 
   it('should throw on a double quote', () => {
-    expect(() => quoteParamValue('a"b')).toThrow(VCardException)
+    expect(() => quoteParamValue('a"b')).toThrow(
+      'Parameter values cannot contain a double quote ("a\\"b")',
+    )
   })
 
   it('should throw on a control character', () => {
@@ -64,91 +66,99 @@ describe('formatFloat()', () => {
 })
 
 describe('escapeText()', () => {
+  const escape = (text: string) => escapeText({ value: text, label: 'Note' })
+
   it.each([undefined, null, 42, {}])(
     'should throw on a non-string value (%s)',
     (value) => {
-      expect(() => escapeText(value as unknown as string)).toThrow(
-        'Text values must be strings',
+      expect(() => escape(value as unknown as string)).toThrow(
+        'Note values must be strings',
       )
     },
   )
 
+  it('should name an array as an array', () => {
+    expect(() => escape([] as unknown as string)).toThrow(
+      'Note values must be strings (got array)',
+    )
+  })
+
   it('should escape backslashes first', () => {
-    expect(escapeText('C:\\Users')).toEqual('C:\\\\Users')
+    expect(escape('C:\\Users')).toEqual('C:\\\\Users')
   })
 
   it('should escape semicolons', () => {
-    expect(escapeText('a;b')).toEqual('a\\;b')
+    expect(escape('a;b')).toEqual('a\\;b')
   })
 
   it('should escape commas', () => {
-    expect(escapeText('a,b')).toEqual('a\\,b')
+    expect(escape('a,b')).toEqual('a\\,b')
   })
 
   it('should escape CRLF newlines', () => {
-    expect(escapeText('\r\n')).toEqual('\\n')
+    expect(escape('\r\n')).toEqual('\\n')
   })
 
   it('should escape LF newlines', () => {
-    expect(escapeText('\n')).toEqual('\\n')
+    expect(escape('\n')).toEqual('\\n')
   })
 
   it('should escape a lone CR', () => {
-    expect(escapeText('a\rb')).toEqual('a\\nb')
+    expect(escape('a\rb')).toEqual('a\\nb')
   })
 
   it('should escape each line break in a sequence', () => {
-    expect(escapeText('\n\r')).toEqual('\\n\\n')
-    expect(escapeText('\r\n\r\n')).toEqual('\\n\\n')
+    expect(escape('\n\r')).toEqual('\\n\\n')
+    expect(escape('\r\n\r\n')).toEqual('\\n\\n')
   })
 
   it('should handle combined special characters', () => {
-    expect(escapeText('a;b,c\\d\ne')).toEqual('a\\;b\\,c\\\\d\\ne')
+    expect(escape('a;b,c\\d\ne')).toEqual('a\\;b\\,c\\\\d\\ne')
   })
 
   it('should escape backslash before semicolon to avoid double-escaping', () => {
-    expect(escapeText('a\\;b')).toEqual('a\\\\\\;b')
+    expect(escape('a\\;b')).toEqual('a\\\\\\;b')
   })
 
   it('should pass through strings with no special characters', () => {
-    expect(escapeText('hello world')).toEqual('hello world')
+    expect(escape('hello world')).toEqual('hello world')
   })
 
   it('should pass through empty string', () => {
-    expect(escapeText('')).toEqual('')
+    expect(escape('')).toEqual('')
   })
 
   it.each(['\x00', '\x08', '\x0E', '\x1C', '\x1E', '\x1F', '\x7F'])(
     'should throw on control character %j',
     (char) => {
-      expect(() => escapeText(`a${char}b`)).toThrow(VCardException)
+      expect(() => escape(`a${char}b`)).toThrow(VCardException)
     },
   )
 
   it('should name the character in the message', () => {
-    expect(() => escapeText('a\x01b')).toThrow(
-      'Text values cannot contain control characters ("a\\u0001b")',
+    expect(() => escape('a\x01b')).toThrow(
+      'Note values cannot contain control characters ("a\\u0001b")',
     )
-    expect(() => escapeText('a\x7Fb')).toThrow(
-      'Text values cannot contain control characters ("a\\u007fb")',
+    expect(() => escape('a\x7Fb')).toThrow(
+      'Note values cannot contain control characters ("a\\u007fb")',
     )
   })
 
   it.each(['\x0B', '\x0C', '\x85', '\u{2028}', '\u{2029}'])(
     'should escape %j as a line break',
     (char) => {
-      expect(escapeText(`a${char}b`)).toEqual('a\\nb')
+      expect(escape(`a${char}b`)).toEqual('a\\nb')
     },
   )
 
   it('should count CRLF as one line break and VT as another', () => {
-    expect(escapeText('a\r\n\x0Bb')).toEqual('a\\n\\nb')
+    expect(escape('a\r\n\x0Bb')).toEqual('a\\n\\nb')
   })
 
   it.each(['\t', '\x80', '\x9F', 'é', '漢', '😀'])(
     'should pass through %j',
     (char) => {
-      expect(escapeText(`a${char}b`)).toEqual(`a${char}b`)
+      expect(escape(`a${char}b`)).toEqual(`a${char}b`)
     },
   )
 })
@@ -345,7 +355,7 @@ describe('buildKey()', () => {
     it('should throw on an array', () => {
       expect(() =>
         key({ params: [{ kind: 'single', name: 'TYPE', value: ['a'] }] }),
-      ).toThrow('Parameter values must be strings (got object)')
+      ).toThrow('Parameter values must be strings (got array)')
     })
   })
 

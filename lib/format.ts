@@ -15,6 +15,12 @@ export interface BuildKeyOptions {
   rawParams?: unknown
 }
 
+export interface EscapeTextOptions {
+  value: string
+  /** Names the property in error messages */
+  label: string
+}
+
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
@@ -63,16 +69,16 @@ export function resolveType<T extends string>(type: T[]): string {
  * @link   http://tools.ietf.org/html/rfc2426
  * @throws VCardException
  */
-export function escapeText(text: string): string {
-  assertString({ value: text, label: 'Text' })
+export function escapeText({ value, label }: EscapeTextOptions): string {
+  assertString({ value, label })
 
-  if (TEXT_CONTROL_CHARS.test(text)) {
+  if (TEXT_CONTROL_CHARS.test(value)) {
     throw new VCardException(
-      `Text values cannot contain control characters (${showValue(text)})`,
+      `${label} values cannot contain control characters (${showValue(value)})`,
     )
   }
 
-  return text
+  return value
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
@@ -92,7 +98,7 @@ export function quoteParamValue(value: string): string {
 
   if (value.includes('"')) {
     throw new VCardException(
-      `Parameter values cannot contain a double quote (${value})`,
+      `Parameter values cannot contain a double quote (${showValue(value)})`,
     )
   }
 

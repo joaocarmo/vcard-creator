@@ -25,14 +25,18 @@ describe('VALUE_PIPELINES', () => {
 
     it('should throw on a non-string component', () => {
       expect(() => run('text-structured', ['a', null])).toThrow(
-        'Text values must be strings (got null)',
+        'Label values must be strings (got null)',
       )
     })
   })
 
   describe('text-list', () => {
-    it('should escape each entry, join with a comma and trim', () => {
-      expect(run('text-list', [' a,b', 'c '])).toBe('a\\,b,c')
+    it('should escape each entry and join with a comma', () => {
+      expect(run('text-list', ['a,b', 'c'])).toBe('a\\,b,c')
+    })
+
+    it('should keep leading and trailing spaces', () => {
+      expect(run('text-list', [' a', 'b '])).toBe(' a,b ')
     })
 
     it('should escape semicolons and backslashes in each entry', () => {
@@ -41,7 +45,7 @@ describe('VALUE_PIPELINES', () => {
 
     it('should throw on a non-string entry', () => {
       expect(() => run('text-list', ['a', 42])).toThrow(
-        'Text values must be strings (got number)',
+        'Label values must be strings (got number)',
       )
     })
 
@@ -249,7 +253,7 @@ describe('VALUE_PIPELINES', () => {
       'should throw on %j',
       (value) => {
         expect(() => run('utc-offset', value, 'Timezone')).toThrow(
-          `Invalid timezone offset: ${value}. Hours must be 00 to 23 and minutes 00 to 59.`,
+          `Invalid timezone offset: ${JSON.stringify(value)}. Hours must be 00 to 23 and minutes 00 to 59.`,
         )
       },
     )

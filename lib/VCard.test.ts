@@ -425,7 +425,7 @@ describe('error order', () => {
   it('should report the value before the parameters', () => {
     expect(() =>
       new VCard().addLabel({ label: 'a\x00b', type: 'work' as never }),
-    ).toThrow('Text values cannot contain control characters ("a\\u0000b")')
+    ).toThrow('Label values cannot contain control characters ("a\\u0000b")')
   })
 
   it('should report the parameters in output order', () => {
@@ -435,6 +435,6 @@ describe('error order', () => {
         type: 'a"b',
         user: 'c"d',
       }),
-    ).toThrow('Parameter values cannot contain a double quote (a"b)')
+    ).toThrow('Parameter values cannot contain a double quote ("a\\"b")')
   })
 })

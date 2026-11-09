@@ -9,7 +9,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests.
 1. A public `add*()` method in `lib/VCard.ts` maps its arguments to 1 or more property inputs and passes them to `storeProperties()`.
 2. `storeProperties()` handles each input:
    - It checks that an options argument is an object (`validate.ts`).
-   - It reads the element's row in `PROPERTIES` (`properties.ts`): the property name, the default value type, whether the property can repeat and whether it takes the charset.
+   - It reads the element's row in `PROPERTIES` (`properties.ts`): the property name, the default value type, whether the property can repeat, whether it takes the charset and the label that error messages use.
    - It runs the value pipeline for the value type (`VALUE_PIPELINES` in `values.ts`). The pipeline checks the value and returns the text to write.
    - It builds the property key with `buildKey()` (`format.ts`). `buildKey()` quotes the parameters and adds `VALUE=` when the value type is not the default one.
    - It checks the group name, and that a property allowed once is not added twice.

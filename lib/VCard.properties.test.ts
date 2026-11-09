@@ -25,6 +25,7 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     (c) => c.addNickname(['Nick,name', 'Other']),
     'NICKNAME:Nick\\,name,Other',
   ],
+  ['addNickname', (c) => c.addNickname([' Jo']), 'NICKNAME: Jo'],
   ['addBirthday', (c) => c.addBirthday('1990-05-15'), 'BDAY:1990-05-15'],
   [
     'addBirthday',
@@ -173,6 +174,7 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     (c) => c.addCategories(['Rock, Pop', 'Jazz']),
     'CATEGORIES:Rock\\, Pop,Jazz',
   ],
+  ['addCategories', (c) => c.addCategories(['a ', ' b']), 'CATEGORIES:a , b'],
   [
     'addNote',
     (c) => c.addNote('Call me; available, Mon\\Fri\nLeave message'),
@@ -504,9 +506,61 @@ describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
   it('should throw and store nothing on an invalid MIME type', () => {
     const vCard = new VCard()
     expect(() => vCard[method]({ image: 'data', mime: 'foobar' })).toThrow(
-      'The MIME Media Type is invalid (foobar)',
+      'The MIME Media Type is invalid ("foobar")',
     )
     expect(vCard.getProperties()).toEqual([])
+  })
+
+  it.each(['data:image/png;base64,AAAA', 'DATA:image/png;base64,AAAA'])(
+    'should throw and store nothing on the data URL %j',
+    (image) => {
+      const vCard = new VCard()
+      expect(() => vCard[method]({ image, mime: 'png' })).toThrow(
+        `Image values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got "${image}")`,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+})
+
+// Each row: the method, a call with the given value and the label in the
+// error message
+describe.each([
+  ['addFullName', 'Full name', (c: VCard, v: string) => c.addFullName(v)],
+  ['addName', 'Name', (c: VCard, v: string) => c.addName({ givenName: v })],
+  ['addNickname', 'Nickname', (c: VCard, v: string) => c.addNickname(v)],
+  ['addNickname', 'Nickname', (c: VCard, v: string) => c.addNickname([v])],
+  ['addCompany', 'Company', (c: VCard, v: string) => c.addCompany({ name: v })],
+  ['addJobtitle', 'Job title', (c: VCard, v: string) => c.addJobtitle(v)],
+  ['addRole', 'Role', (c: VCard, v: string) => c.addRole(v)],
+  ['addEmail', 'Email', (c: VCard, v: string) => c.addEmail({ address: v })],
+  [
+    'addAddress',
+    'Address',
+    (c: VCard, v: string) => c.addAddress({ street: v }),
+  ],
+  ['addLabel', 'Label', (c: VCard, v: string) => c.addLabel({ label: v })],
+  ['addNote', 'Note', (c: VCard, v: string) => c.addNote(v)],
+  ['addUid', 'UID', (c: VCard, v: string) => c.addUid(v)],
+  ['addSortString', 'Sort string', (c: VCard, v: string) => c.addSortString(v)],
+  [
+    'addCategories',
+    'Categories',
+    (c: VCard, v: string) => c.addCategories([v]),
+  ],
+  ['addTimezone', 'Timezone', (c: VCard, v: string) => c.addTimezone(v)],
+] as const)('%s() text errors', (_, label, add) => {
+  it('should name the property on a control character', () => {
+    expect(() => add(new VCard(), 'a\x00b')).toThrow(
+      `${label} values cannot contain control characters ("a\\u0000b")`,
+    )
+  })
+
+  it('should show at most 64 characters and the length of a long value', () => {
+    const value = `${'a'.repeat(9_999)}\x00`
+    expect(() => add(new VCard(), value)).toThrow(
+      `${label} values cannot contain control characters ("${'a'.repeat(64)}"... (length 10000))`,
+    )
   })
 })
 
