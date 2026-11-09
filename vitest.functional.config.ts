@@ -1,9 +1,8 @@
 import { defineConfig } from 'vitest/config'
 
-// Tests the built package in dist/, so coverage of lib/ does not apply
+// Tests the built package in dist/. Coverage stays off, the Vitest default.
 export default defineConfig({
   test: {
     include: ['test/functional/**/*.test.js'],
-    coverage: { enabled: false },
   },
 })

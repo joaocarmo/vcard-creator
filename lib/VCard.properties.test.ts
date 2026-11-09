@@ -277,6 +277,12 @@ describe('addName()', () => {
     expect(output).toContain('FN:John Smith\\, Jr.')
   })
 
+  it('should trim spaces around the generated FN', () => {
+    const vCard = new VCard()
+    vCard.addName({ givenName: ' John ' })
+    expect(vCard.toString()).toContain('\r\nFN:John\r\n')
+  })
+
   it('should not generate FN when all name components are empty', () => {
     const vCard = new VCard()
     vCard.addName({})

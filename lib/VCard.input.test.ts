@@ -12,6 +12,22 @@ import { addMethods } from '../test/helpers'
 describe('line breaks in every string input', () => {
   type Call = (card: VCard, s: string) => unknown
 
+  // Runs `call` on a fresh card. Returns the output, or null when the call
+  // threw a VCardException and stored nothing.
+  const outputOrReject = (call: Call, s: string): string | null => {
+    const vCard = new VCard()
+
+    try {
+      call(vCard, s)
+    } catch (error) {
+      expect(error).toBeInstanceOf(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+      return null
+    }
+
+    return vCard.toString()
+  }
+
   // Each call appends `s` to 1 string value and keeps the others valid
   const calls: Record<string, Call[]> = {
     addAddress: [
@@ -127,18 +143,10 @@ describe('line breaks in every string input', () => {
         expect(() => call(new VCard(), '')).not.toThrow()
 
         for (const lineBreak of ['\r', '\n', '\r\n']) {
-          const vCard = new VCard()
-          const s = `a${lineBreak}X-INJECTED:1`
+          const output = outputOrReject(call, `a${lineBreak}X-INJECTED:1`)
+          if (output === null) continue
 
-          try {
-            call(vCard, s)
-          } catch (error) {
-            expect(error).toBeInstanceOf(VCardException)
-            expect(vCard.getProperties()).toEqual([])
-            continue
-          }
-
-          expect(vCard.toString().replace(/\r\n/g, '')).not.toMatch(/[\r\n]/)
+          expect(output.replace(/\r\n/g, '')).not.toMatch(/[\r\n]/)
         }
       }
     },
@@ -185,23 +193,15 @@ describe('line breaks in every string input', () => {
     'should reject or escape a line separator in %s(): %j',
     (method, char, methodCalls) => {
       for (const call of methodCalls) {
-        const vCard = new VCard()
-        const s = `a${char}b`
-
-        try {
-          call(vCard, s)
-        } catch (error) {
-          expect(error).toBeInstanceOf(VCardException)
-          expect(vCard.getProperties()).toEqual([])
-          continue
-        }
+        const output = outputOrReject(call, `a${char}b`)
+        if (output === null) continue
 
         // Only text values may escape the character
         expect(textMethods).toContain(method)
 
-        const output = vCard.toString().replace(/\r\n /g, '')
-        expect(output).toContain('a\\nb')
-        expect(output).not.toContain(char)
+        const unfolded = output.replace(/\r\n /g, '')
+        expect(unfolded).toContain('a\\nb')
+        expect(unfolded).not.toContain(char)
       }
     },
   )
