@@ -3,10 +3,32 @@ import {
   MIME_TYPES,
   toImageSubtype,
   toMediaInput,
+  toMimeEssence,
 } from './mime'
+
+// Built from code points so the source stays ASCII
+const NO_BREAK_SPACE = String.fromCharCode(0xa0)
+const KELVIN_SIGN = String.fromCharCode(0x212a)
+
+describe('toMimeEssence()', () => {
+  it.each([
+    [' image/png ', 'image/png'],
+    ['png;a=b', 'png'],
+    ['\t\r\npng \n', 'png'],
+    ['; charset=binary', ''],
+    // A no-break space is not HTTP whitespace
+    [`${NO_BREAK_SPACE}png`, `${NO_BREAK_SPACE}png`],
+  ])('should map %j to %j', (mime, expected) => {
+    expect(toMimeEssence(mime)).toBe(expected)
+  })
+})
 
 describe('toImageSubtype()', () => {
   it.each([
+    [' png', 'png'],
+    ['image/png; charset=binary', 'png'],
+    ['\timage/png \n', 'png'],
+    ['image/x-icon', 'x-icon'],
     ['png', 'png'],
     ['image/png', 'png'],
     ['IMAGE/PNG', 'PNG'],
@@ -21,14 +43,28 @@ describe('toImageSubtype()', () => {
 })
 
 describe('isValidMimeType()', () => {
-  it.each(['jpeg', 'PNG', 'svg+xml', 'vnd.microsoft.icon'])(
-    'should accept %j',
-    (mime) => {
-      expect(isValidMimeType(mime)).toBe(true)
-    },
-  )
+  it.each([
+    'jpeg',
+    'PNG',
+    'svg+xml',
+    'vnd.microsoft.icon',
+    'x-icon',
+    'X-MS-BMP',
+  ])('should accept %j', (mime) => {
+    expect(isValidMimeType(mime)).toBe(true)
+  })
 
-  it.each(['', 'foobar', 'jpg', 'image/png'])('should reject %j', (mime) => {
+  it.each([
+    '',
+    'foobar',
+    'jpg',
+    'image/png',
+    'x-',
+    'x_icon',
+    'pjpeg',
+    // The Kelvin sign lower-cases to an ASCII "k"
+    `hej2${KELVIN_SIGN}`,
+  ])('should reject %j', (mime) => {
     expect(isValidMimeType(mime)).toBe(false)
   })
 
@@ -88,7 +124,17 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     expect(() => typeOf(mime)).toThrow('MIME Media Type values must be strings')
   })
 
-  it.each(['foobar', 'image/foo', 'image/', 'jpgx', ''])(
+  it.each(['', '  ', '; charset=binary'])(
+    'should write no TYPE when the essence of mime is empty (%j)',
+    (mime) => {
+      expect(toMediaInput(element, { image: 'data', mime })).toEqual({
+        element,
+        value: 'data',
+      })
+    },
+  )
+
+  it.each(['foobar', 'image/foo', 'image/', 'jpgx', 'image/pjpeg'])(
     'should throw on %j with the original value',
     (mime) => {
       expect(() => typeOf(mime)).toThrow(

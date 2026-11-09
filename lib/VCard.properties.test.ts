@@ -545,13 +545,35 @@ describe.each([
 })
 
 describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
-  it('should throw and store nothing on an invalid MIME type', () => {
-    const vCard = new VCard()
-    expect(() => vCard[method]({ image: 'data', mime: 'foobar' })).toThrow(
-      'The MIME Media Type is invalid ("foobar")',
-    )
-    expect(vCard.getProperties()).toEqual([])
+  const name = method === 'addPhoto' ? 'PHOTO' : 'LOGO'
+
+  // Returns the content lines of a card with 1 image added with `mime`
+  const linesOf = (mime?: string) =>
+    new VCard()[method]({ image: 'AAAA', mime }).toString().split('\r\n')
+
+  it.each([
+    [' png', 'PNG'],
+    ['image/png; charset=binary', 'PNG'],
+    ['image/x-icon', 'X-ICON'],
+    [undefined, 'JPEG'],
+  ])('should map mime %j to TYPE=%s', (mime, type) => {
+    expect(linesOf(mime)).toContain(`${name};ENCODING=b;TYPE=${type}:AAAA`)
   })
+
+  it('should write no TYPE for an empty mime', () => {
+    expect(linesOf('')).toContain(`${name};ENCODING=b:AAAA`)
+  })
+
+  it.each(['foobar', 'image/pjpeg'])(
+    'should throw and store nothing on the invalid MIME type %j',
+    (mime) => {
+      const vCard = new VCard()
+      expect(() => vCard[method]({ image: 'data', mime })).toThrow(
+        `The MIME Media Type is invalid ("${mime}")`,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
 
   it.each(['data:image/png;base64,AAAA', 'DATA:image/png;base64,AAAA'])(
     'should throw and store nothing on the data URL %j',

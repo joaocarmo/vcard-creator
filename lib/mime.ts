@@ -93,22 +93,41 @@ export const MIME_TYPES: ReadonlySet<string> = new Set([
 ])
 
 /**
- * Get the image subtype from a MIME type value. Accepts a subtype (`png`), a
- * full MIME type (`image/png`, such as `File.type`) and the `jpg` file
- * extension, which becomes `jpeg`.
+ * Get the essence of a MIME type value: the part before the first `;`, without
+ * leading or trailing HTTP whitespace (tab, LF, CR and space).
+ *
+ * @link https://mimesniff.spec.whatwg.org/#parse-a-mime-type
  */
-export function toImageSubtype(mime: string): string {
-  return mime.replace(/^image\//i, '').replace(/^jpg$/i, 'jpeg')
+export function toMimeEssence(mime: string): string {
+  return mime.split(';')[0].replace(/^[\t\n\r ]+|[\t\n\r ]+$/g, '')
 }
 
 /**
- * Determines whether the given MIME Media Type is one of the IANA registered
- * image formats.
+ * Get the image subtype from a MIME type value. Accepts a subtype (`png`), a
+ * full MIME type (`image/png`, such as `File.type`) and the `jpg` file
+ * extension, which becomes `jpeg`. MIME parameters and surrounding whitespace
+ * are removed.
+ */
+export function toImageSubtype(mime: string): string {
+  return toMimeEssence(mime)
+    .replace(/^image\//i, '')
+    .replace(/^jpg$/i, 'jpeg')
+}
+
+/**
+ * Determines whether the given image subtype, such as `png` (not `image/png`),
+ * is one of the IANA registered image formats or a non-standard `x-` format
+ * (RFC 2425 `x-name`).
  *
  * @link    https://www.iana.org/assignments/media-types/media-types.xhtml#image
+ * @link    https://tools.ietf.org/html/rfc2426#section-3.1.4
  */
 export function isValidMimeType(mime: string): boolean {
-  return mime !== '' && MIME_TYPES.has(mime.toLowerCase())
+  // toLowerCase() maps some non-ASCII letters, such as the Kelvin sign, to
+  // ASCII ones
+  const lowerCase = mime.replace(/[A-Z]+/g, (letters) => letters.toLowerCase())
+
+  return MIME_TYPES.has(lowerCase) || /^x-[a-z0-9-]+$/i.test(mime)
 }
 
 /**
@@ -134,6 +153,12 @@ export function toMediaInput(
 
   const mime = options.mime ?? DEFAULT_MIME_TYPE
   assertString({ value: mime, label: 'MIME Media Type' })
+
+  // Browsers return an empty File.type for unknown files. TYPE is optional, and
+  // the JPEG default would mislabel them.
+  if (toMimeEssence(mime) === '') {
+    return { element, value: options.image }
+  }
 
   const subtype = toImageSubtype(mime)
 

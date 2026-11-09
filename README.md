@@ -277,8 +277,9 @@ Each method accepts either `{ url }` or `{ image, mime? }`. You can add more tha
 
 `image` must be base64 ([RFC 2045 §6.8][rfc2045-base64]): `A-Z`, `a-z`, `0-9`, `+` and `/`, with `=` padding. Spaces, tabs, CR and LF are removed, so wrapped output such as GNU `base64` works. Any other value throws a `VCardException`.
 
-- `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
-- After that, `mime` must be a string with an [IANA image type][mime-types], or the method throws a `VCardException`. The match ignores case.
+- `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. Leading and trailing whitespace (space, tab, CR, LF) and MIME parameters (`'image/png; charset=binary'`) are removed. `'jpg'` writes `TYPE=JPEG`.
+- The subtype must be an [IANA image type][mime-types] or a non-standard `x-` name, such as `'image/x-icon'` (`TYPE=X-ICON`). Anything else throws a `VCardException`, for example `'image/pjpeg'`. The match ignores case.
+- An empty `mime` (`''`, which browsers return for an unknown `File.type`) writes no `TYPE` parameter. So does a `mime` that is empty after whitespace and parameters are removed, such as `'  '` or `'; charset=binary'`. Leave out `mime` to get `TYPE=JPEG`.
 - Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()` or `canvas.toDataURL()`) throws a `VCardException`. Its message says to remove the prefix and pass the MIME type as `mime`.
 
 ```js
