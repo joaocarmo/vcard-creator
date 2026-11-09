@@ -12,7 +12,7 @@ const createCard = () =>
     .addNickname(['JD', 'Jero'])
     .addBirthday('1990-05-15')
     .addCompany({ name: 'Siesqo', department: 'Engineering' })
-    .addJobtitle('Web Developer')
+    .addJobTitle('Web Developer')
     .addRole('Data Protection Officer')
     .addEmail({ address: 'info@jeroendesloovere.be', type: ['pref', 'work'] })
     .addEmail({ address: 'jeroen@personal.be', type: ['home'] })

@@ -34,7 +34,7 @@ import VCard from 'vcard-creator'
 const card = new VCard()
   .addName({ givenName: 'Jeroen', familyName: 'Desloovere' })
   .addCompany({ name: 'Siesqo' })
-  .addJobtitle('Web Developer')
+  .addJobTitle('Web Developer')
   .addEmail({ address: 'info@jeroendesloovere.be' })
   .addPhoneNumber({ number: '+32 123 41 21 21', type: ['pref', 'work'] })
   .addAddress({ street: 'street', locality: 'worktown', country: 'Belgium' })
@@ -99,7 +99,7 @@ Each method adds 1 vCard property. Your editor shows the options and rules of ea
 | `addNickname()`       | `NICKNAME`                   | repeated |
 | `addBirthday()`       | `BDAY`                       | once     |
 | `addCompany()`        | `ORG`                        | once     |
-| `addJobtitle()`       | `TITLE`                      | once     |
+| `addJobTitle()`       | `TITLE`                      | once     |
 | `addRole()`           | `ROLE`                       | once     |
 | `addEmail()`          | `EMAIL`                      | repeated |
 | `addPhoneNumber()`    | `TEL`                        | repeated |

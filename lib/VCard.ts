@@ -238,19 +238,29 @@ export default class VCard {
   }
 
   /**
-   * Add jobtitle.
+   * Add job title.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.5.1
    * @throws VCardException
    */
-  public addJobtitle(jobtitle: string): this {
+  public addJobTitle(jobTitle: string): this {
     return this.storeProperties({
-      value: jobtitle,
+      value: jobTitle,
       map: (value) => ({
         element: 'jobtitle',
         value,
       }),
     })
+  }
+
+  /**
+   * Add job title.
+   *
+   * @deprecated Use `addJobTitle()`. Removed in the next major version.
+   * @throws VCardException
+   */
+  public addJobtitle(jobtitle: string): this {
+    return this.addJobTitle(jobtitle)
   }
 
   /**
@@ -382,16 +392,17 @@ export default class VCard {
   }
 
   /**
-   * Add categories.
+   * Add categories. A string is 1 category. Pass an array for more.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.1
    * @throws VCardException
    */
-  public addCategories(categories: string[]): this {
+  public addCategories(categories: string | string[]): this {
     return this.storeProperties({
       value: categories,
       map: (value) => ({
         element: 'categories',
+        valueType: Array.isArray(value) ? 'text-list' : 'text',
         value,
       }),
     })

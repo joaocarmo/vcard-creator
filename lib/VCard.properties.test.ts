@@ -52,6 +52,7 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     (c) => c.addCompany({ name: 'Acme; Corp', department: 'Engineering' }),
     'ORG:Acme\\; Corp;Engineering',
   ],
+  ['addJobTitle', (c) => c.addJobTitle('Web Developer'), 'TITLE:Web Developer'],
   ['addJobtitle', (c) => c.addJobtitle('Web Developer'), 'TITLE:Web Developer'],
   ['addRole', (c) => c.addRole('Engineer'), 'ROLE:Engineer'],
   [
@@ -252,6 +253,12 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     'CATEGORIES:Rock\\, Pop,Jazz',
   ],
   ['addCategories', (c) => c.addCategories(['a ', ' b']), 'CATEGORIES:a , b'],
+  ['addCategories', (c) => c.addCategories('a'), 'CATEGORIES:a'],
+  [
+    'addCategories',
+    (c) => c.addCategories('Rock, Pop'),
+    'CATEGORIES:Rock\\, Pop',
+  ],
   [
     'addNote',
     (c) => c.addNote('Call me; available, Mon\\Fri\nLeave message'),
@@ -690,7 +697,7 @@ describe.each([
   ['addNickname', 'Nickname', (c: VCard, v: string) => c.addNickname(v)],
   ['addNickname', 'Nickname', (c: VCard, v: string) => c.addNickname([v])],
   ['addCompany', 'Company', (c: VCard, v: string) => c.addCompany({ name: v })],
-  ['addJobtitle', 'Job title', (c: VCard, v: string) => c.addJobtitle(v)],
+  ['addJobTitle', 'Job title', (c: VCard, v: string) => c.addJobTitle(v)],
   ['addRole', 'Role', (c: VCard, v: string) => c.addRole(v)],
   ['addEmail', 'Email', (c: VCard, v: string) => c.addEmail({ address: v })],
   [
@@ -702,6 +709,7 @@ describe.each([
   ['addNote', 'Note', (c: VCard, v: string) => c.addNote(v)],
   ['addUid', 'UID', (c: VCard, v: string) => c.addUid(v)],
   ['addSortString', 'Sort string', (c: VCard, v: string) => c.addSortString(v)],
+  ['addCategories', 'Categories', (c: VCard, v: string) => c.addCategories(v)],
   [
     'addCategories',
     'Categories',

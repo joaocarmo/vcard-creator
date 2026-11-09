@@ -101,6 +101,11 @@ const cases: Record<AddMethod, MethodCases> = {
     options: (c, v) => c.addKey(v),
     text: true,
   },
+  addJobTitle: {
+    strings: [(c, s) => c.addJobTitle(s)],
+    required: [(c, v) => c.addJobTitle(v)],
+    text: true,
+  },
   addJobtitle: {
     strings: [(c, s) => c.addJobtitle(s)],
     required: [(c, v) => c.addJobtitle(v)],
@@ -146,7 +151,10 @@ const cases: Record<AddMethod, MethodCases> = {
     text: true,
   },
   addCategories: {
-    strings: [(c, s) => c.addCategories(['Work', s])],
+    strings: [
+      (c, s) => c.addCategories(s),
+      (c, s) => c.addCategories(['Work', s]),
+    ],
     required: [
       (c, v) => c.addCategories(v),
       (c, v) => c.addCategories(['Work', v]),
@@ -533,12 +541,6 @@ describe('non-string input', () => {
     expect(() =>
       new VCard().addEmail({ address: 'a@example.com', type: null as never }),
     ).toThrow('Email TYPE values must be an array (got null)')
-  })
-
-  it('should throw on categories that are not an array', () => {
-    expect(() => new VCard().addCategories('Work' as never)).toThrow(
-      'Categories values must be an array (got string)',
-    )
   })
 
   it('should throw on an invalid Date', () => {

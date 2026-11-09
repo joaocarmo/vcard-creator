@@ -17,6 +17,8 @@ These members still work in v1. Your editor marks them as deprecated. The next m
 | `getCharsetString()`                               | Nothing. The output never has a `CHARSET` parameter unless you set one.           |
 | A JavaScript number as `addPhoneNumber()` `number` | A string, such as `'+15550100'`                                                   |
 | The `DateString` type                              | `string`                                                                          |
+| `addJobtitle()`                                    | `addJobTitle()`                                                                   |
+| The `Element` type                                 | Nothing. It is an internal key list, and no method takes or returns it.           |
 
 Notes:
 
