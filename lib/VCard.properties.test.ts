@@ -449,7 +449,7 @@ describe('addGeo()', () => {
   it('should throw and store nothing on an out-of-range latitude', () => {
     const vCard = new VCard()
     expect(() => vCard.addGeo({ latitude: 91, longitude: 0 })).toThrow(
-      'Invalid latitude: 91. Must be between -90 and 90.',
+      'Invalid geo latitude: 91. Must be between -90 and 90.',
     )
     expect(vCard.getProperties()).toEqual([])
   })
@@ -566,15 +566,10 @@ describe.each([
   [
     'addPhoto',
     'PHOTO',
-    'Image',
+    'Photo',
     (c: VCard, v: string) => c.addPhoto({ image: v }),
   ],
-  [
-    'addLogo',
-    'LOGO',
-    'Image',
-    (c: VCard, v: string) => c.addLogo({ image: v }),
-  ],
+  ['addLogo', 'LOGO', 'Logo', (c: VCard, v: string) => c.addLogo({ image: v })],
   ['addKey', 'KEY', 'Key', (c: VCard, v: string) => c.addKey({ key: v })],
 ] as const)('%s() base64 value', (_, property, label, add) => {
   // Unfolds the card and returns the line of the property
@@ -621,6 +616,7 @@ describe.each([
 
 describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
   const name = method === 'addPhoto' ? 'PHOTO' : 'LOGO'
+  const label = method === 'addPhoto' ? 'Photo' : 'Logo'
 
   // Returns the content lines of a card with 1 image added with `mime`
   const linesOf = (mime?: string) =>
@@ -644,7 +640,7 @@ describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
     (mime) => {
       const vCard = new VCard()
       expect(() => vCard[method]({ image: 'data', mime })).toThrow(
-        `The MIME Media Type is invalid ("${mime}")`,
+        `${label} MIME type values must be an image type (got "${mime}")`,
       )
       expect(vCard.getProperties()).toEqual([])
     },
@@ -707,9 +703,9 @@ describe.each([
     'addPhoto',
     (c: VCard, v: string) => c.addPhoto({ url: v }),
     'a\tb',
-    'Image',
+    'Photo',
   ],
-  ['addLogo', (c: VCard, v: string) => c.addLogo({ url: v }), 'a\tb', 'Image'],
+  ['addLogo', (c: VCard, v: string) => c.addLogo({ url: v }), 'a\tb', 'Logo'],
   ['addKey', (c: VCard, v: string) => c.addKey({ url: v }), 'a\tb', 'Key'],
   [
     'addPhoneNumber',
@@ -730,6 +726,42 @@ describe.each([
       `${label} values cannot contain control characters (${JSON.stringify(value)})`,
     )
     expect(vCard.getProperties()).toEqual([])
+  })
+})
+
+describe('property errors', () => {
+  it('should name the property on a second once-only call', () => {
+    expect(() => new VCard().addSortString('a').addSortString('b')).toThrow(
+      'Sort string already exists (SORT-STRING)',
+    )
+  })
+
+  it('should name the property on an invalid group', () => {
+    expect(() =>
+      new VCard().addCustomProperty({ name: 'X-A', value: 'a', group: 'a.b' }),
+    ).toThrow('X-A group values can contain only letters, digits and "-"')
+  })
+
+  it.each([
+    [
+      'a key mime',
+      (c: VCard) => c.addKey({ key: 'AAAA', mime: 'a"b' }),
+      'Key TYPE',
+    ],
+    [
+      'a social profile user',
+      (c: VCard) => c.addSocial({ url: 'u', type: 'x', user: 'a"b' }),
+      'Social profile x-user',
+    ],
+    [
+      'a phone number type',
+      (c: VCard) => c.addPhoneNumber({ number: '1', type: ['a"b' as never] }),
+      'Phone number TYPE',
+    ],
+  ])('should name the property on %s with a double quote', (_, add, label) => {
+    expect(() => add(new VCard())).toThrow(
+      `${label} values cannot contain a double quote ("a\\"b")`,
+    )
   })
 })
 

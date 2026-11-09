@@ -635,7 +635,10 @@ export default class VCard {
       value: date,
       map: (value) => {
         // The date-time pipeline also accepts strings, for birthdays
-        assertValidDate({ date: value, label: 'revision' })
+        assertValidDate({
+          date: value,
+          label: PROPERTIES.revision.label.toLowerCase(),
+        })
 
         return {
           element: 'revision',
@@ -752,7 +755,7 @@ export default class VCard {
 
       // An empty group writes no prefix
       if (input.group !== undefined && input.group !== '') {
-        assertName({ value: input.group, label: 'Group' })
+        assertName({ value: input.group, label: `${label} group` })
       }
 
       return { element: input.element, key, value, group: input.group }
@@ -762,7 +765,8 @@ export default class VCard {
     const definedElements = { ...this.definedElements }
     for (const { element } of properties) {
       if (!PROPERTIES[element].multiple && definedElements[element]) {
-        throw new VCardException(`This element already exists (${element})`)
+        const { label, name } = PROPERTIES[element]
+        throw new VCardException(`${label} already exists (${name})`)
       }
 
       definedElements[element] = true

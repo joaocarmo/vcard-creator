@@ -357,7 +357,7 @@ describe('buildKey()', () => {
 
     it('should throw on a non-array value', () => {
       expect(() => key({ params: [{ kind: 'list', value: 'work' }] })).toThrow(
-        'Type values must be an array (got string)',
+        'X TYPE values must be an array (got string)',
       )
     })
   })
@@ -389,7 +389,7 @@ describe('buildKey()', () => {
     it('should throw on an array', () => {
       expect(() =>
         key({ params: [{ kind: 'single', name: 'TYPE', value: ['a'] }] }),
-      ).toThrow('Parameter values must be strings (got array)')
+      ).toThrow('X TYPE values must be strings (got array)')
     })
   })
 

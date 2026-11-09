@@ -59,18 +59,21 @@ const RAW_PARAMS = new RegExp(`^${PARAM}(?:;${PARAM})*$`)
  *
  * @throws VCardException
  */
-export function resolveType<T extends string>(type: T[]): string {
+export function resolveType<T extends string>(
+  type: T[],
+  label = 'Type',
+): string {
   // Plain JavaScript callers can pass a string or null
   if (!Array.isArray(type)) {
     throw new VCardException(
-      `Type values must be an array (got ${describeType(type)})`,
+      `${label} values must be an array (got ${describeType(type)})`,
     )
   }
 
   // Plain JavaScript callers can pass any entry value, so check it before
   // toUpperCase()
   return type.length > 0
-    ? `TYPE=${type.map((t) => quoteParamValue({ value: t }).toUpperCase()).join(',')}`
+    ? `TYPE=${type.map((t) => quoteParamValue({ value: t, label }).toUpperCase()).join(',')}`
     : ''
 }
 
@@ -235,12 +238,15 @@ export function buildKey({
 
   for (const param of params) {
     if (param.kind === 'list') {
-      const resolved = resolveType(param.value as string[])
+      const resolved = resolveType(param.value as string[], `${label} TYPE`)
       if (resolved !== '') {
         parts.push(resolved)
       }
     } else {
-      const value = quoteParamValue({ value: param.value as string })
+      const value = quoteParamValue({
+        value: param.value as string,
+        label: `${label} ${param.name}`,
+      })
       parts.push(`${param.name}=${param.upper ? value.toUpperCase() : value}`)
     }
   }

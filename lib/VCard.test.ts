@@ -467,6 +467,8 @@ describe('error order', () => {
         type: 'a"b',
         user: 'c"d',
       }),
-    ).toThrow('Parameter values cannot contain a double quote ("a\\"b")')
+    ).toThrow(
+      'Social profile type values cannot contain a double quote ("a\\"b")',
+    )
   })
 })

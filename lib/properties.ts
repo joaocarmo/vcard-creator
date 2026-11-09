@@ -124,7 +124,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     charset: true,
     label: 'Label',
   },
-  logo: { ...repeatable, name: 'LOGO', valueType: 'binary', label: 'Image' },
+  logo: { ...repeatable, name: 'LOGO', valueType: 'binary', label: 'Logo' },
   name: {
     ...single,
     name: 'N',
@@ -152,7 +152,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     valueType: 'raw',
     label: 'Phone number',
   },
-  photo: { ...repeatable, name: 'PHOTO', valueType: 'binary', label: 'Image' },
+  photo: { ...repeatable, name: 'PHOTO', valueType: 'binary', label: 'Photo' },
   revision: {
     ...single,
     name: 'REV',

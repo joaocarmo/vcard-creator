@@ -298,7 +298,7 @@ describe('VALUE_PIPELINES', () => {
       expect(() =>
         run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
       ).toThrow(
-        `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
+        `Invalid label ${name}: ${value}. Must be between -${limit} and ${limit}.`,
       )
     })
 
@@ -322,7 +322,7 @@ describe('VALUE_PIPELINES', () => {
     )('should throw on %s %s', (name, _, value) => {
       expect(() =>
         run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
-      ).toThrow(new RegExp(`Invalid ${name}: .*finite number`))
+      ).toThrow(new RegExp(`Invalid label ${name}: .*finite number`))
     })
   })
 })
