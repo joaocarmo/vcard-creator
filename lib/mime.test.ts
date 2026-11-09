@@ -26,6 +26,12 @@ describe('trimHttpWhitespace()', () => {
   ])('should keep %j as %j', (value, expected) => {
     expect(trimHttpWhitespace(value)).toBe(expected)
   })
+
+  it('should keep a long run of inner whitespace in linear time', () => {
+    const value = `a${' '.repeat(100_000)}a`
+
+    expect(trimHttpWhitespace(` ${value} `)).toBe(value)
+  })
 })
 
 describe('toMimeEssence()', () => {

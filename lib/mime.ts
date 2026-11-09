@@ -92,13 +92,28 @@ export const MIME_TYPES: ReadonlySet<string> = new Set([
   'wmf',
 ])
 
+const HTTP_WHITESPACE: ReadonlySet<string> = new Set(['\t', '\n', '\r', ' '])
+
 /**
  * Remove leading and trailing HTTP whitespace (tab, LF, CR and space).
  *
  * @link https://fetch.spec.whatwg.org/#http-whitespace
  */
 export function trimHttpWhitespace(value: string): string {
-  return value.replace(/^[\t\n\r ]+|[\t\n\r ]+$/g, '')
+  // Index scans keep the cost linear. A `[\t\n\r ]+$` regex backtracks in
+  // quadratic time on a long run of inner whitespace.
+  let start = 0
+  let end = value.length
+
+  while (start < end && HTTP_WHITESPACE.has(value[start])) {
+    start++
+  }
+
+  while (end > start && HTTP_WHITESPACE.has(value[end - 1])) {
+    end--
+  }
+
+  return value.slice(start, end)
 }
 
 /**

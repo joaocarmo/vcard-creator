@@ -495,9 +495,9 @@ describe('non-string input', () => {
       expectThrow(call, value)
     }
 
-    expect(() => optionalMime[0](new VCard(), value as never)).toThrow(
-      `Key TYPE values must be strings (got ${type})`,
-    )
+    expect(() =>
+      new VCard().addKey({ key: 'data', mime: value as never }),
+    ).toThrow(`Key TYPE values must be strings (got ${type})`)
   })
 
   it.each([
