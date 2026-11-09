@@ -24,8 +24,5 @@ node_modules/
 # dotenv environment variables file
 .env
 
-# Test files
-*.ics
-
 # Coverage reports
 coverage/

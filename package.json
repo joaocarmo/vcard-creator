@@ -39,7 +39,8 @@
     "*.{js,ts}": [
       "oxlint --fix",
       "prettier --write"
-    ]
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
   },
   "repository": {
     "type": "git",
