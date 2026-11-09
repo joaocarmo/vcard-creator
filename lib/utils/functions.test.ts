@@ -696,6 +696,13 @@ describe('VALUE_PIPELINES', () => {
       expect(run('binary', value)).toBe(expected)
     })
 
+    it('should check a value of several MB', () => {
+      const value = 'A'.repeat(8_000_000)
+
+      expect(run('binary', value)).toBe(value)
+      expect(() => run('binary', `${value}A`)).toThrow(VCardException)
+    })
+
     it('should accept GNU base64 output wrapped at 76 characters', () => {
       const line = 'A'.repeat(76)
       expect(run('binary', `${line}\n${line}\nQQ==\n`)).toBe(

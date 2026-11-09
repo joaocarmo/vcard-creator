@@ -8,8 +8,8 @@ import {
   assertString,
   assertUri,
   assertValidDate,
-  BASE64,
   describeType,
+  isBase64,
   isRfcDateOrDateTime,
   showValue,
   UTC_OFFSET,
@@ -53,7 +53,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     // remove VT, FF, U+2028 and U+2029, which some parsers read as line breaks.
     const base64 = (value as string).replace(/[ \t\r\n]/g, '')
 
-    if (!BASE64.test(base64)) {
+    if (!isBase64(base64)) {
       throw new VCardException(
         `${label} values must be base64 (got ${showValue(value as string)})`,
       )
