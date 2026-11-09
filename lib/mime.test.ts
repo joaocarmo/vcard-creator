@@ -4,11 +4,35 @@ import {
   toImageSubtype,
   toMediaInput,
   toMimeEssence,
+  trimHttpWhitespace,
 } from './mime'
 
 // Built from code points so the source stays ASCII
 const NO_BREAK_SPACE = String.fromCharCode(0xa0)
 const KELVIN_SIGN = String.fromCharCode(0x212a)
+
+describe('trimHttpWhitespace()', () => {
+  it.each(['\t', '\n', '\r', ' '])('should trim %j at both ends', (char) => {
+    expect(trimHttpWhitespace(`${char}${char}a${char}`)).toBe('a')
+  })
+
+  it.each([
+    ['a b\tc', 'a b\tc'],
+    ['\va\f', '\va\f'],
+    [
+      `${NO_BREAK_SPACE}a${NO_BREAK_SPACE}`,
+      `${NO_BREAK_SPACE}a${NO_BREAK_SPACE}`,
+    ],
+  ])('should keep %j as %j', (value, expected) => {
+    expect(trimHttpWhitespace(value)).toBe(expected)
+  })
+
+  it('should keep a long run of inner whitespace in linear time', () => {
+    const value = `a${' '.repeat(100_000)}a`
+
+    expect(trimHttpWhitespace(` ${value} `)).toBe(value)
+  })
+})
 
 describe('toMimeEssence()', () => {
   it.each([
@@ -74,6 +98,10 @@ describe('isValidMimeType()', () => {
     )
     expect(notLowerCase).toEqual([])
   })
+
+  it('should store MIME_TYPES sorted', () => {
+    expect([...MIME_TYPES]).toEqual([...MIME_TYPES].sort())
+  })
 })
 
 describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
@@ -94,6 +122,14 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
       element,
       valueType: 'uri',
       value: 'https://example.com/a',
+    })
+  })
+
+  it('should map an image with `url: undefined` to the image', () => {
+    expect(toMediaInput(element, { image: 'data', url: undefined })).toEqual({
+      element,
+      value: 'data',
+      params: [{ kind: 'single', name: 'TYPE', value: 'JPEG', upper: true }],
     })
   })
 
@@ -138,12 +174,16 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     },
   )
 
-  it.each(['foobar', 'image/foo', 'image/', 'jpgx', 'image/pjpeg'])(
-    'should throw on %j with the original value',
-    (mime) => {
-      expect(() => typeOf(mime)).toThrow(
-        `${label} MIME type values must be an image type (got ${JSON.stringify(mime)})`,
-      )
-    },
-  )
+  it.each([
+    'foobar',
+    'image/foo',
+    'image/',
+    'jpgx',
+    'image/pjpeg',
+    'image/example',
+  ])('should throw on %j with the original value', (mime) => {
+    expect(() => typeOf(mime)).toThrow(
+      `${label} MIME type values must be an image type (got ${JSON.stringify(mime)})`,
+    )
+  })
 })

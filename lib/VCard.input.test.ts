@@ -487,10 +487,17 @@ describe('non-string input', () => {
     },
   )
 
-  it.each([42, {}])('should throw on a non-string mime (%j)', (value) => {
+  it.each([
+    [42, 'number'],
+    [{}, 'object'],
+  ])('should throw on a non-string mime (%j)', (value, type) => {
     for (const call of optionalMime) {
       expectThrow(call, value)
     }
+
+    expect(() =>
+      new VCard().addKey({ key: 'data', mime: value as never }),
+    ).toThrow(`Key TYPE values must be strings (got ${type})`)
   })
 
   it.each([
@@ -664,6 +671,27 @@ describe('addKey() forms', () => {
     expect(output).toContain(`KEY;VALUE=uri:${url}/b\r\n`)
     expect(output).toContain(`KEY;VALUE=uri:${url}/c\r\n`)
     expect(output).toContain(`KEY;VALUE=uri:${url}/d\r\n`)
+    expect(output).not.toContain('ENCODING=b')
+  })
+})
+
+describe.each(['addPhoto', 'addLogo'] as const)('%s() forms', (method) => {
+  const name = method === 'addPhoto' ? 'PHOTO' : 'LOGO'
+
+  // The type rejects more than 1 form. At runtime, `url` wins.
+  it('should reject more than 1 form in the type', () => {
+    const vCard = new VCard()
+    // @ts-expect-error: url and image
+    vCard[method]({ url: `${url}/a`, image: 'AAAA' })
+    // @ts-expect-error: url and mime
+    vCard[method]({ url: `${url}/b`, mime: 'png' })
+    // @ts-expect-error: url, image and mime
+    vCard[method]({ url: `${url}/c`, image: 'AAAA', mime: 'png' })
+    const output = vCard.toString()
+
+    expect(output).toContain(`${name};VALUE=uri:${url}/a\r\n`)
+    expect(output).toContain(`${name};VALUE=uri:${url}/b\r\n`)
+    expect(output).toContain(`${name};VALUE=uri:${url}/c\r\n`)
     expect(output).not.toContain('ENCODING=b')
   })
 })

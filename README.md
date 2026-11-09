@@ -273,7 +273,7 @@ These text values are escaped like other text properties (see [Text Escaping](#t
 | `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])      |
 | `addLogo({ image, mime? })`  | Logo as base64 content. `mime` defaults to `JPEG`  |
 
-Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
+Each method accepts either `{ url }` or `{ image, mime? }`. A `url` of `undefined` counts as absent, so `{ image, url: undefined }` writes the image. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 `image` must be base64 ([RFC 2045 §6.8][rfc2045-base64]): `A-Z`, `a-z`, `0-9`, `+` and `/`, with `=` padding. Spaces, tabs, CR and LF are removed, so wrapped output such as GNU `base64` works. Any other value throws a `VCardException`.
 
@@ -301,7 +301,7 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | `addKey({ key, mime? })`  | Public key as base64. `mime` defaults to `PGP`                                                             |
 | `addKey({ text, mime? })` | Public key as text, such as an ASCII-armoured PGP key. Written with `VALUE=text`. `mime` defaults to `PGP` |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. An empty `mime` writes no `TYPE`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. `text` is escaped like other text values (see [Text Escaping](#text-escaping)), so line breaks are written as `\n`. A `url` with a control character, such as a line break, throws a `VCardException`.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. Leading and trailing whitespace (space, tab, CR, LF) is removed. An empty `mime`, or one with only whitespace, writes no `TYPE`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab inside the value throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. A `url` or `text` of `undefined` counts as absent. `text` is escaped like other text values (see [Text Escaping](#text-escaping)), so line breaks are written as `\n`. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL

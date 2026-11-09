@@ -129,30 +129,32 @@ export interface ImppOptions {
 }
 
 export type PhotoOptions =
-  | { url: string }
+  | { url: string; image?: never; mime?: never }
   | {
       /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
       /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). A value that is empty after whitespace and parameters are removed writes no TYPE */ mime?: string
+      url?: never
     }
 
 export type LogoOptions =
-  | { url: string }
+  | { url: string; image?: never; mime?: never }
   | {
       /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
       /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). A value that is empty after whitespace and parameters are removed writes no TYPE */ mime?: string
+      url?: never
     }
 
 export type KeyOptions =
   | { url: string; key?: never; text?: never; mime?: never }
   | {
       /** Key as text, such as an ASCII-armored PGP key. Escaped like other text values: line breaks are written as `\n` */ text: string
-      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. Leading and trailing whitespace (space, tab, CR, LF) is removed. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab inside the value throws */ mime?: string
       url?: never
       key?: never
     }
   | {
       /** Base64-encoded public key data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ key: string
-      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. Leading and trailing whitespace (space, tab, CR, LF) is removed. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab inside the value throws */ mime?: string
       url?: never
       text?: never
     }
