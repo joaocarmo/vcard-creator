@@ -20,7 +20,7 @@ describe('vCard output format', () => {
         user: 'desloovere_j',
       })
       .addCompany({ name: 'Siesqo' })
-      .addJobtitle('Web Developer')
+      .addJobTitle('Web Developer')
       .addRole('Data Protection Officer')
       .addEmail({ address: 'info@jeroendesloovere.be' })
       .addPhoneNumber({ number: 1234121212, type: ['pref', 'work'] })
@@ -213,8 +213,9 @@ describe('once-only and repeatable properties', () => {
 
   it('should throw and store nothing on a second call', () => {
     const vCard = new VCard()
-    vCard.addJobtitle('Developer')
+    vCard.addJobTitle('Developer')
 
+    expect(() => vCard.addJobTitle('Manager')).toThrow(VCardException)
     expect(() => vCard.addJobtitle('Manager')).toThrow(VCardException)
     expect(vCard.getProperties()).toHaveLength(1)
   })

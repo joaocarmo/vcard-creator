@@ -49,8 +49,14 @@ describe('VALUE_PIPELINES', () => {
       )
     })
 
-    it('should throw on a non-array value', () => {
-      expect(() => run('text-list', 'a')).toThrow(VCardException)
+    it('should write a string as 1 entry', () => {
+      expect(run('text-list', 'a,b')).toBe('a\\,b')
+    })
+
+    it('should throw on a value that is neither a string nor an array', () => {
+      expect(() => run('text-list', 42)).toThrow(
+        'Label values must be strings or arrays (got number)',
+      )
     })
   })
 

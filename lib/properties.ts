@@ -135,7 +135,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
   nickname: {
     ...repeatable,
     name: 'NICKNAME',
-    valueType: 'text',
+    valueType: 'text-list',
     charset: true,
     label: 'Nickname',
   },

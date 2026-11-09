@@ -50,15 +50,15 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
       .map((part) => escapeText({ value: part, label }))
       .join(';'),
   'text-list': (value, label) => {
-    // Plain JavaScript callers can pass a string
-    if (!Array.isArray(value)) {
+    const list = typeof value === 'string' ? [value] : value
+    if (!Array.isArray(list)) {
       throw new VCardException(
-        `${label} values must be an array (got ${describeType(value)})`,
+        `${label} values must be strings or arrays (got ${describeType(value)})`,
       )
     }
 
     // RFC 2426 text values can start and end with spaces
-    return value.map((entry) => escapeText({ value: entry, label })).join(',')
+    return list.map((entry) => escapeText({ value: entry, label })).join(',')
   },
   uri: (value, label) => {
     assertUri({ value: value as string, label })
