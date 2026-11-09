@@ -35,7 +35,8 @@ function checkDateString(value: string, label: string): string {
 
 /**
  * Check a property value by its value type and return the string to store.
- * Plain JavaScript callers can pass any value, so each pipeline checks it.
+ * Plain JavaScript callers can pass any value, so each pipeline, or the
+ * method that calls it, checks the type first.
  */
 export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
   text: (value, label) => escapeText({ value: value as string, label }),
