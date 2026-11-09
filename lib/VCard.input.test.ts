@@ -88,9 +88,16 @@ const cases: Record<AddMethod, MethodCases> = {
       (c, s) => c.addKey({ url: `https://example.com/k${s}` }),
       (c, s) => c.addKey({ key: `data${s}` }),
       (c, s) => c.addKey({ key: 'data', mime: `PGP${s}` }),
+      (c, s) => c.addKey({ text: `abc${s}` }),
+      (c, s) => c.addKey({ text: 'abc', mime: `PGP${s}` }),
     ],
-    required: [(c, v) => c.addKey({ url: v }), (c, v) => c.addKey({ key: v })],
+    required: [
+      (c, v) => c.addKey({ url: v }),
+      (c, v) => c.addKey({ key: v }),
+      (c, v) => c.addKey({ text: v }),
+    ],
     options: (c, v) => c.addKey(v),
+    text: true,
   },
   addJobtitle: {
     strings: [(c, s) => c.addJobtitle(s)],
@@ -379,6 +386,7 @@ describe('double quotes in parameter values', () => {
       (c, t) => c.addImpp({ uri: 'xmpp:a@example.com', serviceType: t }),
     ],
     ['addKey', (c, t) => c.addKey({ key: 'AAAA', mime: t })],
+    ['addKey', (c, t) => c.addKey({ text: 'abc', mime: t })],
   ]
 
   it.each(methods)(
@@ -395,6 +403,7 @@ describe('non-string input', () => {
   // `null` selects the default, as `??` treats it as missing
   const optionalMime: ValueCall[] = [
     (c, v) => c.addKey({ key: 'data', mime: v }),
+    (c, v) => c.addKey({ text: 'abc', mime: v }),
     (c, v) => c.addLogo({ image: 'data', mime: v }),
     (c, v) => c.addPhoto({ image: 'data', mime: v }),
   ]
@@ -625,6 +634,7 @@ describe('non-string input', () => {
       .addSocial({ url, type: 'x' })
       .addCustomProperty({ name: 'X-A', value: 'v' })
       .addKey({ key: 'data', mime: undefined })
+      .addKey({ text: 'abc', mime: undefined })
 
     const output = vCard.toString()
     expect(output).toContain('N:;Jo;;;\r\n')
@@ -637,6 +647,29 @@ describe('non-string input', () => {
     expect(output).toContain(`X-SOCIALPROFILE;type=x:${url}\r\n`)
     expect(output).toContain('X-A:v\r\n')
     expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:data\r\n')
+    expect(output).toContain('KEY;VALUE=text;TYPE=PGP:abc\r\n')
     expect(output).not.toMatch(/undefined|null/)
+  })
+})
+
+describe('addKey() forms', () => {
+  // The type rejects more than 1 form. At runtime, `url` wins, then `text`.
+  it('should reject more than 1 key form in the type', () => {
+    const output = new VCard()
+      // @ts-expect-error: key and text
+      .addKey({ key: 'AAAA', text: 'a' })
+      // @ts-expect-error: key and url
+      .addKey({ key: 'AAAA', url: `${url}/b` })
+      // @ts-expect-error: text and url
+      .addKey({ text: 'c', url: `${url}/c` })
+      // @ts-expect-error: key, text and url
+      .addKey({ key: 'AAAA', text: 'd', url: `${url}/d` })
+      .toString()
+
+    expect(output).toContain('KEY;VALUE=text;TYPE=PGP:a\r\n')
+    expect(output).toContain(`KEY;VALUE=uri:${url}/b\r\n`)
+    expect(output).toContain(`KEY;VALUE=uri:${url}/c\r\n`)
+    expect(output).toContain(`KEY;VALUE=uri:${url}/d\r\n`)
+    expect(output).not.toContain('ENCODING=b')
   })
 })

@@ -132,10 +132,18 @@ export type LogoOptions =
     }
 
 export type KeyOptions =
-  | { url: string }
+  | { url: string; key?: never; text?: never }
+  | {
+      /** Key as text, such as an ASCII-armoured PGP key. Escaped like other text values: line breaks are written as `\n` */ text: string
+      /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string
+      url?: never
+      key?: never
+    }
   | {
       /** Base64-encoded public key data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ key: string
       /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string
+      url?: never
+      text?: never
     }
 
 export interface GeoOptions {

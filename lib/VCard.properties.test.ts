@@ -183,6 +183,26 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     (c) => c.addKey({ key: 'AAAA', mime: 'PGP;X=1' }),
     'KEY;ENCODING=b;TYPE="PGP;X=1":AAAA',
   ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: '-----BEGIN PGP PUBLIC KEY BLOCK-----\nAB\r\nCD' }),
+    'KEY;VALUE=text;TYPE=PGP:-----BEGIN PGP PUBLIC KEY BLOCK-----\\nAB\\nCD',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'a;b,c\\d' }),
+    'KEY;VALUE=text;TYPE=PGP:a\\;b\\,c\\\\d',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'abc', mime: 'x509' }),
+    'KEY;VALUE=text;TYPE=X509:abc',
+  ],
+  [
+    'addKey',
+    (c) => c.addKey({ text: 'abc', mime: 'PGP;X=1' }),
+    'KEY;VALUE=text;TYPE="PGP;X=1":abc',
+  ],
   ['addUid', (c) => c.addUid('u;1,2\\x'), 'UID:u\\;1\\,2\\\\x'],
   [
     'addCategories',
@@ -495,6 +515,48 @@ describe.each([
     const output = vCard.toString()
     expect(output).toContain(`\r\n${property};ENCODING=b;`)
     expect(output).toContain(`\r\n${property};VALUE=uri:https://example.com/a`)
+  })
+})
+
+describe('addKey() text', () => {
+  it('should write an ASCII-armoured key on 1 line', () => {
+    const body = 'A'.repeat(64)
+    const armored = [
+      '-----BEGIN PGP PUBLIC KEY BLOCK-----',
+      '',
+      body,
+      body,
+      '=AbCd',
+      '-----END PGP PUBLIC KEY BLOCK-----',
+    ].join('\n')
+    const vCard = new VCard().addKey({ text: armored })
+
+    const unfolded = vCard.toString().replace(/\r\n /g, '')
+    expect(unfolded).toContain(
+      `\r\nKEY;VALUE=text;TYPE=PGP:-----BEGIN PGP PUBLIC KEY BLOCK-----\\n\\n${body}\\n${body}\\n=AbCd\\n-----END PGP PUBLIC KEY BLOCK-----\r\n`,
+    )
+  })
+
+  it('should allow all 3 forms on the same card', () => {
+    const output = new VCard()
+      .addKey({ url: 'https://example.com/a' })
+      .addKey({ text: 'abc' })
+      .addKey({ key: 'AAAA' })
+      .toString()
+
+    expect(output).toContain('\r\nKEY;VALUE=uri:https://example.com/a\r\n')
+    expect(output).toContain('\r\nKEY;VALUE=text;TYPE=PGP:abc\r\n')
+    expect(output).toContain('\r\nKEY;ENCODING=b;TYPE=PGP:AAAA\r\n')
+  })
+
+  it('should ignore undefined form keys', () => {
+    const output = new VCard()
+      .addKey({ key: 'AAAA', url: undefined })
+      .addKey({ text: 'abc', url: undefined, key: undefined })
+      .toString()
+
+    expect(output).toContain('\r\nKEY;ENCODING=b;TYPE=PGP:AAAA\r\n')
+    expect(output).toContain('\r\nKEY;VALUE=text;TYPE=PGP:abc\r\n')
   })
 })
 
