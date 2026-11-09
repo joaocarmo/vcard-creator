@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A JavaScript vCard 3.0 creator library for both node.js and the web",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

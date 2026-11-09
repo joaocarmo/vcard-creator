@@ -53,13 +53,16 @@ jobs:
           save-cache: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build the library
+        id: build
         run: pnpm build
-
-      # The functional test imports dist/, so the type check runs after the build
-      - name: Type check
-        run: pnpm type-check
 
       - name: Execute the tests
         run: |
           pnpm test:coverage
           pnpm test:functional
+
+      # The functional test imports dist/, so the type check needs the build.
+      # It also runs when the tests fail.
+      - name: Type check
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: pnpm type-check
