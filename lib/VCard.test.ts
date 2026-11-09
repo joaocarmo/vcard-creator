@@ -216,6 +216,14 @@ describe('CHARSET handling', () => {
 
     expect(() => vCard.toString()).toThrow(VCardException)
   })
+
+  it('should accept a tab in the charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('a\tb')
+    vCard.addNote('Call me')
+
+    expect(vCard.toString()).toContain('NOTE;CHARSET=a\tb:Call me')
+  })
 })
 
 describe('single and repeatable properties', () => {

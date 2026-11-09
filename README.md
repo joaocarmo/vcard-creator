@@ -377,7 +377,7 @@ Other values are written as they are. They throw a `VCardException` if they cont
 - `addBirthday` string
 - `addCustomProperty` value and `params` (a tab is allowed in both)
 - URLs and URIs
-- the deprecated `charset` (checked by `toString()`)
+- the deprecated `charset` (checked by `toString()`, a tab is allowed)
 
 `addKey` key and `addPhoto` and `addLogo` image must be base64 (see [Media](#media)). Spaces, tabs, CR and LF are removed. Any other control character in them throws a `VCardException`.
 

@@ -223,12 +223,12 @@ export function buildKey({
   if (rawParams !== undefined) {
     const raw = rawParams as string
     assertNoControlChars({ value: raw, label: 'Parameter', allowTab: true })
-    if (raw !== '' && !RAW_PARAMS.test(raw)) {
-      throw new VCardException(
-        `Parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${showValue(raw)})`,
-      )
-    }
     if (raw !== '') {
+      if (!RAW_PARAMS.test(raw)) {
+        throw new VCardException(
+          `Parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${showValue(raw)})`,
+        )
+      }
       parts.push(raw)
     }
   }

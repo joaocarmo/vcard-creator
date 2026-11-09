@@ -823,6 +823,7 @@ export default class VCard {
    *
    * @deprecated The output is always a UTF-8 string. Removed in the next
    * major version.
+   * @throws VCardException
    */
   public getCharsetString(): string {
     return this.charsetParam()
@@ -833,7 +834,11 @@ export default class VCard {
    */
   private charsetParam(): string {
     // `charset` is a public field, so it is checked here at build time
-    assertNoControlChars({ value: this.charset, label: 'Charset' })
+    assertNoControlChars({
+      value: this.charset,
+      label: 'Charset',
+      allowTab: true,
+    })
 
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
       return `;CHARSET=${quoteParamValue(this.charset)}`
