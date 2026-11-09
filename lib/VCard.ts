@@ -188,32 +188,42 @@ export default class VCard {
   }
 
   /**
-   * Add public key (base64-encoded or by URL).
+   * Add public key (base64-encoded, as text or by URL).
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.7.1
    * @throws VCardException
+   * @example
+   * vCard.addKey({ url: 'https://example.com/key.pub' }) // KEY;VALUE=uri:https://example.com/key.pub
+   * vCard.addKey({ text: armoredKey }) // KEY;VALUE=text;TYPE=PGP:-----BEGIN PGP PUBLIC KEY BLOCK-----\n…
+   * vCard.addKey({ key: base64cert, mime: 'X509' }) // KEY;ENCODING=b;TYPE=X509:…
    */
   public addKey(options: KeyOptions): this {
     return this.storeProperties({
       options,
       methodName: 'addKey()',
       map: (options) => {
-        if ('url' in options) {
+        // An undefined form key, such as `url: undefined`, selects no form
+        if (options.url !== undefined) {
           return { element: 'key', valueType: 'uri', value: options.url }
         }
 
-        return {
-          element: 'key',
-          value: options.key,
-          params: [
-            {
-              kind: 'single',
-              name: 'TYPE',
-              value: options.mime ?? 'PGP',
-              upper: true,
-            },
-          ],
+        const mime = options.mime ?? 'PGP'
+        // RFC 2426 allows no empty key type, so an empty mime writes no TYPE
+        const params: ParamSpec[] =
+          mime === ''
+            ? []
+            : [{ kind: 'single', name: 'TYPE', value: mime, upper: true }]
+
+        if (options.text !== undefined) {
+          return {
+            element: 'key',
+            valueType: 'text',
+            value: options.text,
+            params,
+          }
         }
+
+        return { element: 'key', value: options.key, params }
       },
     })
   }

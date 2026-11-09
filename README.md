@@ -295,16 +295,20 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 
 ### Security
 
-| Method                   | Description                                        |
-| ------------------------ | -------------------------------------------------- |
-| `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
-| `addKey({ key, mime? })` | Public key as base64. `mime` defaults to `PGP`     |
+| Method                    | Description                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `addKey({ url })`         | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key])                                                         |
+| `addKey({ key, mime? })`  | Public key as base64. `mime` defaults to `PGP`                                                             |
+| `addKey({ text, mime? })` | Public key as text, such as an ASCII-armoured PGP key. Written with `VALUE=text`. `mime` defaults to `PGP` |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. A `url` with a control character, such as a line break, throws a `VCardException`.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. An empty `mime` writes no `TYPE`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. `text` is escaped like other text values (see [Text Escaping](#text-escaping)), so line breaks are written as `\n`. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL
 vCard.addKey({ url: 'https://example.com/key.pub' })
+
+// ASCII-armoured PGP key
+vCard.addKey({ text: armoredKey })
 
 // Embedded X.509 certificate
 vCard.addKey({ key: base64cert, mime: 'X509' })
@@ -375,7 +379,7 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Comma (`,`) → `\,`
 - Line breaks (`\r\n`, `\n`, a lone `\r`, VT (`\x0B`), FF (`\x0C`), NEL (`\x85`), U+2028 and U+2029) → `\n`
 
-This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString`, `addTimezone` (text values only), `addEmail` (address) and `addUid`.
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString`, `addTimezone` (text values only), `addEmail` (address), `addKey` (`text`) and `addUid`.
 Leading and trailing spaces are kept, also in each `addNickname` and `addCategories` entry.
 A text value with DEL (`\x7F`) or a C0 control character (`\x00` to `\x1F`) other than tab, CR, LF, VT or FF throws a `VCardException`. The other C1 control characters (`\x80` to `\x84` and `\x86` to `\x9F`) are allowed in text values.
 
