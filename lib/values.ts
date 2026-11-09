@@ -16,6 +16,11 @@ import {
   UTC_OFFSET,
 } from './validate.js'
 
+export interface DateStringCheckOptions {
+  value: string
+  label: string
+}
+
 type ValuePipeline = (value: unknown, label: string) => string
 
 /**
@@ -23,10 +28,10 @@ type ValuePipeline = (value: unknown, label: string) => string
  *
  * @throws VCardException
  */
-function checkDateString(value: string, label: string): string {
+function checkDateString({ value, label }: DateStringCheckOptions): string {
   if (!isRfcDateOrDateTime(value)) {
     throw new VCardException(
-      `Invalid ${label.toLowerCase()}: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(value)})`,
+      `${label} values must be RFC 2425 dates or date-times, such as 1990-05-15 (got ${showValue(value)})`,
     )
   }
 
@@ -48,7 +53,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     // Plain JavaScript callers can pass a string
     if (!Array.isArray(value)) {
       throw new VCardException(
-        `${label} must be an array (got ${describeType(value)})`,
+        `${label} values must be an array (got ${describeType(value)})`,
       )
     }
 
@@ -74,7 +79,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     // case.
     if (/^data:/i.test(value as string)) {
       throw new VCardException(
-        `${label} values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got ${showValue(value as string)})`,
+        `${label} values must be raw base64 without a "data:" prefix (got ${showValue(value as string)}). Pass the MIME type as mime`,
       )
     }
 
@@ -92,7 +97,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
   },
   'date-or-date-time': (value, label) => {
     if (isDate(value)) {
-      assertValidDate({ date: value, label: label.toLowerCase() })
+      assertValidDate({ date: value, label })
       return Date.prototype.toISOString.call(value).slice(0, 10)
     }
 
@@ -102,14 +107,14 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
       )
     }
 
-    return checkDateString(value, label)
+    return checkDateString({ value, label })
   },
   'date-time': (value, label) => {
     if (typeof value === 'string') {
-      return checkDateString(value, label)
+      return checkDateString({ value, label })
     }
 
-    assertValidDate({ date: value, label: label.toLowerCase() })
+    assertValidDate({ date: value, label })
     return formatDateTime(value as Date)
   },
   'utc-offset': (value, label) => {
@@ -117,7 +122,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
 
     if (offset === null || Number(offset[1]) > 23 || Number(offset[2]) > 59) {
       throw new VCardException(
-        `Invalid ${label.toLowerCase()} offset: ${showValue(value as string)}. Hours must be 00 to 23 and minutes 00 to 59.`,
+        `${label} values must be UTC offsets with hours 00 to 23 and minutes 00 to 59 (got ${showValue(value as string)})`,
       )
     }
 
@@ -126,12 +131,12 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
   'float-pair': (value, label) => {
     const { latitude, longitude } = value as GeoOptions
     assertCoordinate({
-      name: `${label.toLowerCase()} latitude`,
+      label: `${label} latitude`,
       value: latitude,
       limit: 90,
     })
     assertCoordinate({
-      name: `${label.toLowerCase()} longitude`,
+      label: `${label} longitude`,
       value: longitude,
       limit: 180,
     })

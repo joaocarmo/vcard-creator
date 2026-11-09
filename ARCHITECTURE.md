@@ -43,7 +43,7 @@ Each module in `lib/` has 1 job:
 ## Tests
 
 - Unit tests sit next to their module, in files named after it: `<module>.test.ts`. A large module can split its tests by topic into `<module>.<topic>.test.ts`. The topics do not overlap.
-- Each behaviour is tested in 1 place. The value-type rules (escaping, control characters, the date grammar, base64) are tested in the module that owns them: `values.test.ts`, `validate.test.ts` and `format.test.ts`.
+- Each behaviour is tested in 1 place. The value-type rules (escaping, control characters, the date grammar, base64) are tested in the module that owns them: `values.test.ts`, `validate.test.ts` and `format.test.ts`. These tests check which values a rule rejects. The `VCard` tests check the error messages, through the public methods.
 - `VCard` tests:
   - `VCard.test.ts`: the class itself, such as output, charset, `concat()` and grouping.
   - `VCard.properties.test.ts`: what each `add*()` method writes (property name, parameters and value type), plus behaviour that only that method has.

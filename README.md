@@ -145,7 +145,7 @@ try {
   new VCard().addGeo({ latitude: 999, longitude: 0 })
 } catch (error) {
   if (error instanceof VCardException) {
-    console.error(error.message) // Invalid geo latitude: 999. Must be between -90 and 90.
+    console.error(error.message) // Geo latitude values must be -90 to 90 (got 999)
   }
 }
 ```

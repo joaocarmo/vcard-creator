@@ -1,6 +1,6 @@
 class VCardException extends Error {
-  constructor(params: string) {
-    super(params)
+  constructor(message: string) {
+    super(message)
 
     this.name = 'VCardException'
   }

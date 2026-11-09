@@ -92,7 +92,7 @@ export function escapeText({ value, label }: EscapeTextOptions): string {
 
   if (TEXT_CONTROL_CHARS.test(value)) {
     throw new VCardException(
-      `${label} values cannot contain control characters (${showValue(value)})`,
+      `${label} values must not contain control characters (got ${showValue(value)})`,
     )
   }
 
@@ -119,7 +119,7 @@ export function quoteParamValue({
 
   if (value.includes('"')) {
     throw new VCardException(
-      `${label} values cannot contain a double quote (${showValue(value)})`,
+      `${label} values must not contain a double quote (got ${showValue(value)})`,
     )
   }
 
@@ -245,7 +245,7 @@ export function buildKey({
     } else {
       const value = quoteParamValue({
         value: param.value as string,
-        label: `${label} ${param.name}`,
+        label: `${label} ${param.name.toUpperCase()}`,
       })
       parts.push(`${param.name}=${param.upper ? value.toUpperCase() : value}`)
     }
@@ -253,15 +253,12 @@ export function buildKey({
 
   if (rawParams !== undefined) {
     const raw = rawParams as string
-    assertNoControlChars({
-      value: raw,
-      label: `${label} parameter`,
-      allowTab: true,
-    })
+    const rawLabel = `${label} parameter`
+    assertNoControlChars({ value: raw, label: rawLabel, allowTab: true })
     if (raw !== '') {
       if (!RAW_PARAMS.test(raw)) {
         throw new VCardException(
-          `${label} parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${showValue(raw)})`,
+          `${rawLabel} values must be name=value pairs separated by ";" (got ${showValue(raw)}). Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote`,
         )
       }
       parts.push(raw)

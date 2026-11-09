@@ -49,10 +49,8 @@ describe('VALUE_PIPELINES', () => {
       )
     })
 
-    it('should throw on a non-array value with the label', () => {
-      expect(() => run('text-list', 'a')).toThrow(
-        'Label must be an array (got string)',
-      )
+    it('should throw on a non-array value', () => {
+      expect(() => run('text-list', 'a')).toThrow(VCardException)
     })
   })
 
@@ -69,10 +67,8 @@ describe('VALUE_PIPELINES', () => {
       expect(run('raw', 'a;b,c')).toBe('a;b,c')
     })
 
-    it('should throw on a tab with the label', () => {
-      expect(() => run('raw', 'a\tb')).toThrow(
-        'Label values cannot contain control characters ("a\\tb")',
-      )
+    it('should throw on a tab', () => {
+      expect(() => run('raw', 'a\tb')).toThrow(VCardException)
     })
   })
 
@@ -96,9 +92,7 @@ describe('VALUE_PIPELINES', () => {
     it.each(['data:image/png;base64,AAAA', 'DATA:image/png;base64,AAAA'])(
       'should throw on the data URL %j',
       (value) => {
-        expect(() => run('binary', value)).toThrow(
-          `Label values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got "${value}")`,
-        )
+        expect(() => run('binary', value)).toThrow(VCardException)
       },
     )
 
@@ -163,10 +157,8 @@ describe('VALUE_PIPELINES', () => {
       expect(run('raw-tab', 'a\tb')).toBe('a\tb')
     })
 
-    it('should throw on a line break with the label', () => {
-      expect(() => run('raw-tab', 'a\nb')).toThrow(
-        'Label values cannot contain control characters ("a\\nb")',
-      )
+    it('should throw on a line break', () => {
+      expect(() => run('raw-tab', 'a\nb')).toThrow(VCardException)
     })
   })
 
@@ -193,16 +185,14 @@ describe('VALUE_PIPELINES', () => {
 
     it('should throw on an invalid string', () => {
       expect(() => run('date-or-date-time', '1990-02-30', 'Birthday')).toThrow(
-        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-02-30")',
+        VCardException,
       )
     })
 
-    it('should show the rejected string with escapes in the message', () => {
+    it('should throw on a trailing line break', () => {
       expect(() =>
         run('date-or-date-time', '1990-05-15\n', 'Birthday'),
-      ).toThrow(
-        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-05-15\\n")',
-      )
+      ).toThrow(VCardException)
     })
 
     it('should throw on a non-string, non-Date value', () => {
@@ -213,7 +203,7 @@ describe('VALUE_PIPELINES', () => {
 
     it('should throw on an invalid Date', () => {
       expect(() => run('date-or-date-time', new Date('x'), 'Birthday')).toThrow(
-        'Invalid birthday: the Date is invalid',
+        VCardException,
       )
     })
   })
@@ -234,20 +224,16 @@ describe('VALUE_PIPELINES', () => {
     it('should throw on an invalid string', () => {
       expect(() =>
         run('date-time', '1953-10-15T25:10:00Z', 'Birthday'),
-      ).toThrow(
-        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1953-10-15T25:10:00Z")',
-      )
+      ).toThrow(VCardException)
     })
 
     it('should throw on a non-string, non-Date value', () => {
-      expect(() => run('date-time', 42, 'Revision')).toThrow(
-        'Invalid revision: must be a Date (got number)',
-      )
+      expect(() => run('date-time', 42, 'Revision')).toThrow(VCardException)
     })
 
     it('should throw on an invalid Date', () => {
       expect(() => run('date-time', new Date('x'), 'Revision')).toThrow(
-        'Invalid revision: the Date is invalid',
+        VCardException,
       )
     })
   })
@@ -264,7 +250,7 @@ describe('VALUE_PIPELINES', () => {
       'should throw on %j',
       (value) => {
         expect(() => run('utc-offset', value, 'Timezone')).toThrow(
-          `Invalid timezone offset: ${JSON.stringify(value)}. Hours must be 00 to 23 and minutes 00 to 59.`,
+          VCardException,
         )
       },
     )
@@ -288,12 +274,10 @@ describe('VALUE_PIPELINES', () => {
       ['latitude', -91, 90],
       ['longitude', 181, 180],
       ['longitude', -181, 180],
-    ])('should throw on %s %s', (name, value, limit) => {
+    ])('should throw on %s %s', (name, value) => {
       expect(() =>
         run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
-      ).toThrow(
-        `Invalid label ${name}: ${value}. Must be between -${limit} and ${limit}.`,
-      )
+      ).toThrow(VCardException)
     })
 
     const nonFiniteValues: [string, unknown][] = [
@@ -316,7 +300,7 @@ describe('VALUE_PIPELINES', () => {
     )('should throw on %s %s', (name, _, value) => {
       expect(() =>
         run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
-      ).toThrow(new RegExp(`Invalid label ${name}: .*finite number`))
+      ).toThrow(VCardException)
     })
   })
 })

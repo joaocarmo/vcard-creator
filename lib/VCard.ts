@@ -426,13 +426,13 @@ export default class VCard {
         // written as text
         if (typeof number !== 'string' && typeof number !== 'number') {
           throw new VCardException(
-            `Phone number values must be strings or numbers (got ${describeType(number)})`,
+            `${PROPERTIES.phoneNumber.label} values must be strings or numbers (got ${describeType(number)})`,
           )
         }
 
         if (typeof number === 'number' && !Number.isFinite(number)) {
           throw new VCardException(
-            `Phone number values must be finite numbers (got ${number})`,
+            `${PROPERTIES.phoneNumber.label} values must be finite numbers (got ${number})`,
           )
         }
 
@@ -652,10 +652,7 @@ export default class VCard {
       value: date,
       map: (value) => {
         // The date-time pipeline also accepts strings, for birthdays
-        assertValidDate({
-          date: value,
-          label: PROPERTIES.revision.label.toLowerCase(),
-        })
+        assertValidDate({ date: value, label: PROPERTIES.revision.label })
 
         return {
           element: 'revision',
@@ -721,7 +718,7 @@ export default class VCard {
         const hint = RESERVED_PROPERTY_NAMES.get(upperName)
         if (hint !== undefined) {
           throw new VCardException(
-            `Property name ${showValue(name)} is reserved${hint}`,
+            `Property name values must not be ${upperName} (got ${showValue(name)})${hint}`,
           )
         }
 
@@ -784,7 +781,9 @@ export default class VCard {
     for (const { element } of properties) {
       if (!PROPERTIES[element].multiple && definedElements[element]) {
         const { label, name } = PROPERTIES[element]
-        throw new VCardException(`${label} already exists (${name})`)
+        throw new VCardException(
+          `${label} must be added only once (got a second ${name})`,
+        )
       }
 
       definedElements[element] = true
@@ -852,7 +851,7 @@ export default class VCard {
    * @throws VCardException when the deprecated `charset` of a card is invalid
    */
   static concat(...cards: VCard[]): string {
-    return VCard._concat(cards)
+    return VCard.joinCards(cards)
   }
 
   /**
@@ -865,10 +864,10 @@ export default class VCard {
    * @throws VCardException when the deprecated `charset` of a card is invalid
    */
   public concat(...others: VCard[]): string {
-    return VCard._concat([this, ...others])
+    return VCard.joinCards([this, ...others])
   }
 
-  private static _concat(cards: VCard[]): string {
+  private static joinCards(cards: VCard[]): string {
     return cards.map((card) => card.toString()).join('')
   }
 
