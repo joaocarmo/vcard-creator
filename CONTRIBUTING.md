@@ -18,16 +18,12 @@ pnpm test:unit
 # Unit tests with coverage
 pnpm test:coverage
 
-# Functional test (uses dist/, so run pnpm build first)
+# Functional test: type checks and runs it against dist/, so run pnpm build first
 pnpm test:functional
 
-# Lint
+# Lint, type check and format check
 pnpm lint
-
-# Type check (checks the functional test against dist/, so run pnpm build first)
 pnpm type-check
-
-# Format check
 pnpm pretty
 ```
 

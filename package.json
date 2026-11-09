@@ -28,7 +28,7 @@
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
     "test:coverage": "vitest run --coverage",
-    "test:functional": "vitest run --config vitest.functional.config.ts",
+    "test:functional": "tsc -p test/functional && vitest run --config vitest.functional.config.ts",
     "test:unit": "vitest run",
     "type-check": "tsc --noEmit"
   },
