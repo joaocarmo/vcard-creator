@@ -195,16 +195,18 @@ myVCard.addBirthday('1953-10-15T23:10:00Z')
 
 ### Contact
 
-| Method                              | Description                                                                                                                                   |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`. The address is escaped as RFC 2426 text (see [Text Escaping](#text-escaping))    |
-| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`. Pass `number` as a string. A JavaScript number is **deprecated** |
-| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                                                                                                 |
+| Method                              | Description                                                                                                                                                                                                            |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`. [RFC 2426][rfc2426-grammar] allows 1 type, optionally followed by `'pref'`. The address is escaped as RFC 2426 text (see [Text Escaping](#text-escaping)) |
+| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`. Pass `number` as a string. A JavaScript number is **deprecated**                                                                          |
+| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`. [RFC 2426][rfc2426-grammar] allows no type on `URL`                                                                                                                                     |
+
+More email types, or a type on a URL, are written as given, such as `URL;TYPE=WORK:…`. vCard 4.0 ([RFC 6350][rfc6350]) allows both. For strict RFC 2426 output, leave out `type`, or pass 1 email type followed by `'pref'`.
 
 The `type` parameter takes a typed array, for IDE autocomplete and type safety:
 
 ```js
-myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
+myVCard.addEmail({ address: 'john@example.com', type: ['work', 'pref'] })
 myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 ```
 
@@ -514,6 +516,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests, and [ARCHITEC
 [rfc2426-adr]: https://tools.ietf.org/html/rfc2426#section-3.2.1
 [rfc2426-fn]: https://tools.ietf.org/html/rfc2426#section-3.1.1
 [rfc2426-geo]: https://tools.ietf.org/html/rfc2426#section-3.4.2
+[rfc2426-grammar]: https://tools.ietf.org/html/rfc2426#section-4
 [rfc2426-key]: https://tools.ietf.org/html/rfc2426#section-3.7.1
 [rfc2426-label]: https://tools.ietf.org/html/rfc2426#section-3.2.2
 [rfc2426-logo]: https://tools.ietf.org/html/rfc2426#section-3.5.3
@@ -524,3 +527,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests, and [ARCHITEC
 [rfc2426-tz]: https://tools.ietf.org/html/rfc2426#section-3.4.1
 [readme-v0.11]: https://github.com/joaocarmo/vcard-creator/blob/v0.11.0/README.md
 [rfc4770]: https://tools.ietf.org/html/rfc4770
+[rfc6350]: https://tools.ietf.org/html/rfc6350
