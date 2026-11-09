@@ -162,7 +162,7 @@ All `add*` methods return `this`, so you can chain them.
 | `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                                                 |
 | `addBirthday(date)`                                                                          | Birthday. Accepts an RFC 2425 date or date-time string, or a `Date` (read in UTC, see the note below) |
 
-`addName()` creates FN from the name parts. To set FN yourself, call `addFullName()` **before** `addName()`. `addName()` then keeps your FN.
+`addName()` creates FN from the name parts. To set FN yourself, call `addFullName()` **before** `addName()`. `addName()` then keeps your FN. An FN from `addCustomProperty()` also stops `addName()` from adding one.
 If `addName()` already created an FN, calling `addFullName()` after it throws a `VCardException`.
 Use `addFullName()` for single names, a company as the contact, or a custom format.
 
