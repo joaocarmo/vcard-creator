@@ -8,6 +8,7 @@ import {
   assertString,
   assertUri,
   assertValidDate,
+  BASE64,
   describeType,
   isRfcDateOrDateTime,
   showValue,
@@ -47,7 +48,21 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     assertNoControlChars({ value: value as string, label, allowTab: true })
     return value as string
   },
-  binary: rawPipeline,
+  binary: (value, label) => {
+    assertString({ value, label })
+
+    // Wrapped base64, such as GNU `base64` output, is valid. `\s` would also
+    // remove VT, FF, U+2028 and U+2029, which some parsers read as line breaks.
+    const base64 = (value as string).replace(/[ \t\r\n]/g, '')
+
+    if (!BASE64.test(base64)) {
+      throw new VCardException(
+        `${label} values must be base64 (got ${showValue(value as string)})`,
+      )
+    }
+
+    return base64
+  },
   'date-or-date-time': (value, label) => {
     const name = label.toLowerCase()
 

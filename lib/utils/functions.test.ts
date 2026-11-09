@@ -648,14 +648,74 @@ describe('VALUE_PIPELINES', () => {
     })
   })
 
-  describe.each(['raw', 'binary'] as const)('%s', (type) => {
+  describe('raw', () => {
     it('should keep the value as it is', () => {
-      expect(run(type, 'a;b,c')).toBe('a;b,c')
+      expect(run('raw', 'a;b,c')).toBe('a;b,c')
     })
 
     it('should throw on a tab with the label', () => {
-      expect(() => run(type, 'a\tb')).toThrow(
+      expect(() => run('raw', 'a\tb')).toThrow(
         'Label values cannot contain control characters ("a\\tb")',
+      )
+    })
+  })
+
+  describe('binary', () => {
+    it.each(['', 'AAAA', 'ab+/', 'QUJD', 'QUI=', 'QQ==', 'QUJDRA=='])(
+      'should keep valid base64 %j as it is',
+      (value) => {
+        expect(run('binary', value)).toBe(value)
+      },
+    )
+
+    it.each(['-', '_', '.', '!', ':', ';', ',', 'é'])(
+      'should throw on the character %j with the label and the value',
+      (char) => {
+        expect(() => run('binary', `AAA${char}`)).toThrow(
+          `Label values must be base64 (got ${JSON.stringify(`AAA${char}`)})`,
+        )
+      },
+    )
+
+    it.each(['A', 'AA', 'AAA', 'AA=', 'A===', '=AAA', 'AA==AAAA', 'AAAAA'])(
+      'should throw on wrong padding %j',
+      (value) => {
+        expect(() => run('binary', value)).toThrow(VCardException)
+      },
+    )
+
+    it.each([
+      ['AAAA\nBBBB', 'AAAABBBB'],
+      ['AAAA\r\nBBBB\r\n', 'AAAABBBB'],
+      // A folded line
+      ['AAAA\r\n BBBB', 'AAAABBBB'],
+      ['AAAA BBBB', 'AAAABBBB'],
+      ['AAAA\tBB==', 'AAAABB=='],
+      [' AAAA ', 'AAAA'],
+    ])('should remove whitespace from %j', (value, expected) => {
+      expect(run('binary', value)).toBe(expected)
+    })
+
+    it('should accept GNU base64 output wrapped at 76 characters', () => {
+      const line = 'A'.repeat(76)
+      expect(run('binary', `${line}\n${line}\nQQ==\n`)).toBe(
+        `${line}${line}QQ==`,
+      )
+    })
+
+    // VT, FF and NBSP would be removed by `\s`
+    it.each(['\x00', '\x0B', '\x0C', '\x7F', '\x85', '\xA0', ' '])(
+      'should throw on %j',
+      (char) => {
+        expect(() => run('binary', `AA${char}AA`)).toThrow(
+          'Label values must be base64',
+        )
+      },
+    )
+
+    it('should throw on a non-string', () => {
+      expect(() => run('binary', 42)).toThrow(
+        'Label values must be strings (got number)',
       )
     })
   })

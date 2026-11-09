@@ -266,11 +266,13 @@ These text values are escaped like other text properties (see [Text Escaping](#t
 | `addLogo({ url })`           | Logo by URL ([RFC 2426 §3.5.3][rfc2426-logo])      |
 | `addLogo({ image, mime? })`  | Logo as base64 content. `mime` defaults to `JPEG`  |
 
-Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` or an `image` with a control character, such as a line break, throws a `VCardException`.
+Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
+
+`image` must be base64 ([RFC 2045 §6.8][rfc2045-base64]): `A-Z`, `a-z`, `0-9`, `+` and `/`, with `=` padding. Spaces, tabs and line breaks are removed, so wrapped output such as GNU `base64` works. Any other value throws a `VCardException`.
 
 - `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
 - After that, `mime` must be a string with an [IANA image type][mime-types], or the method throws a `VCardException`. The match ignores case.
-- Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) is not removed and breaks the card.
+- Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) throws a `VCardException`.
 
 ```js
 import { readFileSync } from 'fs'
@@ -290,7 +292,7 @@ vCard.addPhoto({ url: 'https://example.com/photo.jpg' })
 | `addKey({ url })`        | Public key by URL ([RFC 2426 §3.7.1][rfc2426-key]) |
 | `addKey({ key, mime? })` | Public key as base64. `mime` defaults to `PGP`     |
 
-For `addKey()`, `mime` is free text, such as `PGP` or `X509`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. Pass raw base64 only, as for photos. A `url` or `key` with a control character, such as a line break, throws a `VCardException`.
+For `addKey()`, `mime` is free text, such as `PGP` or `X509`. A `mime` with `;`, `:` or `,` is written in double quotes. A `mime` with a double quote (`"`) or a control character other than tab throws a `VCardException`. `key` must be base64, with the same rules as a photo `image`. A `url` with a control character, such as a line break, throws a `VCardException`.
 
 ```js
 // PGP key by URL
@@ -371,11 +373,11 @@ Other values are written as they are. They throw a `VCardException` if they cont
 
 - `addPhoneNumber` number
 - `addBirthday` string
-- `addKey` key
-- `addPhoto` and `addLogo` image
 - `addCustomProperty` value and `params` (a tab is allowed in both)
 - URLs and URIs
 - the deprecated `charset` (checked by `toString()`)
+
+`addKey` key and `addPhoto` and `addLogo` image must be base64 (see [Media](#media)). Any control character in them throws a `VCardException`.
 
 Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are written in double quotes when they contain `;`, `:` or `,`. A double quote or a control character other than tab throws a `VCardException`.
 
@@ -383,7 +385,7 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an options argument that is missing (except for `addAddress()` and `addName()`) or is not an object, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, a phone number that is not finite, a birthday string that is not an RFC 2425 date or date-time, a date that does not exist, a `Date` with a year outside `0000` to `9999`, an invalid MIME type, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an options argument that is missing (except for `addAddress()` and `addName()`) or is not an object, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, a phone number that is not finite, a birthday string that is not an RFC 2425 date or date-time, a date that does not exist, a `Date` with a year outside `0000` to `9999`, an invalid MIME type, an `image` or `key` that is not base64, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'
@@ -509,6 +511,7 @@ pnpm pretty
 [issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
+[rfc2045-base64]: https://tools.ietf.org/html/rfc2045#section-6.8
 [rfc2425]: https://tools.ietf.org/html/rfc2425#section-5.8.2
 [rfc2426]: https://tools.ietf.org/html/rfc2426
 [rfc2426-adr]: https://tools.ietf.org/html/rfc2426#section-3.2.1

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
@@ -939,14 +940,16 @@ describe('addPhoto()', () => {
 
   it('should add photo with base64 and MIME', () => {
     const vCard = new VCard()
-    vCard.addPhoto({ image: 'base64data', mime: 'png' })
-    expect(vCard.toString()).toContain('PHOTO;ENCODING=b;TYPE=PNG:base64data')
+    vCard.addPhoto({ image: 'base64data==', mime: 'png' })
+    expect(vCard.toString()).toContain('PHOTO;ENCODING=b;TYPE=PNG:base64data==')
   })
 
   it('should default the MIME type to JPEG', () => {
     const vCard = new VCard()
-    vCard.addPhoto({ image: 'base64data' })
-    expect(vCard.toString()).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data')
+    vCard.addPhoto({ image: 'base64data==' })
+    expect(vCard.toString()).toContain(
+      'PHOTO;ENCODING=b;TYPE=JPEG:base64data==',
+    )
   })
 
   it('should throw on invalid MIME type', () => {
@@ -959,23 +962,23 @@ describe('addPhoto()', () => {
   it('should allow both base64 and URL on the same card', () => {
     const vCard = new VCard()
     vCard
-      .addPhoto({ image: 'base64data', mime: 'jpeg' })
+      .addPhoto({ image: 'base64data==', mime: 'jpeg' })
       .addPhoto({ url: 'https://example.com/photo.jpg' })
 
     const output = vCard.toString()
-    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data')
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data==')
     expect(output).toContain('PHOTO;VALUE=uri:https://example.com/photo.jpg')
   })
 
   it('should allow multiple embedded photos', () => {
     const vCard = new VCard()
     vCard
-      .addPhoto({ image: 'thumb64', mime: 'jpeg' })
-      .addPhoto({ image: 'hires64', mime: 'png' })
+      .addPhoto({ image: 'thumb64=', mime: 'jpeg' })
+      .addPhoto({ image: 'hires64=', mime: 'png' })
 
     const output = vCard.toString()
-    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:thumb64')
-    expect(output).toContain('PHOTO;ENCODING=b;TYPE=PNG:hires64')
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=JPEG:thumb64=')
+    expect(output).toContain('PHOTO;ENCODING=b;TYPE=PNG:hires64=')
   })
 
   it('should write a URL with a comma and a semicolon as it is', () => {
@@ -1010,24 +1013,24 @@ describe('addLogo()', () => {
 
   it('should add logo with base64 and MIME', () => {
     const vCard = new VCard()
-    vCard.addLogo({ image: 'base64data', mime: 'jpeg' })
-    expect(vCard.toString()).toContain('LOGO;ENCODING=b;TYPE=JPEG:base64data')
+    vCard.addLogo({ image: 'base64data==', mime: 'jpeg' })
+    expect(vCard.toString()).toContain('LOGO;ENCODING=b;TYPE=JPEG:base64data==')
   })
 
   it('should default the MIME type to JPEG', () => {
     const vCard = new VCard()
-    vCard.addLogo({ image: 'base64data' })
-    expect(vCard.toString()).toContain('LOGO;ENCODING=b;TYPE=JPEG:base64data')
+    vCard.addLogo({ image: 'base64data==' })
+    expect(vCard.toString()).toContain('LOGO;ENCODING=b;TYPE=JPEG:base64data==')
   })
 
   it('should allow both base64 and URL on the same card', () => {
     const vCard = new VCard()
     vCard
-      .addLogo({ image: 'base64logo', mime: 'png' })
+      .addLogo({ image: 'base64logo==', mime: 'png' })
       .addLogo({ url: 'https://example.com/logo.png' })
 
     const output = vCard.toString()
-    expect(output).toContain('LOGO;ENCODING=b;TYPE=PNG:base64logo')
+    expect(output).toContain('LOGO;ENCODING=b;TYPE=PNG:base64logo==')
     expect(output).toContain('LOGO;VALUE=uri:https://example.com/logo.png')
   })
 
@@ -1132,7 +1135,7 @@ describe.each([
   })
 
   it.each(['\n', '\r', '\r\n'])(
-    'should throw and store nothing on control character %j in image',
+    'should throw and store nothing on an injected line after %j in image',
     (char) => {
       const vCard = new VCard()
       expect(() =>
@@ -1143,19 +1146,77 @@ describe.each([
   )
 })
 
+describe.each([
+  [
+    'addPhoto',
+    'PHOTO',
+    'Image',
+    (c: VCard, v: string) => c.addPhoto({ image: v }),
+  ],
+  [
+    'addLogo',
+    'LOGO',
+    'Image',
+    (c: VCard, v: string) => c.addLogo({ image: v }),
+  ],
+  ['addKey', 'KEY', 'Key', (c: VCard, v: string) => c.addKey({ key: v })],
+] as const)('%s() base64 value', (_, property, label, add) => {
+  // Unfolds the card and returns the line of the property
+  const lineOf = (vCard: VCard) =>
+    vCard
+      .toString()
+      .replace(/\r\n /g, '')
+      .split('\r\n')
+      .find((line) => line.startsWith(`${property};`))
+
+  it.each(['not base64!!', 'AAA', 'AAA-', 'data:image/png;base64,AAAA'])(
+    'should throw and store nothing on %j',
+    (value) => {
+      const vCard = new VCard()
+      expect(() => add(vCard, value)).toThrow(
+        `${label} values must be base64 (got ${JSON.stringify(value)})`,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it('should write wrapped base64 without the whitespace', () => {
+    const vCard = new VCard()
+    add(vCard, 'AAAA\r\nBBBB\n CC==')
+    expect(lineOf(vCard)).toMatch(/:AAAABBBBCC==$/)
+  })
+
+  it('should write the sample image plain and wrapped as the same line', () => {
+    const image = readFileSync(
+      new URL('./assets/sample.jpg', import.meta.url),
+      'base64',
+    )
+    const wrapped = image.replace(/.{76}/g, '$&\n')
+
+    const plain = new VCard()
+    add(plain, image)
+    const fromWrapped = new VCard()
+    add(fromWrapped, wrapped)
+
+    expect(wrapped).toContain('\n')
+    expect(lineOf(plain)?.endsWith(`:${image}`)).toBe(true)
+    expect(lineOf(fromWrapped)).toBe(lineOf(plain))
+  })
+})
+
 describe('addKey()', () => {
   it('should add a base64-encoded PGP key', () => {
     const vCard = new VCard()
-    vCard.addKey({ key: 'MIICajCCAdOgAwIBAgICBEUwDQ...' })
+    vCard.addKey({ key: 'MIICajCCAdOgAwIBAgICBEUwDQ==' })
     expect(vCard.toString()).toContain(
-      'KEY;ENCODING=b;TYPE=PGP:MIICajCCAdOgAwIBAgICBEUwDQ...',
+      'KEY;ENCODING=b;TYPE=PGP:MIICajCCAdOgAwIBAgICBEUwDQ==',
     )
   })
 
   it('should add a key with custom MIME type', () => {
     const vCard = new VCard()
-    vCard.addKey({ key: 'base64cert', mime: 'x509' })
-    expect(vCard.toString()).toContain('KEY;ENCODING=b;TYPE=X509:base64cert')
+    vCard.addKey({ key: 'base64cert==', mime: 'x509' })
+    expect(vCard.toString()).toContain('KEY;ENCODING=b;TYPE=X509:base64cert==')
   })
 
   it('should add a key by URL', () => {
@@ -1169,20 +1230,20 @@ describe('addKey()', () => {
   it('should allow both base64 and URL keys on the same card', () => {
     const vCard = new VCard()
     vCard
-      .addKey({ key: 'pgpdata' })
+      .addKey({ key: 'pgpdata=' })
       .addKey({ url: 'https://example.com/key.pub' })
     const output = vCard.toString()
-    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata=')
     expect(output).toContain('KEY;VALUE=uri:https://example.com/key.pub')
   })
 
   it('should allow multiple keys', () => {
     const vCard = new VCard()
     vCard
-      .addKey({ key: 'pgpdata', mime: 'PGP' })
+      .addKey({ key: 'pgpdata=', mime: 'PGP' })
       .addKey({ key: 'certdata', mime: 'x509' })
     const output = vCard.toString()
-    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata')
+    expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:pgpdata=')
     expect(output).toContain('KEY;ENCODING=b;TYPE=X509:certdata')
   })
 
@@ -1207,7 +1268,7 @@ describe('addKey()', () => {
   )
 
   it.each(['\n', '\r', '\r\n'])(
-    'should throw and store nothing on control character %j in key',
+    'should throw and store nothing on an injected line after %j in key',
     (char) => {
       const vCard = new VCard()
       expect(() => vCard.addKey({ key: `data${char}X-INJECTED:1` })).toThrow(

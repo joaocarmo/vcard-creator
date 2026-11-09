@@ -48,6 +48,10 @@ const RFC_DATE_TIME =
 // `+HH:MM` or `-HH:MM`. Ranges are checked separately.
 export const UTC_OFFSET = /^[+-](\d{2}):(\d{2})$/
 
+// RFC 2045 §6.8: the base64 alphabet, padded with `=` to a multiple of 4
+export const BASE64 =
+  /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
+
 /**
  * Check that a value is a date or a date-time in the RFC 2425 format, such as
  * `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`, and that the date exists.
