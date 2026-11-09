@@ -33,6 +33,16 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     'BDAY:1990-05-15',
   ],
   [
+    'addBirthday',
+    (c) => c.addBirthday('1953-10-15T23:10:00Z'),
+    'BDAY;VALUE=date-time:1953-10-15T23:10:00Z',
+  ],
+  [
+    'addBirthday',
+    (c) => c.addBirthday('1953-10-15T23:10:00,5+01:00'),
+    'BDAY;VALUE=date-time:1953-10-15T23:10:00,5+01:00',
+  ],
+  [
     'addCompany',
     (c) => c.addCompany({ name: 'Acme; Corp', department: 'Engineering' }),
     'ORG:Acme\\; Corp;Engineering',
@@ -184,7 +194,7 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
   [
     'addRevision',
     (c) => c.addRevision(new Date('2024-01-15T10:30:00Z')),
-    'REV:2024-01-15T10:30:00.000Z',
+    'REV:2024-01-15T10:30:00Z',
   ],
   [
     'addCustomProperty',
@@ -440,7 +450,7 @@ describe('addRevision()', () => {
   it('should auto-generate REV when addRevision not called', () => {
     const vCard = new VCard()
     vCard.addName({ givenName: 'John' })
-    expect(vCard.toString()).toContain('REV:2026-01-01T00:00:00.000Z')
+    expect(vCard.toString()).toContain('REV:2026-01-01T00:00:00Z\r\n')
   })
 
   it('should throw and store nothing on a Date in year 10000', () => {

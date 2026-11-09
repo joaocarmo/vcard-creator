@@ -1,3 +1,4 @@
+import { runInNewContext } from 'node:vm'
 import {
   assertCoordinate,
   assertName,
@@ -7,6 +8,7 @@ import {
   assertUri,
   assertValidDate,
   describeType,
+  isDate,
   isRfcDateOrDateTime,
   showValue,
 } from './validate'
@@ -295,6 +297,26 @@ describe('isRfcDateOrDateTime()', () => {
     }
 
     expect(mismatches).toEqual([])
+  })
+})
+
+describe('isDate()', () => {
+  it.each([
+    ['a Date', new Date(0)],
+    ['an invalid Date', new Date('x')],
+    ['a Date from another realm', runInNewContext('new Date(0)')],
+  ])('should be true for %s', (_, value) => {
+    expect(isDate(value)).toBe(true)
+  })
+
+  it.each([
+    ['an object with Symbol.toStringTag', { [Symbol.toStringTag]: 'Date' }],
+    ['an object with the Date prototype', Object.create(Date.prototype)],
+    ['a date string', '2024-01-01'],
+    ['a number', 0],
+    ['null', null],
+  ])('should be false for %s', (_, value) => {
+    expect(isDate(value)).toBe(false)
   })
 })
 

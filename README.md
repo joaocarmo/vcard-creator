@@ -147,7 +147,7 @@ writeFileSync('contact.vcf', myVCard.toString())
 
 - Lines end with CRLF (`\r\n`), as the RFC requires.
 - Lines longer than 75 octets are folded. Folding never splits a UTF-8 character.
-- `VERSION`, `PRODID` and `REV` are added automatically. `REV` is the time `toString()` runs, unless you set it with `addRevision()`.
+- `VERSION`, `PRODID` and `REV` are added automatically. `REV` is the time `toString()` runs, unless you set it with `addRevision()`. It is written in UTC without a fraction of a second, such as `REV:2024-01-15T10:30:00Z`.
 
 ## API
 
@@ -155,12 +155,12 @@ All `add*` methods return `this`, so you can chain them.
 
 ### Personal
 
-| Method                                                                                       | Description                                                                                           |
-| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `addFullName(fullName)`                                                                      | Formatted name ([RFC 2426 §3.1.1][rfc2426-fn]). Call it before `addName()`                            |
-| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]). Adds `FN` only when no `FN` exists                    |
-| `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                                                 |
-| `addBirthday(date)`                                                                          | Birthday. Accepts an RFC 2425 date or date-time string, or a `Date` (read in UTC, see the note below) |
+| Method                                                                                       | Description                                                                                                                                          |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addFullName(fullName)`                                                                      | Formatted name ([RFC 2426 §3.1.1][rfc2426-fn]). Call it before `addName()`                                                                           |
+| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]). Adds `FN` only when no `FN` exists                                                                   |
+| `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                                                                                                |
+| `addBirthday(date)`                                                                          | Birthday. Accepts an RFC 2425 date or date-time string, or a `Date` (read in UTC, see the note below). A date-time is written with `VALUE=date-time` |
 
 `addName()` creates FN from the name parts. To set FN yourself, call `addFullName()` **before** `addName()`. `addName()` then keeps your FN. An FN from `addCustomProperty()` also stops `addName()` from adding one.
 If `addName()` already created an FN, calling `addFullName()` after it throws a `VCardException`.
@@ -168,14 +168,21 @@ Use `addFullName()` for single names, a company as the contact, or a custom form
 
 `addBirthday()` writes a string as it is. Use a string for an exact date.
 A string must be a date or date-time in the RFC 2425 format ([§5.8.4][rfc2425-datetime]), such as `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`. The date must exist, so `1990-02-30` throws.
+A date-time string, such as `1953-10-15T23:10:00Z`, is written as `BDAY;VALUE=date-time:1953-10-15T23:10:00Z`, as RFC 2426 §3.1.5 requires.
 A `Date` must have a year from `0000` to `9999`. Other values throw a `VCardException`.
 A `Date` is read in UTC:
 
 - `new Date('1990-05-15')` and the `valueAsDate` of a date input are UTC midnight, so they give the right day.
 - `new Date(1990, 4, 15)` is local midnight. East of UTC, it becomes the day before.
 
+A card holds 1 birthday. Use one of these calls:
+
 ```js
 myVCard.addBirthday('1990-05-15')
+// BDAY:1990-05-15
+
+myVCard.addBirthday('1953-10-15T23:10:00Z')
+// BDAY;VALUE=date-time:1953-10-15T23:10:00Z
 ```
 
 ### Organisation
@@ -304,13 +311,13 @@ vCard.addKey({ key: base64cert, mime: 'X509' })
 
 ### Other
 
-| Method                      | Description                                                                       |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `addUid(uid)`               | Unique identifier. Escaped as RFC 2426 text (see [Text Escaping](#text-escaping)) |
-| `addCategories(categories)` | Categories or tags. Accepts `string[]`                                            |
-| `addNote(note)`             | Free-text note                                                                    |
-| `addSortString(sortString)` | Sort key for name order ([RFC 2426 §3.6.5][rfc2426-sort]). Useful for CJK names   |
-| `addRevision(date)`         | Revision timestamp. Accepts `Date`. Replaces the automatic `REV`                  |
+| Method                      | Description                                                                                                                                         |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addUid(uid)`               | Unique identifier. Escaped as RFC 2426 text (see [Text Escaping](#text-escaping))                                                                   |
+| `addCategories(categories)` | Categories or tags. Accepts `string[]`                                                                                                              |
+| `addNote(note)`             | Free-text note                                                                                                                                      |
+| `addSortString(sortString)` | Sort key for name order ([RFC 2426 §3.6.5][rfc2426-sort]). Useful for CJK names                                                                     |
+| `addRevision(date)`         | Revision timestamp. Accepts `Date`. Replaces the automatic `REV`. Written in UTC without a fraction of a second, such as `REV:2024-01-15T10:30:00Z` |
 
 ### Custom Properties
 

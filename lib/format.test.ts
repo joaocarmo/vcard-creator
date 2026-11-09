@@ -2,6 +2,7 @@ import {
   buildKey,
   escapeText,
   fold,
+  formatDateTime,
   formatFloat,
   quoteParamValue,
   resolveType,
@@ -62,6 +63,26 @@ describe('formatFloat()', () => {
   it('should expand exponent notation', () => {
     expect(formatFloat(1e-7)).toEqual('0.0000001')
     expect(formatFloat(-1.5e-7)).toEqual('-0.00000015')
+  })
+})
+
+describe('formatDateTime()', () => {
+  it('should drop the milliseconds', () => {
+    expect(formatDateTime(new Date('2024-01-15T10:30:00.000Z'))).toEqual(
+      '2024-01-15T10:30:00Z',
+    )
+  })
+
+  it('should cut the milliseconds without rounding', () => {
+    expect(formatDateTime(new Date('2024-01-15T10:30:59.999Z'))).toEqual(
+      '2024-01-15T10:30:59Z',
+    )
+  })
+
+  it('should write year 0000 with 4 digits', () => {
+    expect(formatDateTime(new Date('0000-01-01T00:00:00Z'))).toEqual(
+      '0000-01-01T00:00:00Z',
+    )
   })
 })
 

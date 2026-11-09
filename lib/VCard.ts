@@ -16,7 +16,7 @@ import {
   SocialOptions,
   UrlOptions,
 } from './types/VCard.js'
-import { buildKey, fold, quoteParamValue } from './format.js'
+import { buildKey, fold, formatDateTime, quoteParamValue } from './format.js'
 import { toMediaInput } from './mime.js'
 import {
   DefinedElements,
@@ -32,6 +32,7 @@ import {
   assertNoControlChars,
   assertOptions,
   assertString,
+  assertValidDate,
   describeType,
   showValue,
   UTC_OFFSET,
@@ -117,20 +118,27 @@ export default class VCard {
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
    * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
+   * A date-time string is written with `VALUE=date-time`.
+   *
    * @param  date A Date object with a UTC year from 0000 to 9999, or a date or
    *              date-time string in the RFC 2425 format
    * @throws VCardException
    * @example
-   * vCard.addBirthday(new Date('1990-05-15'))
-   * vCard.addBirthday('1990-05-15')
-   * vCard.addBirthday('19900515')
-   * vCard.addBirthday('1953-10-15T23:10:00Z')
+   * vCard.addBirthday(new Date('1990-05-15')) // BDAY:1990-05-15
+   * vCard.addBirthday('1990-05-15') // BDAY:1990-05-15
+   * vCard.addBirthday('19900515') // BDAY:19900515
+   * vCard.addBirthday('1953-10-15T23:10:00Z') // BDAY;VALUE=date-time:1953-10-15T23:10:00Z
    */
   public addBirthday(date: Date | string): this {
     return this.storeProperties({
       value: date,
       map: (value) => ({
         element: 'birthday',
+        // Only a date-time contains a T
+        valueType:
+          typeof value === 'string' && /t/i.test(value)
+            ? 'date-time'
+            : undefined,
         value,
       }),
     })
@@ -595,7 +603,8 @@ export default class VCard {
   /**
    * Add revision timestamp.
    *
-   * When set, overrides the auto-generated REV timestamp.
+   * When set, overrides the auto-generated REV timestamp. The value is written
+   * in UTC without a fraction of a second, such as `2024-01-15T10:30:00Z`.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.4
    * @param  date A Date object with a UTC year from 0000 to 9999
@@ -604,10 +613,15 @@ export default class VCard {
   public addRevision(date: Date): this {
     return this.storeProperties({
       value: date,
-      map: (value) => ({
-        element: 'revision',
-        value,
-      }),
+      map: (value) => {
+        // The date-time pipeline also accepts strings, for birthdays
+        assertValidDate({ date: value, label: 'revision' })
+
+        return {
+          element: 'revision',
+          value,
+        }
+      },
     })
   }
 
@@ -756,7 +770,7 @@ export default class VCard {
     ]
 
     if (!this.definedElements['revision']) {
-      parts.push(`REV:${new Date().toISOString()}\r\n`)
+      parts.push(`REV:${formatDateTime(new Date())}\r\n`)
     }
 
     const charsetStr = this.charsetParam()

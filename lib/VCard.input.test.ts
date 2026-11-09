@@ -1,3 +1,4 @@
+import { runInNewContext } from 'node:vm'
 import VCard from './VCard'
 import VCardException from './VCardException'
 import type {
@@ -518,6 +519,21 @@ describe('non-string input', () => {
   it('should throw on an invalid Date', () => {
     expect(() => new VCard().addBirthday(new Date('x'))).toThrow(VCardException)
     expect(() => new VCard().addRevision(new Date('x'))).toThrow(VCardException)
+  })
+
+  it('should accept a Date from another realm', () => {
+    const date = runInNewContext('new Date(0)') as Date
+    const output = new VCard().addBirthday(date).addRevision(date).toString()
+    expect(output).toContain('BDAY:1970-01-01\r\n')
+    expect(output).toContain('REV:1970-01-01T00:00:00Z\r\n')
+  })
+
+  it.each([
+    ['addBirthday', (c: VCard, v: Date) => c.addBirthday(v)],
+    ['addRevision', (c: VCard, v: Date) => c.addRevision(v)],
+  ])('should throw on a fake Date in %s()', (_, call) => {
+    const fake = { [Symbol.toStringTag]: 'Date' } as unknown as Date
+    expect(() => call(new VCard(), fake)).toThrow(VCardException)
   })
 
   it('should throw on a date string in addRevision()', () => {
