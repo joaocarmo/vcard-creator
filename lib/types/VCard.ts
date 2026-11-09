@@ -132,7 +132,7 @@ export type LogoOptions =
     }
 
 export type KeyOptions =
-  | { url: string; key?: never; text?: never }
+  | { url: string; key?: never; text?: never; mime?: never }
   | {
       /** Key as text, such as an ASCII-armored PGP key. Escaped like other text values: line breaks are written as `\n` */ text: string
       /** Key type (e.g., 'PGP', 'X509'). Defaults to 'PGP'. A value with `;`, `:` or `,` is quoted. A `"` or a control character other than tab throws */ mime?: string

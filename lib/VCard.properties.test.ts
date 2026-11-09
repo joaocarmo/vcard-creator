@@ -183,6 +183,8 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     (c) => c.addKey({ key: 'AAAA', mime: 'PGP;X=1' }),
     'KEY;ENCODING=b;TYPE="PGP;X=1":AAAA',
   ],
+  ['addKey', (c) => c.addKey({ key: 'AAAA', mime: '' }), 'KEY;ENCODING=b:AAAA'],
+  ['addKey', (c) => c.addKey({ text: 'abc', mime: '' }), 'KEY;VALUE=text:abc'],
   [
     'addKey',
     (c) => c.addKey({ text: '-----BEGIN PGP PUBLIC KEY BLOCK-----\nAB\r\nCD' }),

@@ -207,14 +207,12 @@ export default class VCard {
           return { element: 'key', valueType: 'uri', value: options.url }
         }
 
-        const params: ParamSpec[] = [
-          {
-            kind: 'single',
-            name: 'TYPE',
-            value: options.mime ?? 'PGP',
-            upper: true,
-          },
-        ]
+        const mime = options.mime ?? 'PGP'
+        // RFC 2426 allows no empty key type, so an empty mime writes no TYPE
+        const params: ParamSpec[] =
+          mime === ''
+            ? []
+            : [{ kind: 'single', name: 'TYPE', value: mime, upper: true }]
 
         if (options.text !== undefined) {
           return {
