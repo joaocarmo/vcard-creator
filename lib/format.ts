@@ -34,6 +34,13 @@ const TEXT_CONTROL_CHARS = /[\x00-\x08\x0E-\x1F\x7F]/
 // oxlint-disable-next-line no-control-regex
 const TEXT_LINE_BREAKS = /\r\n|[\r\n\x0B\x0C\x85\u{2028}\u{2029}]/gu
 
+// RFC 2426 section 4: `param *(";" param)`, where a param value is ptext or a
+// quoted string. Control characters are checked before this pattern runs.
+// https://tools.ietf.org/html/rfc2426#section-4
+const PARAM_VALUE = '(?:[^";:,]*|"[^"]*")'
+const PARAM = `[A-Za-z0-9-]+=${PARAM_VALUE}(?:,${PARAM_VALUE})*`
+const RAW_PARAMS = new RegExp(`^${PARAM}(?:;${PARAM})*$`)
+
 /**
  * Convert a type array to the vCard TYPE= wire format.
  * ['work', 'postal'] → 'TYPE=WORK,POSTAL'
@@ -172,7 +179,8 @@ export function formatFloat(value: number): string {
 
 /**
  * Build a property key, such as `TEL;TYPE=WORK,VOICE`, from a name and
- * structured parameters. This is the only place where parameters are quoted.
+ * structured parameters. Structured parameter values are quoted here. Raw
+ * parameters are checked against the RFC 2426 grammar and written as they are.
  *
  * `VALUE=<type>` is written when the RFC value type is not the default one,
  * and `ENCODING=b` for binary values.
@@ -216,6 +224,11 @@ export function buildKey({
     const raw = rawParams as string
     assertNoControlChars({ value: raw, label: 'Parameter', allowTab: true })
     if (raw !== '') {
+      if (!RAW_PARAMS.test(raw)) {
+        throw new VCardException(
+          `Parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${showValue(raw)})`,
+        )
+      }
       parts.push(raw)
     }
   }
