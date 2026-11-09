@@ -195,11 +195,11 @@ myVCard.addBirthday('1953-10-15T23:10:00Z')
 
 ### Contact
 
-| Method                              | Description                                                                                                                                |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`. The address is escaped as RFC 2426 text (see [Text Escaping](#text-escaping)) |
-| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`. Pass `number` as a string. A `number` is **deprecated**       |
-| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                                                                                              |
+| Method                              | Description                                                                                                                                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`. The address is escaped as RFC 2426 text (see [Text Escaping](#text-escaping))    |
+| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`. Pass `number` as a string. A JavaScript number is **deprecated** |
+| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                                                                                                 |
 
 The `type` parameter takes a typed array, for IDE autocomplete and type safety:
 
@@ -208,7 +208,7 @@ myVCard.addEmail({ address: 'john@example.com', type: ['pref', 'work'] })
 myVCard.addPhoneNumber({ number: '+1-555-0100', type: ['cell'] })
 ```
 
-Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#43][issue-43]). `1e21` is written as `1e+21`, and integers above `Number.MAX_SAFE_INTEGER` change their last digits. A `number` is deprecated and is removed in the next major version ([#156][issue-156]).
+Pass phone numbers as strings. A number loses a leading `0` and the `+` sign ([#43][issue-43]). `1e21` is written as `1e+21`, and integers above `Number.MAX_SAFE_INTEGER` change their last digits. A JavaScript number is deprecated and is removed in the next major version ([#156][issue-156]).
 
 A `url` must not contain control characters, such as a line break. Such a value throws a `VCardException`. Percent-encode them (`%0A`).
 
@@ -452,7 +452,7 @@ Each card keeps its own `BEGIN:VCARD` and `END:VCARD` lines.
 
 ### Advanced Methods
 
-Most users do not need these. The members marked **Deprecated** are removed in the next major version ([#107][issue-107]).
+Most users do not need these. The members marked **Deprecated** are removed in the next major version ([#156][issue-156]).
 
 | Method                                             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -468,7 +468,7 @@ Most users do not need these. The members marked **Deprecated** are removed in t
 
 Also deprecated, and removed in the next major version ([#156][issue-156]):
 
-- a `number` as the `addPhoneNumber()` `number`. Pass a string.
+- a JavaScript number as the `addPhoneNumber()` `number`. Pass a string.
 - the `DateString` type. Use `string`.
 
 ## Migration from v0.x
@@ -505,7 +505,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests, and [ARCHITEC
 
 [issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
 [issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
-[issue-107]: https://github.com/joaocarmo/vcard-creator/issues/107
 [issue-156]: https://github.com/joaocarmo/vcard-creator/issues/156
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
