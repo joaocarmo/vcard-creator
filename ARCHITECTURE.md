@@ -27,7 +27,7 @@ Each module in `lib/` has 1 job:
 - `constants.ts`: library metadata, such as the version and the content type.
 - `properties.ts`: the property table, reserved property names and the property model types.
 - `values.ts`: value pipelines, which check and convert a value by its value type.
-- `validate.ts`: input checks and the RFC 2425 date grammar.
+- `validate.ts`: input checks, the RFC 2425 date grammar and the base64 alphabet.
 - `format.ts`: content-line output: text escaping, parameter quoting, property keys, line folding and number formatting.
 - `mime.ts`: the image MIME type list and its helpers.
 

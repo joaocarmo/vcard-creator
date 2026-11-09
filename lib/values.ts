@@ -17,11 +17,6 @@ import {
 
 type ValuePipeline = (value: unknown, label: string) => string
 
-const rawPipeline: ValuePipeline = (value, label) => {
-  assertNoControlChars({ value: value as string, label })
-  return value as string
-}
-
 /**
  * Check a property value by its value type and return the string to store.
  * Plain JavaScript callers can pass any value, so each pipeline checks it.
@@ -43,7 +38,10 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     assertUri(value as string)
     return value as string
   },
-  raw: rawPipeline,
+  raw: (value, label) => {
+    assertNoControlChars({ value: value as string, label })
+    return value as string
+  },
   'raw-tab': (value, label) => {
     assertNoControlChars({ value: value as string, label, allowTab: true })
     return value as string

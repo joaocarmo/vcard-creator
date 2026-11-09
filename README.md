@@ -268,7 +268,7 @@ These text values are escaped like other text properties (see [Text Escaping](#t
 
 Each method accepts either `{ url }` or `{ image, mime? }`. You can add more than one photo or logo, for example a base64 thumbnail and a URL. A `url` with a control character, such as a line break, throws a `VCardException`.
 
-`image` must be base64 ([RFC 2045 §6.8][rfc2045-base64]): `A-Z`, `a-z`, `0-9`, `+` and `/`, with `=` padding. Spaces, tabs and line breaks are removed, so wrapped output such as GNU `base64` works. Any other value throws a `VCardException`.
+`image` must be base64 ([RFC 2045 §6.8][rfc2045-base64]): `A-Z`, `a-z`, `0-9`, `+` and `/`, with `=` padding. Spaces, tabs, CR and LF are removed, so wrapped output such as GNU `base64` works. Any other value throws a `VCardException`.
 
 - `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
 - After that, `mime` must be a string with an [IANA image type][mime-types], or the method throws a `VCardException`. The match ignores case.
@@ -377,7 +377,7 @@ Other values are written as they are. They throw a `VCardException` if they cont
 - URLs and URIs
 - the deprecated `charset` (checked by `toString()`)
 
-`addKey` key and `addPhoto` and `addLogo` image must be base64 (see [Media](#media)). Any control character in them throws a `VCardException`.
+`addKey` key and `addPhoto` and `addLogo` image must be base64 (see [Media](#media)). Spaces, tabs, CR and LF are removed. Any other control character in them throws a `VCardException`.
 
 Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are written in double quotes when they contain `;`, `:` or `,`. A double quote or a control character other than tab throws a `VCardException`.
 
