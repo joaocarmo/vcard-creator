@@ -18,6 +18,7 @@ import {
   PropertyInput,
   SocialOptions,
   StoredProperty,
+  StorePropertiesOptions,
   UrlOptions,
 } from './types/VCard.js'
 import {
@@ -106,31 +107,35 @@ export default class VCard {
    * @throws VCardException
    */
   public addAddress(options: AddressOptions = {}): this {
-    return this.storeProperties('addAddress()', options, (options) => {
-      const {
-        postOfficeBox = '',
-        extended = '',
-        street = '',
-        locality = '',
-        region = '',
-        postalCode = '',
-        country = '',
-        type = ['intl', 'postal', 'parcel', 'work'],
-      } = options
+    return this.storeProperties({
+      methodName: 'addAddress()',
+      value: options,
+      map: (options) => {
+        const {
+          postOfficeBox = '',
+          extended = '',
+          street = '',
+          locality = '',
+          region = '',
+          postalCode = '',
+          country = '',
+          type = ['intl', 'postal', 'parcel', 'work'],
+        } = options
 
-      return {
-        element: 'address',
-        value: [
-          postOfficeBox,
-          extended,
-          street,
-          locality,
-          region,
-          postalCode,
-          country,
-        ],
-        params: [{ kind: 'list', name: 'TYPE', value: type }],
-      }
+        return {
+          element: 'address',
+          value: [
+            postOfficeBox,
+            extended,
+            street,
+            locality,
+            region,
+            postalCode,
+            country,
+          ],
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
   }
 
@@ -149,10 +154,13 @@ export default class VCard {
    * vCard.addBirthday('1953-10-15T23:10:00Z')
    */
   public addBirthday(date: Date | string): this {
-    return this.storeProperties(null, date, (value) => ({
-      element: 'birthday',
-      value,
-    }))
+    return this.storeProperties({
+      value: date,
+      map: (value) => ({
+        element: 'birthday',
+        value,
+      }),
+    })
   }
 
   /**
@@ -162,13 +170,17 @@ export default class VCard {
    * @throws VCardException
    */
   public addCompany(options: CompanyOptions): this {
-    return this.storeProperties('addCompany()', options, (options) => {
-      const { name, department = '' } = options
+    return this.storeProperties({
+      methodName: 'addCompany()',
+      value: options,
+      map: (options) => {
+        const { name, department = '' } = options
 
-      return {
-        element: 'company',
-        value: department !== '' ? [name, department] : [name],
-      }
+        return {
+          element: 'company',
+          value: department !== '' ? [name, department] : [name],
+        }
+      },
     })
   }
 
@@ -179,14 +191,18 @@ export default class VCard {
    * @throws VCardException
    */
   public addEmail(options: EmailOptions): this {
-    return this.storeProperties('addEmail()', options, (options) => {
-      const { address, type = [] } = options
+    return this.storeProperties({
+      methodName: 'addEmail()',
+      value: options,
+      map: (options) => {
+        const { address, type = [] } = options
 
-      return {
-        element: 'email',
-        value: address,
-        params: [{ kind: 'list', name: 'TYPE', value: type }],
-      }
+        return {
+          element: 'email',
+          value: address,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
   }
 
@@ -197,23 +213,27 @@ export default class VCard {
    * @throws VCardException
    */
   public addKey(options: KeyOptions): this {
-    return this.storeProperties('addKey()', options, (options) => {
-      if ('url' in options) {
-        return { element: 'key', valueType: 'uri', value: options.url }
-      }
+    return this.storeProperties({
+      methodName: 'addKey()',
+      value: options,
+      map: (options) => {
+        if ('url' in options) {
+          return { element: 'key', valueType: 'uri', value: options.url }
+        }
 
-      return {
-        element: 'key',
-        value: options.key,
-        params: [
-          {
-            kind: 'single',
-            name: 'TYPE',
-            value: options.mime ?? 'PGP',
-            upper: true,
-          },
-        ],
-      }
+        return {
+          element: 'key',
+          value: options.key,
+          params: [
+            {
+              kind: 'single',
+              name: 'TYPE',
+              value: options.mime ?? 'PGP',
+              upper: true,
+            },
+          ],
+        }
+      },
     })
   }
 
@@ -224,10 +244,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addJobtitle(jobtitle: string): this {
-    return this.storeProperties(null, jobtitle, (value) => ({
-      element: 'jobtitle',
-      value,
-    }))
+    return this.storeProperties({
+      value: jobtitle,
+      map: (value) => ({
+        element: 'jobtitle',
+        value,
+      }),
+    })
   }
 
   /**
@@ -237,10 +260,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addRole(role: string): this {
-    return this.storeProperties(null, role, (value) => ({
-      element: 'role',
-      value,
-    }))
+    return this.storeProperties({
+      value: role,
+      map: (value) => ({
+        element: 'role',
+        value,
+      }),
+    })
   }
 
   /**
@@ -253,10 +279,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addFullName(fullName: string): this {
-    return this.storeProperties(null, fullName, (value) => ({
-      element: 'fullname',
-      value,
-    }))
+    return this.storeProperties({
+      value: fullName,
+      map: (value) => ({
+        element: 'fullname',
+        value,
+      }),
+    })
   }
 
   /**
@@ -266,50 +295,54 @@ export default class VCard {
    * @throws VCardException
    */
   public addName(options: NameOptions = {}): this {
-    return this.storeProperties('addName()', options, (options) => {
-      const {
-        familyName = '',
-        givenName = '',
-        additionalNames = '',
-        honorificPrefix = '',
-        honorificSuffix = '',
-      } = options
+    return this.storeProperties({
+      methodName: 'addName()',
+      value: options,
+      map: (options) => {
+        const {
+          familyName = '',
+          givenName = '',
+          additionalNames = '',
+          honorificPrefix = '',
+          honorificSuffix = '',
+        } = options
 
-      const inputs: PropertyInput[] = [
-        {
-          element: 'name',
-          value: [
-            familyName,
-            givenName,
-            additionalNames,
-            honorificPrefix,
-            honorificSuffix,
-          ],
-        },
-      ]
+        const inputs: PropertyInput[] = [
+          {
+            element: 'name',
+            value: [
+              familyName,
+              givenName,
+              additionalNames,
+              honorificPrefix,
+              honorificSuffix,
+            ],
+          },
+        ]
 
-      const parts = [
-        honorificPrefix,
-        givenName,
-        additionalNames,
-        familyName,
-        honorificSuffix,
-      ]
-      const hasFullName = this.properties.some(
-        (property) => property.key === 'FN',
-      )
+        const parts = [
+          honorificPrefix,
+          givenName,
+          additionalNames,
+          familyName,
+          honorificSuffix,
+        ]
+        const hasFullName = this.properties.some(
+          (property) => property.key === 'FN',
+        )
 
-      // A non-string part makes the N input throw first. join() would throw
-      // a TypeError on a null-prototype object.
-      if (!hasFullName && parts.every((part) => typeof part === 'string')) {
-        const fullName = parts.filter(Boolean).join(' ').trim()
+        // A non-string part makes the N input throw first. join() would throw
+        // a TypeError on a null-prototype object.
+        if (!hasFullName && parts.every((part) => typeof part === 'string')) {
+          const fullName = parts.filter(Boolean).join(' ').trim()
 
-        if (fullName !== '') {
-          inputs.push({ element: 'fullname', value: fullName })
+          if (fullName !== '') {
+            inputs.push({ element: 'fullname', value: fullName })
+          }
         }
-      }
 
-      return inputs
+        return inputs
+      },
     })
   }
 
@@ -320,11 +353,14 @@ export default class VCard {
    * @throws VCardException
    */
   public addNickname(nickname: string | string[]): this {
-    return this.storeProperties(null, nickname, (value) => ({
-      element: 'nickname',
-      valueType: Array.isArray(value) ? 'text-list' : 'text',
-      value,
-    }))
+    return this.storeProperties({
+      value: nickname,
+      map: (value) => ({
+        element: 'nickname',
+        valueType: Array.isArray(value) ? 'text-list' : 'text',
+        value,
+      }),
+    })
   }
 
   /**
@@ -334,10 +370,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addNote(note: string): this {
-    return this.storeProperties(null, note, (value) => ({
-      element: 'note',
-      value,
-    }))
+    return this.storeProperties({
+      value: note,
+      map: (value) => ({
+        element: 'note',
+        value,
+      }),
+    })
   }
 
   /**
@@ -347,10 +386,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addCategories(categories: string[]): this {
-    return this.storeProperties(null, categories, (value) => ({
-      element: 'categories',
-      value,
-    }))
+    return this.storeProperties({
+      value: categories,
+      map: (value) => ({
+        element: 'categories',
+        value,
+      }),
+    })
   }
 
   /**
@@ -360,28 +402,32 @@ export default class VCard {
    * @throws VCardException
    */
   public addPhoneNumber(options: PhoneOptions): this {
-    return this.storeProperties('addPhoneNumber()', options, (options) => {
-      const { number, type = [] } = options
+    return this.storeProperties({
+      methodName: 'addPhoneNumber()',
+      value: options,
+      map: (options) => {
+        const { number, type = [] } = options
 
-      // Plain JavaScript callers can pass null or undefined, which would be
-      // written as text
-      if (typeof number !== 'string' && typeof number !== 'number') {
-        throw new VCardException(
-          `Phone number values must be strings or numbers (got ${describeType(number)})`,
-        )
-      }
+        // Plain JavaScript callers can pass null or undefined, which would be
+        // written as text
+        if (typeof number !== 'string' && typeof number !== 'number') {
+          throw new VCardException(
+            `Phone number values must be strings or numbers (got ${describeType(number)})`,
+          )
+        }
 
-      if (typeof number === 'number' && !Number.isFinite(number)) {
-        throw new VCardException(
-          `Phone number values must be finite numbers (got ${number})`,
-        )
-      }
+        if (typeof number === 'number' && !Number.isFinite(number)) {
+          throw new VCardException(
+            `Phone number values must be finite numbers (got ${number})`,
+          )
+        }
 
-      return {
-        element: 'phoneNumber',
-        value: `${number}`,
-        params: [{ kind: 'list', name: 'TYPE', value: type }],
-      }
+        return {
+          element: 'phoneNumber',
+          value: `${number}`,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
   }
 
@@ -392,9 +438,11 @@ export default class VCard {
    * @throws VCardException
    */
   public addLogo(options: LogoOptions): this {
-    return this.storeProperties('addLogo()', options, (options) =>
-      toMediaInput('logo', options),
-    )
+    return this.storeProperties({
+      methodName: 'addLogo()',
+      value: options,
+      map: (options) => toMediaInput('logo', options),
+    })
   }
 
   /**
@@ -404,9 +452,11 @@ export default class VCard {
    * @throws VCardException
    */
   public addPhoto(options: PhotoOptions): this {
-    return this.storeProperties('addPhoto()', options, (options) =>
-      toMediaInput('photo', options),
-    )
+    return this.storeProperties({
+      methodName: 'addPhoto()',
+      value: options,
+      map: (options) => toMediaInput('photo', options),
+    })
   }
 
   /**
@@ -416,14 +466,18 @@ export default class VCard {
    * @throws VCardException
    */
   public addUrl(options: UrlOptions): this {
-    return this.storeProperties('addUrl()', options, (options) => {
-      const { url, type = [] } = options
+    return this.storeProperties({
+      methodName: 'addUrl()',
+      value: options,
+      map: (options) => {
+        const { url, type = [] } = options
 
-      return {
-        element: 'url',
-        value: url,
-        params: [{ kind: 'list', name: 'TYPE', value: type }],
-      }
+        return {
+          element: 'url',
+          value: url,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
   }
 
@@ -435,25 +489,33 @@ export default class VCard {
    * @throws VCardException
    */
   public addSocial(options: SocialOptions): this {
-    return this.storeProperties('addSocial()', options, (options) => {
-      const { url, type, user = '' } = options
+    return this.storeProperties({
+      methodName: 'addSocial()',
+      value: options,
+      map: (options) => {
+        const { url, type, user = '' } = options
 
-      const socialParams: ParamSpec[] = []
-      const imppParams: ParamSpec[] = []
+        const socialParams: ParamSpec[] = []
+        const imppParams: ParamSpec[] = []
 
-      if (type !== '') {
-        socialParams.push({ kind: 'single', name: 'type', value: type })
-        imppParams.push({ kind: 'single', name: 'X-SERVICE-TYPE', value: type })
-      }
+        if (type !== '') {
+          socialParams.push({ kind: 'single', name: 'type', value: type })
+          imppParams.push({
+            kind: 'single',
+            name: 'X-SERVICE-TYPE',
+            value: type,
+          })
+        }
 
-      if (user !== '') {
-        socialParams.push({ kind: 'single', name: 'x-user', value: user })
-      }
+        if (user !== '') {
+          socialParams.push({ kind: 'single', name: 'x-user', value: user })
+        }
 
-      return [
-        { element: 'social', value: url, params: socialParams },
-        { element: 'impp', value: url, params: imppParams },
-      ]
+        return [
+          { element: 'social', value: url, params: socialParams },
+          { element: 'impp', value: url, params: imppParams },
+        ]
+      },
     })
   }
 
@@ -464,17 +526,21 @@ export default class VCard {
    * @throws VCardException
    */
   public addImpp(options: ImppOptions): this {
-    return this.storeProperties('addImpp()', options, (options) => {
-      const { uri, serviceType = '' } = options
+    return this.storeProperties({
+      methodName: 'addImpp()',
+      value: options,
+      map: (options) => {
+        const { uri, serviceType = '' } = options
 
-      return {
-        element: 'impp',
-        value: uri,
-        params:
-          serviceType !== ''
-            ? [{ kind: 'single', name: 'X-SERVICE-TYPE', value: serviceType }]
-            : [],
-      }
+        return {
+          element: 'impp',
+          value: uri,
+          params:
+            serviceType !== ''
+              ? [{ kind: 'single', name: 'X-SERVICE-TYPE', value: serviceType }]
+              : [],
+        }
+      },
     })
   }
 
@@ -485,10 +551,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addUid(uid: string): this {
-    return this.storeProperties(null, uid, (value) => ({
-      element: 'uid',
-      value,
-    }))
+    return this.storeProperties({
+      value: uid,
+      map: (value) => ({
+        element: 'uid',
+        value,
+      }),
+    })
   }
 
   /**
@@ -498,10 +567,14 @@ export default class VCard {
    * @throws VCardException
    */
   public addGeo(options: GeoOptions): this {
-    return this.storeProperties('addGeo()', options, (value) => ({
-      element: 'geo',
-      value,
-    }))
+    return this.storeProperties({
+      methodName: 'addGeo()',
+      value: options,
+      map: (value) => ({
+        element: 'geo',
+        value,
+      }),
+    })
   }
 
   /**
@@ -515,15 +588,18 @@ export default class VCard {
    * @throws VCardException
    */
   public addTimezone(timezone: string): this {
-    return this.storeProperties(null, timezone, (value) => {
-      // test() would turn an object into a string and match it
-      assertString({ value, label: 'Timezone' })
+    return this.storeProperties({
+      value: timezone,
+      map: (value) => {
+        // test() would turn an object into a string and match it
+        assertString({ value, label: 'Timezone' })
 
-      return {
-        element: 'timezone',
-        valueType: UTC_OFFSET.test(value) ? 'utc-offset' : 'text',
-        value,
-      }
+        return {
+          element: 'timezone',
+          valueType: UTC_OFFSET.test(value) ? 'utc-offset' : 'text',
+          value,
+        }
+      },
     })
   }
 
@@ -534,10 +610,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addSortString(sortString: string): this {
-    return this.storeProperties(null, sortString, (value) => ({
-      element: 'sortString',
-      value,
-    }))
+    return this.storeProperties({
+      value: sortString,
+      map: (value) => ({
+        element: 'sortString',
+        value,
+      }),
+    })
   }
 
   /**
@@ -550,10 +629,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addRevision(date: Date): this {
-    return this.storeProperties(null, date, (value) => ({
-      element: 'revision',
-      value,
-    }))
+    return this.storeProperties({
+      value: date,
+      map: (value) => ({
+        element: 'revision',
+        value,
+      }),
+    })
   }
 
   /**
@@ -563,14 +645,18 @@ export default class VCard {
    * @throws VCardException
    */
   public addLabel(options: LabelOptions): this {
-    return this.storeProperties('addLabel()', options, (options) => {
-      const { label, type = ['intl', 'postal', 'parcel', 'work'] } = options
+    return this.storeProperties({
+      methodName: 'addLabel()',
+      value: options,
+      map: (options) => {
+        const { label, type = ['intl', 'postal', 'parcel', 'work'] } = options
 
-      return {
-        element: 'label',
-        value: label,
-        params: [{ kind: 'list', name: 'TYPE', value: type }],
-      }
+        return {
+          element: 'label',
+          value: label,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
   }
 
@@ -593,25 +679,29 @@ export default class VCard {
    * vCard.addCustomProperty({ name: 'TEL', value: '+1-555', group: 'item1' })
    */
   public addCustomProperty(options: CustomPropertyOptions): this {
-    return this.storeProperties('addCustomProperty()', options, (options) => {
-      const { name, value, params = '', group } = options
+    return this.storeProperties({
+      methodName: 'addCustomProperty()',
+      value: options,
+      map: (options) => {
+        const { name, value, params = '', group } = options
 
-      assertName({ value: name, label: 'Property name' })
-      const upperName = name.toUpperCase()
-      const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)
-      if (hint !== undefined) {
-        throw new VCardException(
-          `Property name ${JSON.stringify(name)} is reserved${hint}`,
-        )
-      }
+        assertName({ value: name, label: 'Property name' })
+        const upperName = name.toUpperCase()
+        const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)
+        if (hint !== undefined) {
+          throw new VCardException(
+            `Property name ${JSON.stringify(name)} is reserved${hint}`,
+          )
+        }
 
-      return {
-        element: 'custom',
-        name: upperName,
-        value,
-        rawParams: params,
-        group,
-      }
+        return {
+          element: 'custom',
+          name: upperName,
+          value,
+          rawParams: params,
+          group,
+        }
+      },
     })
   }
 
@@ -620,20 +710,21 @@ export default class VCard {
    * and build the key of each input, then store them. Nothing is stored when
    * an input throws.
    *
-   * @param  method The method name for the options message, or `null` when
-   *                the method takes no options object
+   * @param  methodName The calling method, such as `'addAddress()'`. When
+   *                    set, `value` must be an options object, and the error
+   *                    message names this method.
    * @throws VCardException
    */
-  private storeProperties<T>(
-    method: string | null,
-    options: T,
-    map: (options: T) => PropertyInput | PropertyInput[],
-  ): this {
-    if (method !== null) {
-      assertOptions({ value: options, label: method })
+  private storeProperties<T>({
+    methodName,
+    value,
+    map,
+  }: StorePropertiesOptions<T>): this {
+    if (methodName !== undefined) {
+      assertOptions({ value, label: methodName })
     }
 
-    const mapped = map(options)
+    const mapped = map(value)
     const inputs = Array.isArray(mapped) ? mapped : [mapped]
 
     const properties: StoredProperty[] = inputs.map((input) => {

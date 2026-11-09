@@ -87,6 +87,13 @@ export interface PropertyInput {
   name?: string
 }
 
+export interface StorePropertiesOptions<T> {
+  /** The calling method, such as `'addAddress()'`. Set it when `value` must be an options object. */
+  methodName?: string
+  value: T
+  map: (value: T) => PropertyInput | PropertyInput[]
+}
+
 export interface BuildKeyOptions {
   name: string
   valueType: ValueType
