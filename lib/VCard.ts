@@ -29,42 +29,12 @@ import {
   buildKey,
   describeType,
   fold,
-  isValidMimeType,
-  toImageSubtype,
   UTC_OFFSET,
   VALUE_PIPELINES,
+  toMediaInput,
 } from './utils/functions.js'
 import { PROPERTIES } from './utils/properties.js'
 import * as constants from './utils/constants.js'
-
-/**
- * Map photo or logo options to a property input.
- *
- * @throws VCardException
- */
-function toMediaInput(
-  element: 'logo' | 'photo',
-  options: LogoOptions | PhotoOptions,
-): PropertyInput {
-  if ('url' in options) {
-    return { element, valueType: 'uri', value: options.url }
-  }
-
-  const mime = options.mime ?? constants.DEFAULT_MIME_TYPE
-  assertString({ value: mime, label: 'MIME Media Type' })
-
-  const subtype = toImageSubtype(mime)
-
-  if (!isValidMimeType(subtype)) {
-    throw new VCardException(`The MIME Media Type is invalid (${mime})`)
-  }
-
-  return {
-    element,
-    value: options.image,
-    params: [{ kind: 'single', name: 'TYPE', value: subtype, upper: true }],
-  }
-}
 
 export default class VCard {
   /**

@@ -1,12 +1,15 @@
 import VCardException from '../VCardException.js'
-import { MIME_TYPES } from './constants.js'
+import { DEFAULT_MIME_TYPE, MIME_TYPES } from './constants.js'
 import type {
   BuildKeyOptions,
   ControlCharsOptions,
   CoordinateOptions,
   DateCheckOptions,
   GeoOptions,
+  LogoOptions,
   OptionsCheckOptions,
+  PhotoOptions,
+  PropertyInput,
   PropertyNameOptions,
   StringCheckOptions,
   ValueType,
@@ -345,6 +348,35 @@ export function toImageSubtype(mime: string): string {
  */
 export function isValidMimeType(mime: string): boolean {
   return mime !== '' && MIME_TYPES.has(mime.toLowerCase())
+}
+
+/**
+ * Map photo or logo options to a property input.
+ *
+ * @throws VCardException
+ */
+export function toMediaInput(
+  element: 'logo' | 'photo',
+  options: LogoOptions | PhotoOptions,
+): PropertyInput {
+  if ('url' in options) {
+    return { element, valueType: 'uri', value: options.url }
+  }
+
+  const mime = options.mime ?? DEFAULT_MIME_TYPE
+  assertString({ value: mime, label: 'MIME Media Type' })
+
+  const subtype = toImageSubtype(mime)
+
+  if (!isValidMimeType(subtype)) {
+    throw new VCardException(`The MIME Media Type is invalid (${mime})`)
+  }
+
+  return {
+    element,
+    value: options.image,
+    params: [{ kind: 'single', name: 'TYPE', value: subtype, upper: true }],
+  }
 }
 
 /**
