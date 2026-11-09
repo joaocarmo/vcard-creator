@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import VCard from './VCard'
-import { LIB_VERSION } from './utils/constants'
+import { LIB_VERSION } from './constants'
 
 describe('vCard output format', () => {
   const photoURL = 'https://example.com/img/photo.jpg'

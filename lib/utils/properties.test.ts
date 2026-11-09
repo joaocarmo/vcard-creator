@@ -1,4 +1,4 @@
-import { PROPERTIES } from './properties'
+import { PROPERTIES } from '../properties'
 import type { Element } from '../types/VCard'
 
 const elements = Object.keys(PROPERTIES) as Element[]

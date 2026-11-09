@@ -4,20 +4,21 @@ import {
   assertOptions,
   assertString,
   assertUri,
+  isRfcDateOrDateTime,
+} from '../validate'
+import {
   buildKey,
   escapeText,
   fold,
   formatFloat,
-  isRfcDateOrDateTime,
-  isValidMimeType,
   quoteParamValue,
   resolveType,
-  toImageSubtype,
-  VALUE_PIPELINES,
-} from './functions'
-import { MIME_TYPES } from './constants'
+} from '../format'
+import { isValidMimeType, MIME_TYPES, toImageSubtype } from '../mime'
+import { VALUE_PIPELINES } from '../values'
 import VCardException from '../VCardException'
-import type { BuildKeyOptions, ValueType } from '../types/VCard'
+import type { BuildKeyOptions } from '../format'
+import type { ValueType } from '../properties'
 
 describe('quoteParamValue()', () => {
   it('should keep simple values as they are', () => {

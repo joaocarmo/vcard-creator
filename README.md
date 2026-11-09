@@ -497,6 +497,8 @@ pnpm pretty
 
 `pnpm test:unit` also measures test coverage of `lib/`. Coverage must stay at 100% for statements, branches, functions and lines. The command fails below 100%, and so does the `test` CI job.
 
+[ARCHITECTURE.md](ARCHITECTURE.md) describes the source layout and how a property is added.
+
 ## License
 
 [MIT](LICENSE)
