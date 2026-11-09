@@ -26,4 +26,6 @@ pnpm pretty
 
 `pnpm test:unit` also measures test coverage of `lib/`. Coverage must stay at 100% for statements, branches, functions and lines. The command fails below 100%, and so does the `test` CI job.
 
+`pnpm test:functional` runs Vitest against the built package in `dist/`. It writes no files.
+
 [ARCHITECTURE.md](ARCHITECTURE.md) describes the source layout and how a property is added.

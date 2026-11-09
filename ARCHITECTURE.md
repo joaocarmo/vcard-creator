@@ -36,3 +36,14 @@ Each module in `lib/` has 1 job:
 1. Add the element name to `Element` in `types/VCard.ts`.
 2. Add its row to `PROPERTIES` in `properties.ts`. The type check fails until every element has a row.
 3. Add a public `add*()` method to `VCard` that maps its arguments to `storeProperties()`.
+
+## Tests
+
+- Unit tests sit next to their module, in files named after it: `<module>.test.ts`. A large module can split its tests by topic into `<module>.<topic>.test.ts`. The topics do not overlap.
+- Each behaviour is tested in 1 place. The value-type rules (escaping, control characters, the date grammar, base64) are tested in the module that owns them: `values.test.ts`, `validate.test.ts` and `format.test.ts`.
+- `VCard` tests:
+  - `VCard.test.ts`: the class itself, such as output, charset, `concat()` and grouping.
+  - `VCard.properties.test.ts`: what each `add*()` method writes (property name, parameters and value type), plus behaviour that only that method has.
+  - `VCard.input.test.ts`: checks that run over every input of every `add*()` method.
+- Test fixtures live in `test/fixtures/`.
+- The functional test lives in `test/functional/`. It tests the built package in `dist/`, with its own Vitest config (`vitest.functional.config.ts`).

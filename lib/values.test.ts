@@ -1,0 +1,322 @@
+import { VALUE_PIPELINES } from './values'
+import VCardException from './VCardException'
+import type { ValueType } from './properties'
+
+describe('VALUE_PIPELINES', () => {
+  const run = (type: ValueType, value: unknown, label = 'Label') =>
+    VALUE_PIPELINES[type](value, label)
+
+  describe('text', () => {
+    it('should escape the value', () => {
+      expect(run('text', 'a;b,c\\d\ne')).toBe('a\\;b\\,c\\\\d\\ne')
+    })
+
+    it('should throw on a control character', () => {
+      expect(() => run('text', 'a\x00b')).toThrow(
+        'Text values cannot contain control characters ("a\\u0000b")',
+      )
+    })
+  })
+
+  describe('text-structured', () => {
+    it('should escape each component and join with a semicolon', () => {
+      expect(run('text-structured', ['a;b', '', 'c'])).toBe('a\\;b;;c')
+    })
+
+    it('should escape commas and backslashes in each component', () => {
+      expect(run('text-structured', ['Doe, Jr.', 'C:\\x'])).toBe(
+        'Doe\\, Jr.;C:\\\\x',
+      )
+    })
+
+    it('should throw on a non-string component', () => {
+      expect(() => run('text-structured', ['a', null])).toThrow(
+        'Text values must be strings (got null)',
+      )
+    })
+  })
+
+  describe('text-list', () => {
+    it('should escape each entry, join with a comma and trim', () => {
+      expect(run('text-list', [' a,b', 'c '])).toBe('a\\,b,c')
+    })
+
+    it('should escape semicolons and backslashes in each entry', () => {
+      expect(run('text-list', ['a;b', 'c\\d'])).toBe('a\\;b,c\\\\d')
+    })
+
+    it('should throw on a non-string entry', () => {
+      expect(() => run('text-list', ['a', 42])).toThrow(
+        'Text values must be strings (got number)',
+      )
+    })
+
+    it('should throw on a non-array value with the label', () => {
+      expect(() => run('text-list', 'a')).toThrow(
+        'Label must be an array (got string)',
+      )
+    })
+  })
+
+  describe('uri', () => {
+    it('should keep the value as it is', () => {
+      expect(run('uri', 'https://example.com/a;b?c=1,2')).toBe(
+        'https://example.com/a;b?c=1,2',
+      )
+    })
+
+    it('should throw on a tab with the URI label', () => {
+      expect(() => run('uri', 'a\tb')).toThrow(
+        'URI values cannot contain control characters ("a\\tb")',
+      )
+    })
+  })
+
+  describe('raw', () => {
+    it('should keep the value as it is', () => {
+      expect(run('raw', 'a;b,c')).toBe('a;b,c')
+    })
+
+    it('should throw on a tab with the label', () => {
+      expect(() => run('raw', 'a\tb')).toThrow(
+        'Label values cannot contain control characters ("a\\tb")',
+      )
+    })
+  })
+
+  describe('binary', () => {
+    it.each(['', 'AAAA', 'ab+/', 'QUJD', 'QUI=', 'QQ==', 'QUJDRA=='])(
+      'should keep valid base64 %j as it is',
+      (value) => {
+        expect(run('binary', value)).toBe(value)
+      },
+    )
+
+    it.each(['-', '_', '.', '!', ':', ';', ',', 'é'])(
+      'should throw on the character %j with the label and the value',
+      (char) => {
+        expect(() => run('binary', `AAA${char}`)).toThrow(
+          `Label values must be base64 (got ${JSON.stringify(`AAA${char}`)})`,
+        )
+      },
+    )
+
+    it('should throw on a data URL', () => {
+      expect(() => run('binary', 'data:image/png;base64,AAAA')).toThrow(
+        'Label values must be base64 (got "data:image/png;base64,AAAA")',
+      )
+    })
+
+    it.each(['A', 'AA', 'AAA', 'AA=', 'A===', '=AAA', 'AA==AAAA', 'AAAAA'])(
+      'should throw on wrong padding %j',
+      (value) => {
+        expect(() => run('binary', value)).toThrow(VCardException)
+      },
+    )
+
+    it.each([
+      ['AAAA\nBBBB', 'AAAABBBB'],
+      ['AAAA\r\nBBBB\r\n', 'AAAABBBB'],
+      // A folded line
+      ['AAAA\r\n BBBB', 'AAAABBBB'],
+      ['AAAA BBBB', 'AAAABBBB'],
+      ['AAAA\tBB==', 'AAAABB=='],
+      [' AAAA ', 'AAAA'],
+    ])('should remove whitespace from %j', (value, expected) => {
+      expect(run('binary', value)).toBe(expected)
+    })
+
+    it('should check a value of several MB', () => {
+      const value = 'A'.repeat(8_000_000)
+
+      expect(run('binary', value)).toBe(value)
+      expect(() => run('binary', `${value}A`)).toThrow(VCardException)
+    })
+
+    it('should accept GNU base64 output wrapped at 76 characters', () => {
+      const line = 'A'.repeat(76)
+      expect(run('binary', `${line}\n${line}\nQQ==\n`)).toBe(
+        `${line}${line}QQ==`,
+      )
+    })
+
+    // VT, FF and NBSP would be removed by `\s`
+    it.each([
+      '\x00',
+      '\x0B',
+      '\x0C',
+      '\x7F',
+      '\x85',
+      '\xA0',
+      '\u{2028}',
+      '\u{3000}',
+    ])('should throw on %j', (char) => {
+      expect(() => run('binary', `AA${char}AA`)).toThrow(
+        'Label values must be base64',
+      )
+    })
+
+    it('should throw on a non-string', () => {
+      expect(() => run('binary', 42)).toThrow(
+        'Label values must be strings (got number)',
+      )
+    })
+  })
+
+  describe('raw-tab', () => {
+    it('should allow a tab', () => {
+      expect(run('raw-tab', 'a\tb')).toBe('a\tb')
+    })
+
+    it('should throw on a line break with the label', () => {
+      expect(() => run('raw-tab', 'a\nb')).toThrow(
+        'Label values cannot contain control characters ("a\\nb")',
+      )
+    })
+  })
+
+  describe('date-or-date-time', () => {
+    it('should write a Date as a date', () => {
+      expect(
+        run('date-or-date-time', new Date('1990-05-15T12:00:00Z'), 'Birthday'),
+      ).toBe('1990-05-15')
+    })
+
+    it.each([
+      ['0000-01-01T00:00:00Z', '0000-01-01'],
+      ['9999-12-31T00:00:00Z', '9999-12-31'],
+    ])('should write a Date at the year limit (%s)', (iso, expected) => {
+      expect(run('date-or-date-time', new Date(iso), 'Birthday')).toBe(expected)
+    })
+
+    it.each(['1990-05-15', '19900515', '1953-10-15T23:10:00Z'])(
+      'should keep %j as it is',
+      (value) => {
+        expect(run('date-or-date-time', value, 'Birthday')).toBe(value)
+      },
+    )
+
+    it('should throw on an invalid string', () => {
+      expect(() => run('date-or-date-time', '1990-02-30', 'Birthday')).toThrow(
+        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-02-30")',
+      )
+    })
+
+    it('should show the rejected string with escapes in the message', () => {
+      expect(() =>
+        run('date-or-date-time', '1990-05-15\n', 'Birthday'),
+      ).toThrow(
+        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-05-15\\n")',
+      )
+    })
+
+    it('should throw on a non-string, non-Date value', () => {
+      expect(() => run('date-or-date-time', 42, 'Birthday')).toThrow(
+        'Birthday values must be strings (got number)',
+      )
+    })
+
+    it('should throw on an invalid Date', () => {
+      expect(() => run('date-or-date-time', new Date('x'), 'Birthday')).toThrow(
+        'Invalid birthday: the Date is invalid',
+      )
+    })
+  })
+
+  describe('date-time', () => {
+    it('should write a Date as a date-time', () => {
+      expect(
+        run('date-time', new Date('2024-01-02T03:04:05Z'), 'Revision'),
+      ).toBe('2024-01-02T03:04:05.000Z')
+    })
+
+    it('should throw on a string', () => {
+      expect(() => run('date-time', '2024-01-02', 'Revision')).toThrow(
+        'Invalid revision: must be a Date (got string)',
+      )
+    })
+
+    it.each([
+      ['+010000-01-01T00:00:00Z', 10000],
+      ['-000001-01-01T00:00:00Z', -1],
+    ])('should throw on a Date in year %s', (iso, year) => {
+      expect(() => run('date-time', new Date(iso), 'Revision')).toThrow(
+        `Invalid revision: the year must be 0000 to 9999 (got ${year})`,
+      )
+    })
+
+    it('should throw on an invalid Date', () => {
+      expect(() => run('date-time', new Date('x'), 'Revision')).toThrow(
+        'Invalid revision: the Date is invalid',
+      )
+    })
+  })
+
+  describe('utc-offset', () => {
+    it.each(['+00:00', '-05:00', '+14:00', '+23:59'])(
+      'should keep %j',
+      (value) => {
+        expect(run('utc-offset', value, 'Timezone')).toBe(value)
+      },
+    )
+
+    it.each(['+24:00', '-25:00', '+05:60', '+99:99', 'Europe/Lisbon'])(
+      'should throw on %j',
+      (value) => {
+        expect(() => run('utc-offset', value, 'Timezone')).toThrow(
+          `Invalid timezone offset: ${value}. Hours must be 00 to 23 and minutes 00 to 59.`,
+        )
+      },
+    )
+  })
+
+  describe('float-pair', () => {
+    it('should write latitude and longitude', () => {
+      expect(run('float-pair', { latitude: 1e-7, longitude: -180 })).toBe(
+        '0.0000001;-180',
+      )
+    })
+
+    it('should accept the boundary values', () => {
+      expect(run('float-pair', { latitude: -90, longitude: 180 })).toBe(
+        '-90;180',
+      )
+    })
+
+    it.each([
+      ['latitude', 91, 90],
+      ['latitude', -91, 90],
+      ['longitude', 181, 180],
+      ['longitude', -181, 180],
+    ])('should throw on %s %s', (name, value, limit) => {
+      expect(() =>
+        run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
+      ).toThrow(
+        `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
+      )
+    })
+
+    const nonFiniteValues: [string, unknown][] = [
+      ['NaN', NaN],
+      ['Infinity', Infinity],
+      ['-Infinity', -Infinity],
+      ["'abc'", 'abc'],
+      ["'45'", '45'],
+      ['null', null],
+      ['undefined', undefined],
+      ['{}', {}],
+      ["Symbol('x')", Symbol('x')],
+      ['Object.create(null)', Object.create(null)],
+    ]
+
+    it.each(
+      ['latitude', 'longitude'].flatMap((name) =>
+        nonFiniteValues.map(([shown, value]) => [name, shown, value] as const),
+      ),
+    )('should throw on %s %s', (name, _, value) => {
+      expect(() =>
+        run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
+      ).toThrow(new RegExp(`Invalid ${name}: .*finite number`))
+    })
+  })
+})

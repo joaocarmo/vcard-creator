@@ -1,5 +1,4 @@
 # Build
 dist/
-test-functional/test-build.js
 coverage/
 *lock*
