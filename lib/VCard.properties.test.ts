@@ -293,15 +293,42 @@ describe('addName()', () => {
     expect(output).not.toContain('FN:')
   })
 
+  // Matches the property name exactly, with an optional group
+  const fnLines = (vCard: VCard) =>
+    vCard
+      .toString()
+      .split('\r\n')
+      .filter((line) => /^(?:[A-Za-z0-9-]+\.)?FN[;:]/.test(line))
+
   it('should not generate FN when a custom FN property exists', () => {
     const vCard = new VCard()
     vCard.addCustomProperty({ name: 'fn', value: 'Custom' })
     vCard.addName({ givenName: 'John' })
-    const fnLines = vCard
-      .toString()
-      .split('\r\n')
-      .filter((line) => line.startsWith('FN'))
-    expect(fnLines).toEqual(['FN:Custom'])
+    expect(fnLines(vCard)).toEqual(['FN:Custom'])
+  })
+
+  it.each(['FN', 'fn'])(
+    'should not generate FN when a custom %s property with parameters exists',
+    (name) => {
+      const vCard = new VCard()
+      vCard.addCustomProperty({ name, value: 'A', params: 'LANGUAGE=en' })
+      vCard.addName({ givenName: 'B' })
+      expect(fnLines(vCard)).toEqual(['FN;LANGUAGE=en:A'])
+    },
+  )
+
+  it('should not generate FN when a grouped custom FN property exists', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'FN', value: 'A', group: 'item1' })
+    vCard.addName({ givenName: 'B' })
+    expect(fnLines(vCard)).toEqual(['item1.FN:A'])
+  })
+
+  it('should generate FN when a custom property name only starts with FN', () => {
+    const vCard = new VCard()
+    vCard.addCustomProperty({ name: 'FNX', value: 'A' })
+    vCard.addName({ givenName: 'B' })
+    expect(fnLines(vCard)).toEqual(['FN:B'])
   })
 })
 

@@ -158,7 +158,7 @@ All `add*` methods return `this`, so you can chain them.
 | Method                                                                                       | Description                                                                                           |
 | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `addFullName(fullName)`                                                                      | Formatted name ([RFC 2426 §3.1.1][rfc2426-fn]). Call it before `addName()`                            |
-| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n])                                                        |
+| `addName({ givenName?, familyName?, additionalNames?, honorificPrefix?, honorificSuffix? })` | Structured name ([RFC 2426 §3.1.2][rfc2426-n]). Adds `FN` only when no `FN` exists                    |
 | `addNickname(nickname)`                                                                      | Nickname or nicknames. Accepts `string` or `string[]`                                                 |
 | `addBirthday(date)`                                                                          | Birthday. Accepts an RFC 2425 date or date-time string, or a `Date` (read in UTC, see the note below) |
 

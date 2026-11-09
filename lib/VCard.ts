@@ -301,7 +301,7 @@ export default class VCard {
           honorificSuffix,
         ]
         const hasFullName = this.properties.some(
-          (property) => property.key === 'FN',
+          (property) => property.key.split(';')[0] === 'FN',
         )
 
         // A non-string part makes the N input throw first. join() would throw
