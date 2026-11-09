@@ -89,6 +89,40 @@ describe('Text escaping', () => {
       vCard.addRole('Manager; Team Lead')
       expect(vCard.toString()).toContain('ROLE:Manager\\; Team Lead')
     })
+
+    it.each([
+      ['\\', '\\\\'],
+      [';', '\\;'],
+      [',', '\\,'],
+    ])('should escape %j in email address', (char, escaped) => {
+      const vCard = new VCard()
+      vCard.addEmail({ address: `a${char}b@example.com` })
+      expect(vCard.toString()).toContain(
+        `\r\nEMAIL:a${escaped}b@example.com\r\n`,
+      )
+    })
+
+    it.each([
+      ['\\', '\\\\'],
+      [';', '\\;'],
+      [',', '\\,'],
+    ])('should escape %j in uid', (char, escaped) => {
+      const vCard = new VCard()
+      vCard.addUid(`u${char}1`)
+      expect(vCard.toString()).toContain(`\r\nUID:u${escaped}1\r\n`)
+    })
+
+    it('should escape a quoted email address with a comma', () => {
+      const vCard = new VCard()
+      vCard.addEmail({ address: '"a,b"@x.y' })
+      expect(vCard.toString()).toContain('\r\nEMAIL:"a\\,b"@x.y\r\n')
+    })
+
+    it('should escape every special character in uid', () => {
+      const vCard = new VCard()
+      vCard.addUid('u;1,2\\x')
+      expect(vCard.toString()).toContain('\r\nUID:u\\;1\\,2\\\\x\r\n')
+    })
   })
 
   describe('non-escaped values', () => {
@@ -100,10 +134,18 @@ describe('Text escaping', () => {
       )
     })
 
-    it('should not escape email values', () => {
+    it('should write an email address without special characters as it is', () => {
       const vCard = new VCard()
       vCard.addEmail({ address: 'user@example.com' })
-      expect(vCard.toString()).toContain('EMAIL:user@example.com')
+      expect(vCard.toString()).toContain('\r\nEMAIL:user@example.com\r\n')
+    })
+
+    it('should write a uid without special characters as it is', () => {
+      const vCard = new VCard()
+      vCard.addUid('urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6')
+      expect(vCard.toString()).toContain(
+        '\r\nUID:urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6\r\n',
+      )
     })
 
     it('should not escape phone number values', () => {
@@ -282,6 +324,7 @@ describe('Text escaping', () => {
       'addAddress',
       'addCategories',
       'addCompany',
+      'addEmail',
       'addFullName',
       'addJobtitle',
       'addLabel',
@@ -291,6 +334,7 @@ describe('Text escaping', () => {
       'addRole',
       'addSortString',
       'addTimezone',
+      'addUid',
     ])
 
     it.each(

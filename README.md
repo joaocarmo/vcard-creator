@@ -188,11 +188,11 @@ myVCard.addBirthday('1990-05-15')
 
 ### Contact
 
-| Method                              | Description                                                                 |
-| ----------------------------------- | --------------------------------------------------------------------------- |
-| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`                 |
-| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]` |
-| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                               |
+| Method                              | Description                                                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `addEmail({ address, type? })`      | Email address. Type: `['internet', 'pref', 'work', 'home']`. The address is escaped as RFC 2426 text (see [Text Escaping](#text-escaping)) |
+| `addPhoneNumber({ number, type? })` | Phone number. Type: `['pref', 'work', 'home', 'voice', 'fax', 'cell', ...]`                                                                |
+| `addUrl({ url, type? })`            | URL. Type: `['work', 'home']`                                                                                                              |
 
 The `type` parameter takes a typed array, for IDE autocomplete and type safety:
 
@@ -207,7 +207,7 @@ A `url` must not contain control characters, such as a line break. Such a value 
 
 A `url` must be a string. Pass a `URL` object as `url.href`.
 
-An `address` or a `number` with a control character also throws a `VCardException`. So does a `number` that is `NaN`, `Infinity` or `-Infinity`.
+A `number` with a control character also throws a `VCardException`. So does a `number` that is `NaN`, `Infinity` or `-Infinity`.
 
 A `type` entry can contain `;`, `:` and `,`. An entry with these characters is written in double quotes, such as `TYPE="A;B"`. An entry with a double quote (`"`) or a control character other than tab, such as a line break, throws a `VCardException`.
 
@@ -302,13 +302,13 @@ vCard.addKey({ key: base64cert, mime: 'X509' })
 
 ### Other
 
-| Method                      | Description                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `addUid(uid)`               | Unique identifier. Throws `VCardException` on a control character               |
-| `addCategories(categories)` | Categories or tags. Accepts `string[]`                                          |
-| `addNote(note)`             | Free-text note                                                                  |
-| `addSortString(sortString)` | Sort key for name order ([RFC 2426 §3.6.5][rfc2426-sort]). Useful for CJK names |
-| `addRevision(date)`         | Revision timestamp. Accepts `Date`. Replaces the automatic `REV`                |
+| Method                      | Description                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `addUid(uid)`               | Unique identifier. Escaped as RFC 2426 text (see [Text Escaping](#text-escaping)) |
+| `addCategories(categories)` | Categories or tags. Accepts `string[]`                                            |
+| `addNote(note)`             | Free-text note                                                                    |
+| `addSortString(sortString)` | Sort key for name order ([RFC 2426 §3.6.5][rfc2426-sort]). Useful for CJK names   |
+| `addRevision(date)`         | Revision timestamp. Accepts `Date`. Replaces the automatic `REV`                  |
 
 ### Custom Properties
 
@@ -364,13 +364,12 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Comma (`,`) → `\,`
 - Line breaks (`\r\n`, `\n`, a lone `\r`, VT (`\x0B`), FF (`\x0C`), NEL (`\x85`), U+2028 and U+2029) → `\n`
 
-This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString` and `addTimezone` (text values only).
+This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString`, `addTimezone` (text values only), `addEmail` (address) and `addUid`.
 A text value with DEL (`\x7F`) or a C0 control character (`\x00` to `\x1F`) other than tab, CR, LF, VT or FF throws a `VCardException`. The other C1 control characters (`\x80` to `\x84` and `\x86` to `\x9F`) are allowed in text values.
 
 Other values are written as they are. They throw a `VCardException` if they contain a control character: `\x00` to `\x1F`, `\x7F`, C1 (`\x80` to `\x9F`, including NEL), U+2028 (line separator) or U+2029 (paragraph separator). Some parsers treat these as line breaks. This applies to:
 
-- `addUid` uid
-- `addEmail` address and `addPhoneNumber` number
+- `addPhoneNumber` number
 - `addBirthday` string
 - `addKey` key
 - `addPhoto` and `addLogo` image
