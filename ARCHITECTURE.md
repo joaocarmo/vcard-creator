@@ -2,6 +2,8 @@
 
 This file is a map of the source code. It says where things live and how a property travels from a method call to the output.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests.
+
 ## How a property is added
 
 1. A public `add*()` method in `lib/VCard.ts` maps its arguments to 1 or more property inputs and passes them to `storeProperties()`.

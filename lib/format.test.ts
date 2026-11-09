@@ -302,21 +302,19 @@ describe('buildKey()', () => {
     it('should quote and uppercase each entry', () => {
       expect(
         key({
-          params: [{ kind: 'list', name: 'TYPE', value: ['work', 'a,b'] }],
+          params: [{ kind: 'list', value: ['work', 'a,b'] }],
         }),
       ).toBe('X;TYPE=WORK,"A,B"')
     })
 
     it('should leave out an empty array', () => {
-      expect(key({ params: [{ kind: 'list', name: 'TYPE', value: [] }] })).toBe(
-        'X',
-      )
+      expect(key({ params: [{ kind: 'list', value: [] }] })).toBe('X')
     })
 
     it('should throw on a non-array value', () => {
-      expect(() =>
-        key({ params: [{ kind: 'list', name: 'TYPE', value: 'work' }] }),
-      ).toThrow('Type values must be an array (got string)')
+      expect(() => key({ params: [{ kind: 'list', value: 'work' }] })).toThrow(
+        'Type values must be an array (got string)',
+      )
     })
   })
 

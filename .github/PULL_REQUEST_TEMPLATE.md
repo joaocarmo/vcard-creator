@@ -29,3 +29,4 @@
 
 - [ ] Tests passed
 - [ ] Coding style respected
+- [ ] Checks in [CONTRIBUTING.md](https://github.com/joaocarmo/vcard-creator/blob/main/CONTRIBUTING.md) passed

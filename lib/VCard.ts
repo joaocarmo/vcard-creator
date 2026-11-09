@@ -105,7 +105,7 @@ export default class VCard {
             postalCode,
             country,
           ],
-          params: [{ kind: 'list', name: 'TYPE', value: type }],
+          params: [{ kind: 'list', value: type }],
         }
       },
     })
@@ -172,7 +172,7 @@ export default class VCard {
         return {
           element: 'email',
           value: address,
-          params: [{ kind: 'list', name: 'TYPE', value: type }],
+          params: [{ kind: 'list', value: type }],
         }
       },
     })
@@ -397,7 +397,7 @@ export default class VCard {
         return {
           element: 'phoneNumber',
           value: `${number}`,
-          params: [{ kind: 'list', name: 'TYPE', value: type }],
+          params: [{ kind: 'list', value: type }],
         }
       },
     })
@@ -447,7 +447,7 @@ export default class VCard {
         return {
           element: 'url',
           value: url,
-          params: [{ kind: 'list', name: 'TYPE', value: type }],
+          params: [{ kind: 'list', value: type }],
         }
       },
     })
@@ -626,7 +626,7 @@ export default class VCard {
         return {
           element: 'label',
           value: label,
-          params: [{ kind: 'list', name: 'TYPE', value: type }],
+          params: [{ kind: 'list', value: type }],
         }
       },
     })

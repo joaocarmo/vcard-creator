@@ -397,6 +397,27 @@ describe('non-string input', () => {
     addCustomProperty: (c, v) => c.addCustomProperty(v),
   }
 
+  // Methods that take a string, not an options object
+  const stringArgMethods = new Set([
+    'addBirthday',
+    'addCategories',
+    'addFullName',
+    'addJobtitle',
+    'addNickname',
+    'addNote',
+    'addRevision',
+    'addRole',
+    'addSortString',
+    'addTimezone',
+    'addUid',
+  ])
+
+  it('should cover every add*() method that takes options', () => {
+    expect(Object.keys(options).sort()).toEqual(
+      addMethods.filter((name) => !stringArgMethods.has(name)).sort(),
+    )
+  })
+
   // `undefined` selects the `{}` default of these methods
   const optionalOptions = new Set(['addAddress', 'addName'])
 
