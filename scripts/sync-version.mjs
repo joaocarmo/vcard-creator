@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
 // Sets the version in package.json and LIB_VERSION from a release tag name,
-// such as v1.2.3. Writes nothing unless both files can be updated.
+// such as v1.2.3. Validates the tag and both files before it writes either.
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// SemVer 2.0: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+// SemVer 2.0 without build metadata: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+// npm drops build metadata on publish, so the published version would not
+// match LIB_VERSION.
 const SEMVER =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?$/
 const LIB_VERSION = /export const LIB_VERSION = '.*'/
 
 function fail(message) {
@@ -26,7 +28,9 @@ if (tag === undefined) {
 const version = tag.replace(/^v/, '')
 
 if (!SEMVER.test(version)) {
-  fail(`"${tag}" is not a SemVer version, such as v1.2.3`)
+  fail(
+    `"${tag}" is not a SemVer version without build metadata, such as v1.2.3`,
+  )
 }
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')

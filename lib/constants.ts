@@ -1,4 +1,4 @@
-// Updated automatically during the release action
+// Set from the release tag when publishing. Set it on main with each release.
 export const LIB_VERSION = '1.0.0'
 
 export const CONTENT_TYPE = 'text/vcard'

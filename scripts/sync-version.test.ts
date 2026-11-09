@@ -9,7 +9,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { check } from 'prettier'
+import { check, resolveConfig } from 'prettier'
 
 const repoRoot = resolve(import.meta.dirname, '..')
 const files = ['scripts/sync-version.mjs', 'package.json', 'lib/constants.ts']
@@ -42,7 +42,6 @@ describe('sync-version', () => {
     ['v1.2.3', '1.2.3'],
     ['1.2.3', '1.2.3'],
     ['v1.2.3-beta.1', '1.2.3-beta.1'],
-    ['1.2.3+build.5', '1.2.3+build.5'],
   ])('should set the version from %s', (tag, version) => {
     const result = run(tag)
 
@@ -59,13 +58,14 @@ describe('sync-version', () => {
     run('v9.8.7')
 
     const after = read('package.json')
+    const filepath = join(repoRoot, 'package.json')
     expect(JSON.parse(after)).toEqual({ ...before, version: '9.8.7' })
     expect(
-      await check(after, { filepath: join(repoRoot, 'package.json') }),
+      await check(after, { ...(await resolveConfig(filepath)), filepath }),
     ).toBe(true)
   })
 
-  it.each([['1.2'], ['vx.y.z'], ['01.2.3'], ['']])(
+  it.each(['1.2', 'vx.y.z', '01.2.3', '1.2.3+build.5', ''])(
     'should reject the tag "%s" and change no file',
     (tag) => {
       const pkg = read('package.json')
