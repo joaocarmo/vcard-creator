@@ -96,7 +96,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     charset: true,
   },
   custom: { ...repeatable, name: '', valueType: 'raw-tab', label: 'Property' },
-  email: { ...repeatable, name: 'EMAIL', valueType: 'raw', label: 'Email' },
+  email: { ...repeatable, name: 'EMAIL', valueType: 'text' },
   fullname: { ...single, name: 'FN', valueType: 'text', charset: true },
   geo: { ...single, name: 'GEO', valueType: 'float-pair' },
   impp: { ...repeatable, name: 'IMPP', valueType: 'uri' },
@@ -139,7 +139,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     valueType: 'utc-offset',
     label: 'Timezone',
   },
-  uid: { ...single, name: 'UID', valueType: 'raw', label: 'UID' },
+  uid: { ...single, name: 'UID', valueType: 'text' },
   url: { ...repeatable, name: 'URL', valueType: 'uri' },
 }
 

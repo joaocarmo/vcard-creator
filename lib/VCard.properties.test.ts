@@ -278,12 +278,23 @@ describe('addEmail()', () => {
   })
 
   it.each(['\n', '\r', '\r\n'])(
+    'should write line break %j in address as \\n',
+    (char) => {
+      const output = new VCard()
+        .addEmail({ address: `a@example.com${char}X-INJECTED:1` })
+        .toString()
+      expect(output).toContain('EMAIL:a@example.com\\nX-INJECTED:1')
+      expect(output).not.toMatch(/^X-INJECTED/m)
+    },
+  )
+
+  it.each(['\x00', '\x7F'])(
     'should throw and store nothing on control character %j in address',
     (char) => {
       const vCard = new VCard()
-      expect(() =>
-        vCard.addEmail({ address: `a@example.com${char}X-INJECTED:1` }),
-      ).toThrow(VCardException)
+      expect(() => vCard.addEmail({ address: `a@example.com${char}` })).toThrow(
+        VCardException,
+      )
       expect(vCard.getProperties()).toEqual([])
     },
   )
@@ -1247,10 +1258,19 @@ describe('addUid()', () => {
   })
 
   it.each(['\n', '\r', '\r\n'])(
+    'should write line break %j in uid as \\n',
+    (char) => {
+      const output = new VCard().addUid(`x${char}X-INJECTED:1`).toString()
+      expect(output).toContain('UID:x\\nX-INJECTED:1')
+      expect(output).not.toMatch(/^X-INJECTED/m)
+    },
+  )
+
+  it.each(['\x00', '\x7F'])(
     'should throw and store nothing on control character %j in uid',
     (char) => {
       const vCard = new VCard()
-      expect(() => vCard.addUid(`x${char}X-INJECTED:1`)).toThrow(VCardException)
+      expect(() => vCard.addUid(`x${char}`)).toThrow(VCardException)
       expect(vCard.getProperties()).toEqual([])
     },
   )
