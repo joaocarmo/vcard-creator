@@ -140,6 +140,8 @@ X-A parameters must be name=value pairs separated by ";". …
 
 A value longer than 64 characters is cut, and the message gives its length, such as `Photo values must be base64 (got "AAAA…"... (length 10000))`.
 
+<!-- References -->
+
 [mime-types]: https://www.iana.org/assignments/media-types/media-types.xhtml#image
 [rfc2045-base64]: https://tools.ietf.org/html/rfc2045#section-6.8
 [rfc2425]: https://tools.ietf.org/html/rfc2425

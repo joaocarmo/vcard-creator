@@ -45,6 +45,8 @@ The [v0.11.0 README][readme-v0.11] documents the old API.
 - **`addBirthday()`**: accepts a `Date`, or a date or date-time string in the RFC 2425 format, such as `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`.
 - **`getProperties()`**: returns values already escaped, as written to the file.
 
+<!-- References -->
+
 [issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
 [issue-156]: https://github.com/joaocarmo/vcard-creator/issues/156
 [readme-v0.11]: https://github.com/joaocarmo/vcard-creator/blob/v0.11.0/README.md

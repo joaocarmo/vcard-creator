@@ -160,6 +160,8 @@ try {
 
 [MIT](LICENSE)
 
+<!-- References -->
+
 [issue-41]: https://github.com/joaocarmo/vcard-creator/issues/41
 [jeroendesloovere]: https://github.com/jeroendesloovere/vcard
 [rfc2426]: https://tools.ietf.org/html/rfc2426
