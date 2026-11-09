@@ -48,7 +48,7 @@ export interface PropertyInput {
   valueType?: ValueType
   value: unknown
   params?: ParamSpec[]
-  /** Parameters written as they are, after a control-character check */
+  /** Parameters written as they are, after a control-character check and an RFC 2426 grammar check */
   rawParams?: unknown
   group?: string
   /** Defaults to the name of the element */

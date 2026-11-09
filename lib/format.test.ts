@@ -374,5 +374,37 @@ describe('buildKey()', () => {
         'Parameter values cannot contain control characters ("X-A=a\\nb")',
       )
     })
+
+    it.each([
+      'X-L="a:b"',
+      'TYPE=work,home',
+      'TYPE=work;X-A=1',
+      'X-L=',
+      'TYPE=a,',
+      'X-L=ä',
+      'X-A="c\td"',
+    ])('should write %j as it is', (rawParams) => {
+      expect(key({ rawParams })).toBe(`X;${rawParams}`)
+    })
+
+    it.each([
+      'X-L=a:b',
+      'X-L=a"b',
+      'WORK',
+      '=a',
+      'X-L',
+      'X L=a',
+      'X-L=a;',
+      'X-L="a',
+      'X-L="a"b',
+    ])('should throw on %j', (rawParams) => {
+      expect(() => key({ rawParams })).toThrow(VCardException)
+    })
+
+    it('should explain the grammar in the error', () => {
+      expect(() => key({ rawParams: 'X-L=a:b' })).toThrow(
+        'Parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote ("X-L=a:b")',
+      )
+    })
   })
 })

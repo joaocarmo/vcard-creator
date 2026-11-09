@@ -153,7 +153,7 @@ export interface CustomPropertyOptions {
   name: string
   /** Property value (NOT automatically escaped: the caller is responsible for escaping). A control character other than tab throws */
   value: string
-  /** Optional parameters (e.g., 'TYPE=work') */
+  /** Optional parameters (e.g., 'TYPE=work'): `name=value` pairs separated by `;`, values separated by `,`. A value with `;`, `:` or `,` must be in double quotes */
   params?: string
   /** Optional group prefix for property grouping (e.g., 'item1'). Only letters, digits and `-` */
   group?: string

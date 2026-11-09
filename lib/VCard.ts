@@ -16,7 +16,7 @@ import {
   SocialOptions,
   UrlOptions,
 } from './types/VCard.js'
-import { buildKey, fold } from './format.js'
+import { buildKey, fold, quoteParamValue } from './format.js'
 import { toMediaInput } from './mime.js'
 import {
   DefinedElements,
@@ -643,6 +643,9 @@ export default class VCard {
    * such as a line break, throws. `name` and `group` may contain only
    * letters, digits and `-`. The names `BEGIN`, `END`, `VERSION`, `PRODID`
    * and `REV` throw. The check ignores case. Use `addRevision()` to set `REV`.
+   * `params` must be `name=value` pairs separated by `;`. Put a value with
+   * `;`, `:` or `,` in double quotes. A bare parameter, such as `WORK`,
+   * throws.
    *
    * @throws VCardException
    * @example
@@ -833,7 +836,7 @@ export default class VCard {
     assertNoControlChars({ value: this.charset, label: 'Charset' })
 
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
-      return `;CHARSET=${this.charset}`
+      return `;CHARSET=${quoteParamValue(this.charset)}`
     }
 
     return ''

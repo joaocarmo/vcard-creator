@@ -631,6 +631,26 @@ describe('addCustomProperty()', () => {
     ).toThrow('addRevision()')
   })
 
+  it.each(['X-L=a:b', 'X-L=a"b', 'WORK'])(
+    'should throw and store nothing on params %j',
+    (params) => {
+      const vCard = new VCard()
+      expect(() =>
+        vCard.addCustomProperty({ name: 'X-A', value: 'v', params }),
+      ).toThrow(VCardException)
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
+  it.each(['X-L="a:b"', 'TYPE=work,home', 'TYPE=work;X-A=1'])(
+    'should write params %j as they are',
+    (params) => {
+      const vCard = new VCard()
+      vCard.addCustomProperty({ name: 'X-A', value: 'v', params })
+      expect(vCard.toString()).toContain(`\r\nX-A;${params}:v\r\n`)
+    },
+  )
+
   it.each(['X-END', 'ENDX', 'X-REV', 'REVISION'])(
     'should accept name %j',
     (name) => {

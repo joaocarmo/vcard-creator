@@ -200,6 +200,22 @@ describe('CHARSET handling', () => {
       expect(() => vCard.toString()).toThrow(VCardException)
     },
   )
+
+  it('should quote a charset with ";", ":" or ","', () => {
+    const vCard = new VCard()
+    vCard.setCharset('a;b:c')
+    vCard.addName({ familyName: 'Doe', givenName: 'John' })
+
+    expect(vCard.toString()).toContain('N;CHARSET="a;b:c":Doe;John;;;')
+  })
+
+  it('should throw on a double quote in the charset', () => {
+    const vCard = new VCard()
+    vCard.setCharset('a"b')
+    vCard.addNote('Call me')
+
+    expect(() => vCard.toString()).toThrow(VCardException)
+  })
 })
 
 describe('single and repeatable properties', () => {
@@ -272,6 +288,12 @@ describe('getCharsetString()', () => {
     const vCard = new VCard()
     vCard.setCharset('iso-8859-1')
     expect(vCard.getCharsetString()).toBe(';CHARSET=iso-8859-1')
+  })
+
+  it('should quote a charset with ";", ":" or ","', () => {
+    const vCard = new VCard()
+    vCard.setCharset('a;b:c')
+    expect(vCard.getCharsetString()).toBe(';CHARSET="a;b:c"')
   })
 })
 
