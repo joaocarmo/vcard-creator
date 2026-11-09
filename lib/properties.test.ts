@@ -22,7 +22,7 @@ describe('PROPERTIES', () => {
     ])
   })
 
-  it('should write the charset for the text properties except EMAIL and UID', () => {
+  it('should write the charset for the text properties except EMAIL, UID and TZ', () => {
     expect(elements.filter((element) => PROPERTIES[element].charset)).toEqual([
       'address',
       'categories',

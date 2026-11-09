@@ -384,7 +384,7 @@ describe('double quotes in parameter values', () => {
   ]
 
   it.each(methods)(
-    'should throw and store nothing on a double quote in %s()',
+    'should throw and store nothing on a double quote in %s() in row %#',
     (_, add) => {
       const vCard = new VCard()
       expect(() => add(vCard, 'a"b')).toThrow(VCardException)
