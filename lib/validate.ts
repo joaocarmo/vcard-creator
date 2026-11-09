@@ -41,9 +41,9 @@ const RAW_CONTROL_CHARS_EXCEPT_TAB =
 const CONTROL_CHARS_KEPT_BY_JSON = /[\x7F-\x9F\u{2028}\u{2029}]/gu
 
 // RFC 2425 §5.8.4: the dashes and colons are optional, and a fraction of a
-// second uses a comma
+// second uses a comma. ABNF literals ignore case, so `t` and `z` are valid.
 const RFC_DATE_TIME =
-  /^(\d{4})-?(\d{2})-?(\d{2})(?:T(\d{2}):?(\d{2}):?(\d{2})(?:,\d+)?(?:Z|[+-](\d{2}):?(\d{2}))?)?$/
+  /^(\d{4})-?(\d{2})-?(\d{2})(?:T(\d{2}):?(\d{2}):?(\d{2})(?:,\d+)?(?:Z|[+-](\d{2}):?(\d{2}))?)?$/i
 
 // `+HH:MM` or `-HH:MM`. Ranges are checked separately.
 export const UTC_OFFSET = /^[+-](\d{2}):(\d{2})$/

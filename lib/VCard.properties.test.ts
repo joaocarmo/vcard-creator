@@ -43,6 +43,11 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     'BDAY;VALUE=date-time:1953-10-15T23:10:00,5+01:00',
   ],
   [
+    'addBirthday',
+    (c) => c.addBirthday('1953-10-15t23:10:00z'),
+    'BDAY;VALUE=date-time:1953-10-15t23:10:00z',
+  ],
+  [
     'addCompany',
     (c) => c.addCompany({ name: 'Acme; Corp', department: 'Engineering' }),
     'ORG:Acme\\; Corp;Engineering',

@@ -168,7 +168,7 @@ Use `addFullName()` for single names, a company as the contact, or a custom form
 
 `addBirthday()` writes a string as it is. Use a string for an exact date.
 A string must be a date or date-time in the RFC 2425 format ([§5.8.4][rfc2425-datetime]), such as `1990-05-15`, `19900515` or `1953-10-15T23:10:00Z`. The date must exist, so `1990-02-30` throws.
-A date-time string, such as `1953-10-15T23:10:00Z`, is written as `BDAY;VALUE=date-time:1953-10-15T23:10:00Z`. The default `BDAY` value type is `date`, so `VALUE` names the other type.
+A date-time string, such as `1953-10-15T23:10:00Z`, is written as `BDAY;VALUE=date-time:1953-10-15T23:10:00Z`. The default `BDAY` value type is `date`, so `VALUE` names the other type. `T` and `Z` can also be lower case, as in the RFC grammar.
 A `Date` must have a year from `0000` to `9999`. Other values throw a `VCardException`.
 A `Date` is read in UTC:
 

@@ -222,6 +222,7 @@ describe('isRfcDateOrDateTime()', () => {
     '2000-02-29',
     '0000-02-29',
     '1990-12-31T23:59:60Z',
+    '1953-10-15t23:10:00z',
   ])('should accept %j', (value) => {
     expect(isRfcDateOrDateTime(value)).toBe(true)
   })
