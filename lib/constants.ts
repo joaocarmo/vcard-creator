@@ -1,5 +1,5 @@
-// Updated automatically during the release action
-export const LIB_VERSION = '1.0.0'
+// Set from the release tag when publishing
+export const LIB_VERSION = '0.0.0-development'
 
 export const CONTENT_TYPE = 'text/vcard'
 export const DEFAULT_CHARACTER_SET = 'utf-8'

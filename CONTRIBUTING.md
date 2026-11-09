@@ -44,6 +44,14 @@ pnpm pretty
 
 Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm test:functional`, `pnpm test:smoke`, `pnpm lint`, `pnpm type-check` and `pnpm pretty`.
 
+## Release
+
+The release tag is the only source of the version. On `main`, `package.json` and `LIB_VERSION` stay at `0.0.0-development`.
+
+1. Create a GitHub release on `main` with tag `vX.Y.Z` and publish it. A tag on another branch fails the workflow. A pre-release publishes with the npm dist-tag `next`, a release with `latest`.
+2. The `Publish` workflow runs all checks on the tagged commit, writes the version from the tag into `package.json` and `LIB_VERSION`, builds and publishes to npm.
+3. Check the workflow run and the version on npm. If the publish step fails for an external reason, use "Re-run failed jobs": it runs on the same commit. If a check fails, fix it on `main` and release a new version.
+
 ## Documentation
 
 Each fact lives in 1 place:

@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "type": "module",
   "description": "A JavaScript vCard 3.0 creator library for both node.js and the web",
   "main": "./dist/index.js",
@@ -31,7 +31,8 @@
     "test:functional": "tsc -p test/functional && vitest run --config vitest.functional.config.ts",
     "test:smoke": "node test/smoke/node.mjs",
     "test:unit": "vitest run",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "version:set": "node scripts/set-version.mjs"
   },
   "lint-staged": {
     "*.{js,mjs,ts}": [
@@ -45,8 +46,7 @@
     "url": "git+https://github.com/joaocarmo/vcard-creator.git"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "tag": "latest"
+    "registry": "https://registry.npmjs.org"
   },
   "keywords": [
     "vcard",

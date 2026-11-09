@@ -11,6 +11,6 @@
     "target": "esnext",
     "types": ["vitest/globals", "node"]
   },
-  "include": ["lib/**/*.ts", "test/**/*.ts", "vitest*.ts"],
+  "include": ["lib/**/*.ts", "test/**/*.ts", "scripts/**/*.ts", "vitest*.ts"],
   "exclude": ["node_modules", "dist/**/*", "test/functional"]
 }
