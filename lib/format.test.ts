@@ -66,7 +66,7 @@ describe('formatFloat()', () => {
 })
 
 describe('escapeText()', () => {
-  const escape = (text: string) => escapeText(text, 'Note')
+  const escape = (text: string) => escapeText({ value: text, label: 'Note' })
 
   it.each([undefined, null, 42, {}])(
     'should throw on a non-string value (%s)',

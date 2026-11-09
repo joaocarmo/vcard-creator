@@ -15,6 +15,12 @@ export interface BuildKeyOptions {
   rawParams?: unknown
 }
 
+export interface EscapeTextOptions {
+  value: string
+  /** Names the property in error messages */
+  label: string
+}
+
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
@@ -58,22 +64,21 @@ export function resolveType<T extends string>(type: T[]): string {
  *
  * Backslashes are replaced first to avoid double-escaping. Line breaks
  * (`\r\n`, `\n`, a lone `\r`, VT, FF, NEL, U+2028 and U+2029) become `\n`.
- * DEL and any other C0 control character except tab throw. `label` names the
- * property in error messages.
+ * DEL and any other C0 control character except tab throw.
  *
  * @link   http://tools.ietf.org/html/rfc2426
  * @throws VCardException
  */
-export function escapeText(text: string, label: string): string {
-  assertString({ value: text, label })
+export function escapeText({ value, label }: EscapeTextOptions): string {
+  assertString({ value, label })
 
-  if (TEXT_CONTROL_CHARS.test(text)) {
+  if (TEXT_CONTROL_CHARS.test(value)) {
     throw new VCardException(
-      `${label} values cannot contain control characters (${showValue(text)})`,
+      `${label} values cannot contain control characters (${showValue(value)})`,
     )
   }
 
-  return text
+  return value
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')

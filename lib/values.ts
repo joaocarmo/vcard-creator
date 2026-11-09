@@ -22,10 +22,11 @@ type ValuePipeline = (value: unknown, label: string) => string
  * Plain JavaScript callers can pass any value, so each pipeline checks it.
  */
 export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
-  text: (value, label) => escapeText(value as string, label),
-  // .map(escapeText) would pass the index as the label
+  text: (value, label) => escapeText({ value: value as string, label }),
   'text-structured': (value, label) =>
-    (value as string[]).map((part) => escapeText(part, label)).join(';'),
+    (value as string[])
+      .map((part) => escapeText({ value: part, label }))
+      .join(';'),
   'text-list': (value, label) => {
     // Plain JavaScript callers can pass a string
     if (!Array.isArray(value)) {
@@ -35,7 +36,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     }
 
     // RFC 2426 text values can start and end with spaces
-    return value.map((entry) => escapeText(entry, label)).join(',')
+    return value.map((entry) => escapeText({ value: entry, label })).join(',')
   },
   uri: (value) => {
     assertUri(value as string)
