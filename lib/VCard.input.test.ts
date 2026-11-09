@@ -540,10 +540,23 @@ describe('non-string input', () => {
 
   it('should name the method input in the message', () => {
     expect(() => new VCard().addNote(42 as never)).toThrow(
-      'Text values must be strings (got number)',
+      'Note values must be strings (got number)',
     )
     expect(() => new VCard().addPhoneNumber({ number: null as never })).toThrow(
       'Phone number values must be strings or numbers (got null)',
+    )
+  })
+
+  it('should name an array as an array', () => {
+    expect(() => new VCard().addNote([] as never)).toThrow(
+      'Note values must be strings (got array)',
+    )
+  })
+
+  it('should show at most 64 characters and the length of a long image', () => {
+    const image = `${'A'.repeat(9_999)}!`
+    expect(() => new VCard().addPhoto({ image })).toThrow(
+      `Image values must be base64 (got "${'A'.repeat(64)}"... (length 10000))`,
     )
   })
 

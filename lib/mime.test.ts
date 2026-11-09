@@ -92,7 +92,7 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     'should throw on %j with the original value',
     (mime) => {
       expect(() => typeOf(mime)).toThrow(
-        `The MIME Media Type is invalid (${mime})`,
+        `The MIME Media Type is invalid (${JSON.stringify(mime)})`,
       )
     },
   )

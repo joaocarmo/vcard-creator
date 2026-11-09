@@ -1,13 +1,68 @@
 import {
+  assertCoordinate,
   assertName,
   assertNoControlChars,
   assertOptions,
   assertString,
   assertUri,
   assertValidDate,
+  describeType,
   isRfcDateOrDateTime,
+  showValue,
 } from './validate'
 import VCardException from './VCardException'
+
+describe('showValue()', () => {
+  it('should quote a value of 64 characters in full', () => {
+    const value = 'a'.repeat(64)
+    expect(showValue(value)).toBe(`"${value}"`)
+  })
+
+  it('should cut a value of 65 characters and add its length', () => {
+    expect(showValue('a'.repeat(65))).toBe(`"${'a'.repeat(64)}"... (length 65)`)
+  })
+
+  it('should show the first 64 characters of a value of 10,000', () => {
+    expect(showValue('b'.repeat(10_000))).toBe(
+      `"${'b'.repeat(64)}"... (length 10000)`,
+    )
+  })
+
+  it('should escape control characters in the shown part', () => {
+    expect(showValue(`\x85${'a'.repeat(70)}`)).toBe(
+      `"\\u0085${'a'.repeat(63)}"... (length 71)`,
+    )
+  })
+})
+
+describe('describeType()', () => {
+  it.each([
+    ['[]', [], 'array'],
+    ['null', null, 'null'],
+    ['{}', {}, 'object'],
+    ['42', 42, 'number'],
+  ])('should name %s as %s', (_, value, name) => {
+    expect(describeType(value)).toBe(name)
+  })
+})
+
+describe('assertCoordinate()', () => {
+  it.each([
+    ['NaN', NaN, 'NaN'],
+    ['a string', 'x'.repeat(100), `"${'x'.repeat(64)}"... (length 100)`],
+    ['an array', [], 'array'],
+    ['null', null, 'null'],
+    ['undefined', undefined, 'undefined'],
+  ])('should show %s in the message', (_, value, shown) => {
+    expect(() =>
+      assertCoordinate({
+        name: 'latitude',
+        value: value as unknown as number,
+        limit: 90,
+      }),
+    ).toThrow(`Invalid latitude: ${shown}. Must be a finite number.`)
+  })
+})
 
 describe('assertString()', () => {
   it('should accept a string', () => {
@@ -316,6 +371,12 @@ describe('assertName()', () => {
   it('should name the label in the message', () => {
     expect(() => assertName({ value: 'X:A', label: 'Property name' })).toThrow(
       'Property name values can contain only letters, digits and "-" ("X:A")',
+    )
+  })
+
+  it('should escape control characters in the message', () => {
+    expect(() => assertName({ value: 'X\x85A', label: 'Group' })).toThrow(
+      'Group values can contain only letters, digits and "-" ("X\\u0085A")',
     )
   })
 })

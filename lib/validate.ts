@@ -106,15 +106,25 @@ export function isRfcDateOrDateTime(value: string): boolean {
   )
 }
 
+// Longer values are cut, so a large image or a note does not fill the logs
+const MAX_SHOWN_LENGTH = 64
+
 /**
  * Quote a value for an error message, with every control character written
- * as a `\uXXXX` escape.
+ * as a `\uXXXX` escape. A value longer than 64 characters is cut to its first
+ * 64 characters, followed by its length.
  */
 export function showValue(value: string): string {
-  return JSON.stringify(value).replace(
+  const isLong = value.length > MAX_SHOWN_LENGTH
+  // Cut before quoting, so a value of several MB is not copied
+  const shown = JSON.stringify(
+    isLong ? value.slice(0, MAX_SHOWN_LENGTH) : value,
+  ).replace(
     CONTROL_CHARS_KEPT_BY_JSON,
     (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`,
   )
+
+  return isLong ? `${shown}... (length ${value.length})` : shown
 }
 
 /**
@@ -164,19 +174,22 @@ export function assertString({ value, label }: StringCheckOptions): void {
  */
 export function assertOptions({ value, label }: OptionsCheckOptions): void {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    const shown = Array.isArray(value) ? 'array' : describeType(value)
     throw new VCardException(
-      `${label} options must be an object (got ${shown})`,
+      `${label} options must be an object (got ${describeType(value)})`,
     )
   }
 }
 
 /**
- * Name the type of a value for an error message. `typeof null` is `object`,
- * so `null` is named on its own.
+ * Name the type of a value for an error message. `typeof` names `null` and
+ * arrays `object`, so they are named on their own.
  */
 export function describeType(value: unknown): string {
-  return value === null ? 'null' : typeof value
+  if (value === null) {
+    return 'null'
+  }
+
+  return Array.isArray(value) ? 'array' : typeof value
 }
 
 /**
@@ -190,7 +203,7 @@ export function assertName({ value, label }: PropertyNameOptions): void {
   if (typeof value !== 'string' || !/^[A-Za-z0-9-]+$/.test(value)) {
     // JSON.stringify() throws on a BigInt
     const shown =
-      typeof value === 'string' ? JSON.stringify(value) : describeType(value)
+      typeof value === 'string' ? showValue(value) : describeType(value)
     throw new VCardException(
       `${label} values can contain only letters, digits and "-" (${shown})`,
     )
@@ -219,9 +232,14 @@ export function assertCoordinate({
   limit,
 }: CoordinateOptions): void {
   if (!Number.isFinite(value)) {
-    // String() throws on objects without a usable toString()
+    // Plain JavaScript callers can pass any value. String() throws on objects
+    // without a usable toString().
     const shown =
-      typeof value === 'object' && value !== null ? typeof value : String(value)
+      typeof value === 'number'
+        ? String(value)
+        : typeof value === 'string'
+          ? showValue(value)
+          : describeType(value)
     throw new VCardException(
       `Invalid ${name}: ${shown}. Must be a finite number.`,
     )

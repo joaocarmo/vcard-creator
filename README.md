@@ -272,7 +272,7 @@ Each method accepts either `{ url }` or `{ image, mime? }`. You can add more tha
 
 - `mime` is the image subtype, such as `'png'` or `'jpeg'`. The file extension `'jpg'` and full MIME types, such as `'image/png'` from `File.type`, also work. `'jpg'` writes `TYPE=JPEG`.
 - After that, `mime` must be a string with an [IANA image type][mime-types], or the method throws a `VCardException`. The match ignores case.
-- Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()`) throws a `VCardException`.
+- Pass raw base64 only. A `data:image/...;base64,` prefix (for example from `FileReader.readAsDataURL()` or `canvas.toDataURL()`) throws a `VCardException`. Its message says to remove the prefix and pass the MIME type as `mime`.
 
 ```js
 import { readFileSync } from 'fs'
@@ -367,6 +367,7 @@ Built-in methods escape special characters per [RFC 2426][rfc2426]:
 - Line breaks (`\r\n`, `\n`, a lone `\r`, VT (`\x0B`), FF (`\x0C`), NEL (`\x85`), U+2028 and U+2029) → `\n`
 
 This applies to text values in `addFullName`, `addName`, `addAddress`, `addCompany`, `addNickname`, `addCategories`, `addJobtitle`, `addRole`, `addNote`, `addLabel`, `addSortString`, `addTimezone` (text values only), `addEmail` (address) and `addUid`.
+Leading and trailing spaces are kept, also in each `addNickname` and `addCategories` entry.
 A text value with DEL (`\x7F`) or a C0 control character (`\x00` to `\x1F`) other than tab, CR, LF, VT or FF throws a `VCardException`. The other C1 control characters (`\x80` to `\x84` and `\x86` to `\x9F`) are allowed in text values.
 
 Other values are written as they are. They throw a `VCardException` if they contain a control character: `\x00` to `\x1F`, `\x7F`, C1 (`\x80` to `\x9F`, including NEL), U+2028 (line separator) or U+2029 (paragraph separator). Some parsers treat these as line breaks. This applies to:
@@ -385,7 +386,11 @@ Parameter values (`type` entries, `addKey` `mime`, `user` and `serviceType`) are
 
 ### Error Handling
 
-`VCardException` is thrown for invalid input: a second call to a once-only method, an options argument that is missing (except for `addAddress()` and `addName()`) or is not an object, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, a phone number that is not finite, a birthday string that is not an RFC 2425 date or date-time, a date that does not exist, a `Date` with a year outside `0000` to `9999`, an invalid MIME type, an `image` or `key` that is not base64, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`). It is exported, so you can catch it:
+`VCardException` is thrown for invalid input: a second call to a once-only method, an options argument that is missing (except for `addAddress()` and `addName()`) or is not an object, a value that is not a string where the method expects one (or a `type` or `categories` that is not an array), an invalid `Date`, a phone number that is not finite, a birthday string that is not an RFC 2425 date or date-time, a date that does not exist, a `Date` with a year outside `0000` to `9999`, an invalid MIME type, an `image` or `key` that is not base64, coordinates that are not finite numbers or are out of range, a UTC offset out of range, a text value with DEL or a C0 control character other than tab, CR, LF, VT or FF, a value that is written as it is and contains a control character, a parameter value (`type` entry, `mime`, `user` or `serviceType`) with a double quote or a control character other than tab, a property name or group with a character other than a letter, digit or `-`, or a reserved property name (`BEGIN`, `END`, `VERSION`, `PRODID` or `REV`).
+
+The message names the property and shows the rejected value in quotes, with control characters written as `\uXXXX`, such as `Note values cannot contain control characters ("a\u0000b")`. A value longer than 64 characters is cut to its first 64 characters, followed by its length, such as `Image values must be base64 (got "AAAA…"... (length 10000))`.
+
+`VCardException` is exported, so you can catch it:
 
 ```js
 import { VCard, VCardException } from 'vcard-creator'

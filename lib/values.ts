@@ -22,8 +22,10 @@ type ValuePipeline = (value: unknown, label: string) => string
  * Plain JavaScript callers can pass any value, so each pipeline checks it.
  */
 export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
-  text: (value) => escapeText(value as string),
-  'text-structured': (value) => (value as string[]).map(escapeText).join(';'),
+  text: (value, label) => escapeText(value as string, label),
+  // .map(escapeText) would pass the index as the label
+  'text-structured': (value, label) =>
+    (value as string[]).map((part) => escapeText(part, label)).join(';'),
   'text-list': (value, label) => {
     // Plain JavaScript callers can pass a string
     if (!Array.isArray(value)) {
@@ -32,7 +34,8 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
       )
     }
 
-    return value.map(escapeText).join(',').trim()
+    // RFC 2426 text values can start and end with spaces
+    return value.map((entry) => escapeText(entry, label)).join(',')
   },
   uri: (value) => {
     assertUri(value as string)
@@ -88,7 +91,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
 
     if (offset === null || Number(offset[1]) > 23 || Number(offset[2]) > 59) {
       throw new VCardException(
-        `Invalid ${label.toLowerCase()} offset: ${value as string}. Hours must be 00 to 23 and minutes 00 to 59.`,
+        `Invalid ${label.toLowerCase()} offset: ${showValue(value as string)}. Hours must be 00 to 23 and minutes 00 to 59.`,
       )
     }
 

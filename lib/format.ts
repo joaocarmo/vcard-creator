@@ -58,17 +58,18 @@ export function resolveType<T extends string>(type: T[]): string {
  *
  * Backslashes are replaced first to avoid double-escaping. Line breaks
  * (`\r\n`, `\n`, a lone `\r`, VT, FF, NEL, U+2028 and U+2029) become `\n`.
- * DEL and any other C0 control character except tab throw.
+ * DEL and any other C0 control character except tab throw. `label` names the
+ * property in error messages.
  *
  * @link   http://tools.ietf.org/html/rfc2426
  * @throws VCardException
  */
-export function escapeText(text: string): string {
-  assertString({ value: text, label: 'Text' })
+export function escapeText(text: string, label: string): string {
+  assertString({ value: text, label })
 
   if (TEXT_CONTROL_CHARS.test(text)) {
     throw new VCardException(
-      `Text values cannot contain control characters (${showValue(text)})`,
+      `${label} values cannot contain control characters (${showValue(text)})`,
     )
   }
 
@@ -92,7 +93,7 @@ export function quoteParamValue(value: string): string {
 
   if (value.includes('"')) {
     throw new VCardException(
-      `Parameter values cannot contain a double quote (${value})`,
+      `Parameter values cannot contain a double quote (${showValue(value)})`,
     )
   }
 
