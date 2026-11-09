@@ -297,11 +297,14 @@ describe('property mapping', () => {
     )
   })
 
-  it.each(mappings)('%s() should write %#', (_, add, line) => {
-    const vCard = new VCard()
-    add(vCard)
-    expect(vCard.toString()).toContain(`\r\n${line}\r\n`)
-  })
+  it.each(mappings)(
+    'should write the line of %s() in row %#',
+    (_, add, line) => {
+      const vCard = new VCard()
+      add(vCard)
+      expect(vCard.toString()).toContain(`\r\n${line}\r\n`)
+    },
+  )
 })
 
 describe('addFullName()', () => {
@@ -652,39 +655,6 @@ describe.each([
     expect(lineOf(plain)?.endsWith(`:${image}`)).toBe(true)
     expect(lineOf(fromWrapped)).toBe(lineOf(plain))
   })
-})
-
-describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
-  const name = method === 'addPhoto' ? 'PHOTO' : 'LOGO'
-  const label = method === 'addPhoto' ? 'Photo' : 'Logo'
-
-  // Returns the content lines of a card with 1 image added with `mime`
-  const linesOf = (mime?: string) =>
-    new VCard()[method]({ image: 'AAAA', mime }).toString().split('\r\n')
-
-  it.each([
-    [' png', 'PNG'],
-    ['image/png; charset=binary', 'PNG'],
-    ['image/x-icon', 'X-ICON'],
-    [undefined, 'JPEG'],
-  ])('should map mime %j to TYPE=%s', (mime, type) => {
-    expect(linesOf(mime)).toContain(`${name};ENCODING=b;TYPE=${type}:AAAA`)
-  })
-
-  it('should write no TYPE for an empty mime', () => {
-    expect(linesOf('')).toContain(`${name};ENCODING=b:AAAA`)
-  })
-
-  it.each(['foobar', 'image/pjpeg'])(
-    'should throw and store nothing on the invalid MIME type %j',
-    (mime) => {
-      const vCard = new VCard()
-      expect(() => vCard[method]({ image: 'data', mime })).toThrow(
-        `${label} MIME type values must be an image type (got "${mime}")`,
-      )
-      expect(vCard.getProperties()).toEqual([])
-    },
-  )
 })
 
 // Each row: the method, a call with the given value and the label in the

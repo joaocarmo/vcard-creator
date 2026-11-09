@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, vi } from 'vitest'
 import VCard from '../lib/VCard'
 
 /** The public add*() methods of VCard. */

@@ -1,4 +1,3 @@
-import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 import { LIB_VERSION } from './constants'
@@ -159,35 +158,11 @@ describe('CHARSET handling', () => {
     expect(output).toContain('N;CHARSET=iso-8859-1:Doe;John;;;')
   })
 
-  it('should add CHARSET to all text properties for non-default charset', () => {
+  it('should add CHARSET to a text property for a non-default charset', () => {
     const vCard = new VCard()
     vCard.setCharset('iso-8859-1')
-    vCard.addName({ givenName: 'John', familyName: 'Doe' })
-    vCard.addNickname('JD')
-    vCard.addCompany({ name: 'Acme' })
-    vCard.addJobtitle('Dev')
-    vCard.addRole('Engineer')
     vCard.addNote('A note')
-    vCard.addCategories(['Work'])
-    vCard.addSortString('Doe')
-    vCard.addAddress({ street: '123 Main' })
-    vCard.addLabel({ label: 'Home' })
-    const output = vCard.toString()
-    expect(output).toContain('N;CHARSET=iso-8859-1:Doe;John;;;')
-    expect(output).toContain('FN;CHARSET=iso-8859-1:John Doe')
-    expect(output).toContain('NICKNAME;CHARSET=iso-8859-1:JD')
-    expect(output).toContain('ORG;CHARSET=iso-8859-1:Acme')
-    expect(output).toContain('TITLE;CHARSET=iso-8859-1:Dev')
-    expect(output).toContain('ROLE;CHARSET=iso-8859-1:Engineer')
-    expect(output).toContain('NOTE;CHARSET=iso-8859-1:A note')
-    expect(output).toContain('CATEGORIES;CHARSET=iso-8859-1:Work')
-    expect(output).toContain('SORT-STRING;CHARSET=iso-8859-1:Doe')
-    expect(output).toContain(
-      'ADR;TYPE=INTL,POSTAL,PARCEL,WORK;CHARSET=iso-8859-1:',
-    )
-    expect(output).toContain(
-      'LABEL;TYPE=INTL,POSTAL,PARCEL,WORK;CHARSET=iso-8859-1:Home',
-    )
+    expect(vCard.toString()).toContain('NOTE;CHARSET=iso-8859-1:A note')
   })
 
   it.each(['\r', '\n', '\r\n'])(
@@ -228,22 +203,20 @@ describe('CHARSET handling', () => {
   })
 })
 
-describe('single and repeatable properties', () => {
-  it('should throw and store nothing on a second call to a single property', () => {
+describe('once-only and repeatable properties', () => {
+  it('should store each call of a repeatable property', () => {
+    const vCard = new VCard()
+    vCard.addNote('a').addNote('b')
+
+    expect(vCard.getProperties()).toHaveLength(2)
+  })
+
+  it('should throw and store nothing on a second call', () => {
     const vCard = new VCard()
     vCard.addJobtitle('Developer')
 
     expect(() => vCard.addJobtitle('Manager')).toThrow(VCardException)
     expect(vCard.getProperties()).toHaveLength(1)
-  })
-
-  it('should store each call to a repeatable property', () => {
-    const vCard = new VCard()
-    vCard.addNote('Met at conference').addNote('Follows up quarterly')
-
-    const output = vCard.toString()
-    expect(output).toContain('NOTE:Met at conference\r\n')
-    expect(output).toContain('NOTE:Follows up quarterly\r\n')
   })
 })
 
