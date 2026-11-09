@@ -441,6 +441,12 @@ describe('addLabel()', () => {
     expect(vCard.toString()).toContain('LABEL;TYPE=HOME:Home address')
   })
 
+  it('should add label without TYPE for an empty type list', () => {
+    const vCard = new VCard()
+    vCard.addLabel({ label: 'Home address', type: [] })
+    expect(vCard.toString()).toContain('\r\nLABEL:Home address\r\n')
+  })
+
   it('should escape newlines in label', () => {
     const vCard = new VCard()
     vCard.addLabel({ label: 'Line 1\nLine 2' })
@@ -926,6 +932,12 @@ describe('addPhoto()', () => {
     expect(vCard.toString()).toContain('PHOTO;ENCODING=b;TYPE=PNG:base64data')
   })
 
+  it('should default the MIME type to JPEG', () => {
+    const vCard = new VCard()
+    vCard.addPhoto({ image: 'base64data' })
+    expect(vCard.toString()).toContain('PHOTO;ENCODING=b;TYPE=JPEG:base64data')
+  })
+
   it('should throw on invalid MIME type', () => {
     const vCard = new VCard()
     expect(() => {
@@ -988,6 +1000,12 @@ describe('addLogo()', () => {
   it('should add logo with base64 and MIME', () => {
     const vCard = new VCard()
     vCard.addLogo({ image: 'base64data', mime: 'jpeg' })
+    expect(vCard.toString()).toContain('LOGO;ENCODING=b;TYPE=JPEG:base64data')
+  })
+
+  it('should default the MIME type to JPEG', () => {
+    const vCard = new VCard()
+    vCard.addLogo({ image: 'base64data' })
     expect(vCard.toString()).toContain('LOGO;ENCODING=b;TYPE=JPEG:base64data')
   })
 

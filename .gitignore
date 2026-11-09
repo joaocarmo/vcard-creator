@@ -29,3 +29,5 @@ node_modules/
 *.vcf
 *.ics
 
+# Coverage reports
+coverage/

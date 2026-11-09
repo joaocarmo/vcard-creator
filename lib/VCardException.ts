@@ -3,11 +3,6 @@ class VCardException extends Error {
     // Pass remaining arguments to the parent constructor
     super(params)
 
-    // Maintains a proper stack trace where our error was thrown
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, VCardException)
-    }
-
     this.name = 'VCardException'
   }
 }
