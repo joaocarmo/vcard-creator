@@ -497,20 +497,7 @@ pnpm pretty
 
 `pnpm test:unit` also measures test coverage of `lib/`. Coverage must stay at 100% for statements, branches, functions and lines. The command fails below 100%, and so does the `test` CI job.
 
-### Source layout
-
-Each module in `lib/` has 1 job:
-
-- `index.ts`: the public exports.
-- `VCard.ts`: the `VCard` class.
-- `VCardException.ts`: the error class.
-- `types/VCard.ts`: the public types.
-- `constants.ts`: library metadata, such as the version and the content type.
-- `properties.ts`: the property table, reserved property names and the property model types.
-- `values.ts`: value pipelines, which check and convert a value by its value type.
-- `validate.ts`: input checks and the RFC 2425 date grammar.
-- `format.ts`: content-line output: text escaping, parameter quoting, property keys, line folding and number formatting.
-- `mime.ts`: the image MIME type list and its helpers.
+[ARCHITECTURE.md](ARCHITECTURE.md) describes the source layout and how a property is added.
 
 ## License
 
