@@ -1,10 +1,15 @@
 import VCardException from '../VCardException.js'
 import { MIME_TYPES } from './constants.js'
 import type {
+  BuildKeyOptions,
   ControlCharsOptions,
+  CoordinateOptions,
+  DateCheckOptions,
+  GeoOptions,
   OptionsCheckOptions,
   PropertyNameOptions,
   StringCheckOptions,
+  ValueType,
 } from '../types/VCard.js'
 
 const encoder = new TextEncoder()
@@ -35,6 +40,9 @@ const CONTROL_CHARS_KEPT_BY_JSON = /[\x7F-\x9F\u{2028}\u{2029}]/gu
 // second uses a comma
 const RFC_DATE_TIME =
   /^(\d{4})-?(\d{2})-?(\d{2})(?:T(\d{2}):?(\d{2}):?(\d{2})(?:,\d+)?(?:Z|[+-](\d{2}):?(\d{2}))?)?$/
+
+// `+HH:MM` or `-HH:MM`. Ranges are checked separately.
+export const UTC_OFFSET = /^[+-](\d{2}):(\d{2})$/
 
 /**
  * Check that a value is a date or a date-time in the RFC 2425 format, such as
@@ -337,4 +345,175 @@ export function toImageSubtype(mime: string): string {
  */
 export function isValidMimeType(mime: string): boolean {
   return mime !== '' && MIME_TYPES.has(mime.toLowerCase())
+}
+
+/**
+ * Check that a coordinate is a finite number from -limit to limit.
+ *
+ * @throws VCardException
+ */
+export function assertCoordinate({
+  name,
+  value,
+  limit,
+}: CoordinateOptions): void {
+  if (!Number.isFinite(value)) {
+    // String() throws on objects without a usable toString()
+    const shown =
+      typeof value === 'object' && value !== null ? typeof value : String(value)
+    throw new VCardException(
+      `Invalid ${name}: ${shown}. Must be a finite number.`,
+    )
+  }
+
+  if (value < -limit || value > limit) {
+    throw new VCardException(
+      `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
+    )
+  }
+}
+
+/**
+ * Check that a date is a valid `Date` object.
+ *
+ * @throws VCardException
+ */
+export function assertValidDate({ date, label }: DateCheckOptions): void {
+  // Plain JavaScript callers can pass a string or other values
+  if (!(date instanceof Date)) {
+    throw new VCardException(
+      `Invalid ${label}: must be a Date (got ${describeType(date)})`,
+    )
+  }
+
+  if (Number.isNaN(date.getTime())) {
+    throw new VCardException(`Invalid ${label}: the Date is invalid`)
+  }
+
+  // toISOString() writes other years with a sign and 6 digits
+  const year = date.getUTCFullYear()
+  if (year < 0 || year > 9999) {
+    throw new VCardException(
+      `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,
+    )
+  }
+}
+
+type ValuePipeline = (value: unknown, label: string) => string
+
+/**
+ * Check a property value by its value type and return the string to store.
+ * Plain JavaScript callers can pass any value, so each pipeline checks it.
+ */
+export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
+  text: (value) => escapeText(value as string),
+  'text-structured': (value) => (value as string[]).map(escapeText).join(';'),
+  'text-list': (value) => (value as string[]).map(escapeText).join(',').trim(),
+  uri: (value) => {
+    assertUri(value as string)
+    return value as string
+  },
+  raw: (value, label) => {
+    assertNoControlChars({ value: value as string, label })
+    return value as string
+  },
+  'raw-tab': (value, label) => {
+    assertNoControlChars({ value: value as string, label, allowTab: true })
+    return value as string
+  },
+  binary: (value, label) => {
+    assertNoControlChars({ value: value as string, label })
+    return value as string
+  },
+  'date-or-date-time': (value, label) => {
+    const name = label.toLowerCase()
+
+    if (value instanceof Date) {
+      assertValidDate({ date: value, label: name })
+      return value.toISOString().slice(0, 10)
+    }
+
+    assertString({ value, label })
+
+    if (!isRfcDateOrDateTime(value as string)) {
+      throw new VCardException(
+        `Invalid ${name}: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(value as string)})`,
+      )
+    }
+
+    return value as string
+  },
+  'date-time': (value, label) => {
+    assertValidDate({ date: value, label: label.toLowerCase() })
+    return (value as Date).toISOString()
+  },
+  'utc-offset': (value, label) => {
+    const offset = UTC_OFFSET.exec(value as string)
+
+    if (offset === null || Number(offset[1]) > 23 || Number(offset[2]) > 59) {
+      throw new VCardException(
+        `Invalid ${label.toLowerCase()} offset: ${value as string}. Hours must be 00 to 23 and minutes 00 to 59.`,
+      )
+    }
+
+    return value as string
+  },
+  'float-pair': (value) => {
+    const { latitude, longitude } = value as GeoOptions
+    assertCoordinate({ name: 'latitude', value: latitude, limit: 90 })
+    assertCoordinate({ name: 'longitude', value: longitude, limit: 180 })
+    return `${formatFloat(latitude)};${formatFloat(longitude)}`
+  },
+}
+
+/**
+ * Build a property key, such as `TEL;TYPE=WORK,VOICE`, from a name and
+ * structured parameters. This is the only place where parameters are quoted.
+ *
+ * `VALUE=<type>` is written when the RFC value type is not the default one,
+ * and `ENCODING=b` for binary values.
+ *
+ * @throws VCardException
+ */
+export function buildKey({
+  name,
+  valueType,
+  defaultType,
+  params = [],
+  rawParams,
+  quote = quoteParamValue,
+}: BuildKeyOptions): string {
+  const parts = [name]
+  // The structured and list pipelines write RFC `text` values
+  const rfcType = valueType.startsWith('text') ? 'text' : valueType
+  const rfcDefaultType = defaultType.startsWith('text') ? 'text' : defaultType
+
+  if (rfcType !== rfcDefaultType) {
+    parts.push(`VALUE=${rfcType}`)
+  }
+
+  if (valueType === 'binary') {
+    parts.push('ENCODING=b')
+  }
+
+  for (const param of params) {
+    if (param.kind === 'list') {
+      const resolved = resolveType(param.value as string[])
+      if (resolved !== '') {
+        parts.push(resolved)
+      }
+    } else {
+      const value = quote(param.value as string)
+      parts.push(`${param.name}=${param.upper ? value.toUpperCase() : value}`)
+    }
+  }
+
+  if (rawParams !== undefined) {
+    const raw = VALUE_PIPELINES['raw-tab'](rawParams, 'Parameter')
+    if (raw !== '') {
+      parts.push(raw)
+    }
+  }
+
+  return parts.join(';')
 }

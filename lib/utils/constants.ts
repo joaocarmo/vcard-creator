@@ -1,36 +1,4 @@
-import { Element } from '../types/VCard.js'
-
 export { MIME_TYPES } from './mime-types.js'
-
-export const ALLOWED_MULTIPLE_PROPERTIES: ReadonlySet<Element> = new Set([
-  'address',
-  'custom',
-  'email',
-  'impp',
-  'key',
-  'label',
-  'logo',
-  'nickname',
-  'note',
-  'phoneNumber',
-  'photo',
-  'social',
-  'url',
-])
-
-export const TEXT_ELEMENTS: ReadonlySet<Element> = new Set([
-  'address',
-  'categories',
-  'company',
-  'fullname',
-  'jobtitle',
-  'label',
-  'name',
-  'nickname',
-  'note',
-  'role',
-  'sortString',
-])
 
 // Written by the library, so a custom property must not use them. Each value
 // is a hint appended to the error message.

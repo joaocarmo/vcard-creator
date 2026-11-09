@@ -233,10 +233,7 @@ describe('Text escaping', () => {
 
     it('should cover every public add*() method', () => {
       const methods = Object.getOwnPropertyNames(VCard.prototype).filter(
-        (name) =>
-          name.startsWith('add') &&
-          name !== 'addMediaUrl' &&
-          name !== 'addMediaContent',
+        (name) => name.startsWith('add'),
       )
 
       expect(Object.keys(calls).sort()).toEqual(methods.sort())

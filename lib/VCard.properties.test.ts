@@ -1654,11 +1654,8 @@ describe('non-string input', () => {
   }
 
   it('should cover every public add*() method', () => {
-    const methods = Object.getOwnPropertyNames(VCard.prototype).filter(
-      (name) =>
-        name.startsWith('add') &&
-        name !== 'addMediaUrl' &&
-        name !== 'addMediaContent',
+    const methods = Object.getOwnPropertyNames(VCard.prototype).filter((name) =>
+      name.startsWith('add'),
     )
 
     expect(Object.keys(required).sort()).toEqual(methods.sort())
@@ -1859,5 +1856,23 @@ describe('non-string input', () => {
     expect(output).toContain('X-A:v\r\n')
     expect(output).toContain('KEY;ENCODING=b;TYPE=PGP:data\r\n')
     expect(output).not.toMatch(/undefined|null/)
+  })
+})
+
+describe('error order', () => {
+  it('should report the value before the parameters', () => {
+    expect(() =>
+      new VCard().addLabel({ label: 'a\x00b', type: 'work' as never }),
+    ).toThrow('Text values cannot contain control characters ("a\\u0000b")')
+  })
+
+  it('should report the parameters in output order', () => {
+    expect(() =>
+      new VCard().addSocial({
+        url: 'https://example.com',
+        type: 'a"b',
+        user: 'c"d',
+      }),
+    ).toThrow('Parameter values cannot contain a double quote (a"b)')
   })
 })
