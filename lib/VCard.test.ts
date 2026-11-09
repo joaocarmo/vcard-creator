@@ -44,7 +44,7 @@ describe('vCard output format', () => {
 BEGIN:VCARD\r\n\
 VERSION:3.0\r\n\
 PRODID:-//vcard-creator//vcard-creator ${LIB_VERSION}//EN\r\n\
-REV:${new Date().toISOString()}\r\n\
+REV:2024-01-15T10:00:00Z\r\n\
 N:Desloovere;Jeroen;;;\r\n\
 FN:Jeroen Desloovere\r\n\
 NICKNAME:Jero,Jerox\r\n\

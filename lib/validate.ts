@@ -41,9 +41,9 @@ const RAW_CONTROL_CHARS_EXCEPT_TAB =
 const CONTROL_CHARS_KEPT_BY_JSON = /[\x7F-\x9F\u{2028}\u{2029}]/gu
 
 // RFC 2425 §5.8.4: the dashes and colons are optional, and a fraction of a
-// second uses a comma
+// second uses a comma. ABNF literals ignore case, so `t` and `z` are valid.
 const RFC_DATE_TIME =
-  /^(\d{4})-?(\d{2})-?(\d{2})(?:T(\d{2}):?(\d{2}):?(\d{2})(?:,\d+)?(?:Z|[+-](\d{2}):?(\d{2}))?)?$/
+  /^(\d{4})-?(\d{2})-?(\d{2})(?:T(\d{2}):?(\d{2}):?(\d{2})(?:,\d+)?(?:Z|[+-](\d{2}):?(\d{2}))?)?$/i
 
 // `+HH:MM` or `-HH:MM`. Ranges are checked separately.
 export const UTC_OFFSET = /^[+-](\d{2}):(\d{2})$/
@@ -253,24 +253,39 @@ export function assertCoordinate({
 }
 
 /**
+ * Check that a value is a `Date`, including one from another realm, such as
+ * `vm` or an iframe. `instanceof` fails across realms, and
+ * `Symbol.toStringTag` can spoof `Object.prototype.toString`.
+ */
+export function isDate(value: unknown): value is Date {
+  try {
+    Date.prototype.getTime.call(value)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
  * Check that a date is a valid `Date` object.
  *
  * @throws VCardException
  */
 export function assertValidDate({ date, label }: DateCheckOptions): void {
   // Plain JavaScript callers can pass a string or other values
-  if (!(date instanceof Date)) {
+  if (!isDate(date)) {
     throw new VCardException(
       `Invalid ${label}: must be a Date (got ${describeType(date)})`,
     )
   }
 
-  if (Number.isNaN(date.getTime())) {
+  // The built-in methods, so an own or prototype override cannot fake the value
+  if (Number.isNaN(Date.prototype.getTime.call(date))) {
     throw new VCardException(`Invalid ${label}: the Date is invalid`)
   }
 
   // toISOString() writes other years with a sign and 6 digits
-  const year = date.getUTCFullYear()
+  const year = Date.prototype.getUTCFullYear.call(date)
   if (year < 0 || year > 9999) {
     throw new VCardException(
       `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,

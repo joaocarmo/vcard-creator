@@ -225,12 +225,26 @@ describe('VALUE_PIPELINES', () => {
     it('should write a Date as a date-time', () => {
       expect(
         run('date-time', new Date('2024-01-02T03:04:05Z'), 'Revision'),
-      ).toBe('2024-01-02T03:04:05.000Z')
+      ).toBe('2024-01-02T03:04:05Z')
     })
 
-    it('should throw on a string', () => {
-      expect(() => run('date-time', '2024-01-02', 'Revision')).toThrow(
-        'Invalid revision: must be a Date (got string)',
+    it('should keep a date-time string as it is', () => {
+      expect(run('date-time', '1953-10-15T23:10:00Z', 'Birthday')).toBe(
+        '1953-10-15T23:10:00Z',
+      )
+    })
+
+    it('should throw on an invalid string', () => {
+      expect(() =>
+        run('date-time', '1953-10-15T25:10:00Z', 'Birthday'),
+      ).toThrow(
+        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1953-10-15T25:10:00Z")',
+      )
+    })
+
+    it('should throw on a non-string, non-Date value', () => {
+      expect(() => run('date-time', 42, 'Revision')).toThrow(
+        'Invalid revision: must be a Date (got number)',
       )
     })
 

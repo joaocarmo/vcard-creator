@@ -1,5 +1,5 @@
 import VCardException from './VCardException.js'
-import { escapeText, formatFloat } from './format.js'
+import { escapeText, formatDateTime, formatFloat } from './format.js'
 import type { ValueType } from './properties.js'
 import type { GeoOptions } from './types/VCard.js'
 import {
@@ -10,12 +10,30 @@ import {
   assertValidDate,
   describeType,
   isBase64,
+  isDate,
   isRfcDateOrDateTime,
   showValue,
   UTC_OFFSET,
 } from './validate.js'
 
 type ValuePipeline = (value: unknown, label: string) => string
+
+/**
+ * Check that a value is an RFC 2425 date or date-time string and return it.
+ *
+ * @throws VCardException
+ */
+function checkDateString(value: unknown, label: string): string {
+  assertString({ value, label })
+
+  if (!isRfcDateOrDateTime(value as string)) {
+    throw new VCardException(
+      `Invalid ${label.toLowerCase()}: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(value as string)})`,
+    )
+  }
+
+  return value as string
+}
 
 /**
  * Check a property value by its value type and return the string to store.
@@ -66,26 +84,20 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     return base64
   },
   'date-or-date-time': (value, label) => {
-    const name = label.toLowerCase()
-
-    if (value instanceof Date) {
-      assertValidDate({ date: value, label: name })
-      return value.toISOString().slice(0, 10)
+    if (isDate(value)) {
+      assertValidDate({ date: value, label: label.toLowerCase() })
+      return Date.prototype.toISOString.call(value).slice(0, 10)
     }
 
-    assertString({ value, label })
-
-    if (!isRfcDateOrDateTime(value as string)) {
-      throw new VCardException(
-        `Invalid ${name}: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(value as string)})`,
-      )
-    }
-
-    return value as string
+    return checkDateString(value, label)
   },
   'date-time': (value, label) => {
+    if (typeof value === 'string') {
+      return checkDateString(value, label)
+    }
+
     assertValidDate({ date: value, label: label.toLowerCase() })
-    return (value as Date).toISOString()
+    return formatDateTime(value as Date)
   },
   'utc-offset': (value, label) => {
     const offset = UTC_OFFSET.exec(value as string)
