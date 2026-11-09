@@ -8,7 +8,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const { version } = JSON.parse(
   readFileSync(resolve(root, 'package.json'), 'utf8'),
 )
-const file = resolve(root, 'lib/utils/constants.ts')
+const file = resolve(root, 'lib/constants.ts')
 
 const src = readFileSync(file, 'utf8')
 const pattern = /export const LIB_VERSION = '.*'/

@@ -3,7 +3,6 @@ import {
   AddressOptions,
   CompanyOptions,
   CustomPropertyOptions,
-  DefinedElements,
   EmailOptions,
   GeoOptions,
   ImppOptions,
@@ -11,30 +10,33 @@ import {
   LabelOptions,
   LogoOptions,
   NameOptions,
-  ParamSpec,
   PhoneOptions,
   PhotoOptions,
   Property,
-  PropertyInput,
   SocialOptions,
-  StoredProperty,
-  StorePropertiesOptions,
   UrlOptions,
 } from './types/VCard.js'
+import { buildKey, fold } from './format.js'
+import { toMediaInput } from './mime.js'
+import {
+  DefinedElements,
+  ParamSpec,
+  PROPERTIES,
+  PropertyInput,
+  RESERVED_PROPERTY_NAMES,
+  StoredProperty,
+  StorePropertiesOptions,
+} from './properties.js'
 import {
   assertName,
   assertNoControlChars,
   assertOptions,
   assertString,
-  buildKey,
   describeType,
-  fold,
   UTC_OFFSET,
-  VALUE_PIPELINES,
-  toMediaInput,
-} from './utils/functions.js'
-import { PROPERTIES } from './utils/properties.js'
-import * as constants from './utils/constants.js'
+} from './validate.js'
+import { VALUE_PIPELINES } from './values.js'
+import * as constants from './constants.js'
 
 export default class VCard {
   /**
@@ -657,7 +659,7 @@ export default class VCard {
 
         assertName({ value: name, label: 'Property name' })
         const upperName = name.toUpperCase()
-        const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)
+        const hint = RESERVED_PROPERTY_NAMES.get(upperName)
         if (hint !== undefined) {
           throw new VCardException(
             `Property name ${JSON.stringify(name)} is reserved${hint}`,
