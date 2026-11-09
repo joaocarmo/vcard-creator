@@ -3,10 +3,27 @@ import {
   MIME_TYPES,
   toImageSubtype,
   toMediaInput,
+  toMimeEssence,
 } from './mime'
+
+describe('toMimeEssence()', () => {
+  it.each([
+    [' image/png ', 'image/png'],
+    ['png;a=b', 'png'],
+    ['\t\r\npng \n', 'png'],
+    ['; charset=binary', ''],
+    [' png', ' png'],
+  ])('should map %j to %j', (mime, expected) => {
+    expect(toMimeEssence(mime)).toBe(expected)
+  })
+})
 
 describe('toImageSubtype()', () => {
   it.each([
+    [' png', 'png'],
+    ['image/png; charset=binary', 'png'],
+    ['\timage/png \n', 'png'],
+    ['image/x-icon', 'x-icon'],
     ['png', 'png'],
     ['image/png', 'png'],
     ['IMAGE/PNG', 'PNG'],
@@ -21,16 +38,23 @@ describe('toImageSubtype()', () => {
 })
 
 describe('isValidMimeType()', () => {
-  it.each(['jpeg', 'PNG', 'svg+xml', 'vnd.microsoft.icon'])(
-    'should accept %j',
+  it.each([
+    'jpeg',
+    'PNG',
+    'svg+xml',
+    'vnd.microsoft.icon',
+    'x-icon',
+    'X-MS-BMP',
+  ])('should accept %j', (mime) => {
+    expect(isValidMimeType(mime)).toBe(true)
+  })
+
+  it.each(['', 'foobar', 'jpg', 'image/png', 'x-', 'x_icon', 'pjpeg'])(
+    'should reject %j',
     (mime) => {
-      expect(isValidMimeType(mime)).toBe(true)
+      expect(isValidMimeType(mime)).toBe(false)
     },
   )
-
-  it.each(['', 'foobar', 'jpg', 'image/png'])('should reject %j', (mime) => {
-    expect(isValidMimeType(mime)).toBe(false)
-  })
 
   it('should store every MIME_TYPES entry in lower case', () => {
     const notLowerCase = [...MIME_TYPES].filter(
@@ -88,7 +112,17 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     expect(() => typeOf(mime)).toThrow('MIME Media Type values must be strings')
   })
 
-  it.each(['foobar', 'image/foo', 'image/', 'jpgx', ''])(
+  it.each(['', '  ', '; charset=binary'])(
+    'should write no TYPE when the essence of mime is empty (%j)',
+    (mime) => {
+      expect(toMediaInput(element, { image: 'data', mime })).toEqual({
+        element,
+        value: 'data',
+      })
+    },
+  )
+
+  it.each(['foobar', 'image/foo', 'image/', 'jpgx', 'image/pjpeg'])(
     'should throw on %j with the original value',
     (mime) => {
       expect(() => typeOf(mime)).toThrow(

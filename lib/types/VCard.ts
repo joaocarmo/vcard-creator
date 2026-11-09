@@ -121,14 +121,14 @@ export type PhotoOptions =
   | { url: string }
   | {
       /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
-      /** Image MIME type, such as 'png', 'jpg' or 'image/png' (defaults to 'JPEG') */ mime?: string
+      /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). An empty string writes no TYPE */ mime?: string
     }
 
 export type LogoOptions =
   | { url: string }
   | {
       /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
-      /** Image MIME type, such as 'png', 'jpg' or 'image/png' (defaults to 'JPEG') */ mime?: string
+      /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). An empty string writes no TYPE */ mime?: string
     }
 
 export type KeyOptions =
