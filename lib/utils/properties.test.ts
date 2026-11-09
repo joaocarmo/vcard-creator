@@ -1,0 +1,40 @@
+import { PROPERTIES } from './properties'
+import type { Element } from '../types/VCard'
+
+const elements = Object.keys(PROPERTIES) as Element[]
+
+describe('PROPERTIES', () => {
+  it('should allow repeats of the README repeatable properties only', () => {
+    expect(elements.filter((element) => PROPERTIES[element].multiple)).toEqual([
+      'address',
+      'custom',
+      'email',
+      'impp',
+      'key',
+      'label',
+      'logo',
+      'nickname',
+      'note',
+      'phoneNumber',
+      'photo',
+      'social',
+      'url',
+    ])
+  })
+
+  it('should write the charset for text properties only', () => {
+    expect(elements.filter((element) => PROPERTIES[element].charset)).toEqual([
+      'address',
+      'categories',
+      'company',
+      'fullname',
+      'jobtitle',
+      'label',
+      'name',
+      'nickname',
+      'note',
+      'role',
+      'sortString',
+    ])
+  })
+})

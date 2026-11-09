@@ -35,11 +35,70 @@ export interface Property {
   group?: string
 }
 
-export interface SetPropertyOptions {
+export type ValueType =
+  | 'text'
+  | 'text-structured'
+  | 'text-list'
+  | 'uri'
+  | 'raw'
+  | 'raw-tab'
+  | 'binary'
+  | 'date-or-date-time'
+  | 'date-time'
+  | 'utc-offset'
+  | 'float-pair'
+
+export interface PropertySpec {
+  /** Property name. Empty for custom properties, whose caller gives it */
+  name: string
+  /** Default value type. Another type writes `VALUE=<type>` */
+  valueType: ValueType
+  multiple: boolean
+  /** Whether the deprecated `CHARSET` parameter is written */
+  charset: boolean
+  /** Error label of the value */
+  label?: string
+}
+
+export type ParamSpec =
+  | {
+      /** A type array, written as `TYPE=A,B` and left out when empty */
+      kind: 'list'
+      name: 'TYPE'
+      value: unknown
+    }
+  | {
+      kind: 'single'
+      name: string
+      value: unknown
+      upper?: boolean
+    }
+
+export interface PropertyInput {
   element: Element
-  key: string
-  value: string
+  /** Defaults to the value type of the element */
+  valueType?: ValueType
+  value: unknown
+  params?: ParamSpec[]
+  /** Parameters written as they are, after a control-character check */
+  rawParams?: unknown
   group?: string
+  /** Defaults to the name of the element */
+  name?: string
+}
+
+type MapProperties<T> = (value: T) => PropertyInput | PropertyInput[]
+
+export type StorePropertiesOptions<T> =
+  | { options: T; methodName: string; map: MapProperties<T> }
+  | { value: T; methodName?: never; map: MapProperties<T> }
+
+export interface BuildKeyOptions {
+  name: string
+  valueType: ValueType
+  defaultType: ValueType
+  params?: ParamSpec[]
+  rawParams?: unknown
 }
 
 export interface CoordinateOptions {

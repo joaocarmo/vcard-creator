@@ -2,11 +2,8 @@ import VCardException from './VCardException.js'
 import {
   AddressOptions,
   CompanyOptions,
-  CoordinateOptions,
   CustomPropertyOptions,
-  DateCheckOptions,
   DefinedElements,
-  Element,
   EmailOptions,
   GeoOptions,
   ImppOptions,
@@ -14,12 +11,14 @@ import {
   LabelOptions,
   LogoOptions,
   NameOptions,
+  ParamSpec,
   PhoneOptions,
   PhotoOptions,
   Property,
-  SetPropertyOptions,
+  PropertyInput,
   SocialOptions,
   StoredProperty,
+  StorePropertiesOptions,
   UrlOptions,
 } from './types/VCard.js'
 import {
@@ -27,18 +26,14 @@ import {
   assertNoControlChars,
   assertOptions,
   assertString,
-  assertUri,
+  buildKey,
   describeType,
-  escapeText,
   fold,
-  formatFloat,
-  isRfcDateOrDateTime,
-  isValidMimeType,
-  quoteParamValue,
-  resolveType,
-  showValue,
-  toImageSubtype,
+  UTC_OFFSET,
+  VALUE_PIPELINES,
+  toMediaInput,
 } from './utils/functions.js'
+import { PROPERTIES } from './utils/properties.js'
 import * as constants from './utils/constants.js'
 
 export default class VCard {
@@ -76,49 +71,42 @@ export default class VCard {
   private definedElements: DefinedElements = {}
 
   /**
-   * Multiple properties for element allowed.
-   */
-  private multiplePropertiesForElementAllowed: ReadonlySet<Element> =
-    constants.ALLOWED_MULTIPLE_PROPERTIES
-
-  /**
    * Add address.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.2.1
    * @throws VCardException
    */
   public addAddress(options: AddressOptions = {}): this {
-    assertOptions({ value: options, label: 'addAddress()' })
-    const {
-      postOfficeBox = '',
-      extended = '',
-      street = '',
-      locality = '',
-      region = '',
-      postalCode = '',
-      country = '',
-      type = ['intl', 'postal', 'parcel', 'work'],
-    } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addAddress()',
+      map: (options) => {
+        const {
+          postOfficeBox = '',
+          extended = '',
+          street = '',
+          locality = '',
+          region = '',
+          postalCode = '',
+          country = '',
+          type = ['intl', 'postal', 'parcel', 'work'],
+        } = options
 
-    const value = [
-      postOfficeBox,
-      extended,
-      street,
-      locality,
-      region,
-      postalCode,
-      country,
-    ]
-      .map(escapeText)
-      .join(';')
-    const resolved = resolveType(type)
-    this.setProperty({
-      element: 'address',
-      key: `ADR${resolved !== '' ? `;${resolved}` : ''}`,
-      value,
+        return {
+          element: 'address',
+          value: [
+            postOfficeBox,
+            extended,
+            street,
+            locality,
+            region,
+            postalCode,
+            country,
+          ],
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -136,26 +124,13 @@ export default class VCard {
    * vCard.addBirthday('1953-10-15T23:10:00Z')
    */
   public addBirthday(date: Date | string): this {
-    let value: string
-
-    if (date instanceof Date) {
-      this.assertValidDate({ date, label: 'birthday' })
-      value = date.toISOString().slice(0, 10)
-    } else {
-      assertString({ value: date, label: 'Birthday' })
-
-      if (!isRfcDateOrDateTime(date)) {
-        throw new VCardException(
-          `Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got ${showValue(date)})`,
-        )
-      }
-
-      value = date
-    }
-
-    this.setProperty({ element: 'birthday', key: 'BDAY', value })
-
-    return this
+    return this.storeProperties({
+      value: date,
+      map: (value) => ({
+        element: 'birthday',
+        value,
+      }),
+    })
   }
 
   /**
@@ -165,18 +140,18 @@ export default class VCard {
    * @throws VCardException
    */
   public addCompany(options: CompanyOptions): this {
-    assertOptions({ value: options, label: 'addCompany()' })
-    const { name, department = '' } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addCompany()',
+      map: (options) => {
+        const { name, department = '' } = options
 
-    const escapedName = escapeText(name)
-    const escapedDept = department !== '' ? `;${escapeText(department)}` : ''
-    this.setProperty({
-      element: 'company',
-      key: `ORG`,
-      value: escapedName + escapedDept,
+        return {
+          element: 'company',
+          value: department !== '' ? [name, department] : [name],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -186,19 +161,19 @@ export default class VCard {
    * @throws VCardException
    */
   public addEmail(options: EmailOptions): this {
-    assertOptions({ value: options, label: 'addEmail()' })
-    const { address, type = [] } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addEmail()',
+      map: (options) => {
+        const { address, type = [] } = options
 
-    assertNoControlChars({ value: address, label: 'Email' })
-
-    const resolved = resolveType(type)
-    this.setProperty({
-      element: 'email',
-      key: `EMAIL${resolved !== '' ? `;${resolved}` : ''}`,
-      value: address,
+        return {
+          element: 'email',
+          value: address,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -208,30 +183,28 @@ export default class VCard {
    * @throws VCardException
    */
   public addKey(options: KeyOptions): this {
-    assertOptions({ value: options, label: 'addKey()' })
+    return this.storeProperties({
+      options,
+      methodName: 'addKey()',
+      map: (options) => {
+        if ('url' in options) {
+          return { element: 'key', valueType: 'uri', value: options.url }
+        }
 
-    if ('url' in options) {
-      assertUri(options.url)
-
-      this.setProperty({
-        element: 'key',
-        key: 'KEY;VALUE=uri',
-        value: options.url,
-      })
-    } else {
-      const mime = options.mime ?? 'PGP'
-      assertNoControlChars({ value: options.key, label: 'Key' })
-      // Checks a non-string value before toUpperCase()
-      const type = quoteParamValue(mime).toUpperCase()
-
-      this.setProperty({
-        element: 'key',
-        key: `KEY;ENCODING=b;TYPE=${type}`,
-        value: options.key,
-      })
-    }
-
-    return this
+        return {
+          element: 'key',
+          value: options.key,
+          params: [
+            {
+              kind: 'single',
+              name: 'TYPE',
+              value: options.mime ?? 'PGP',
+              upper: true,
+            },
+          ],
+        }
+      },
+    })
   }
 
   /**
@@ -241,13 +214,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addJobtitle(jobtitle: string): this {
-    this.setProperty({
-      element: 'jobtitle',
-      key: `TITLE`,
-      value: escapeText(jobtitle),
+    return this.storeProperties({
+      value: jobtitle,
+      map: (value) => ({
+        element: 'jobtitle',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -257,60 +230,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addRole(role: string): this {
-    this.setProperty({
-      element: 'role',
-      key: `ROLE`,
-      value: escapeText(role),
+    return this.storeProperties({
+      value: role,
+      map: (value) => ({
+        element: 'role',
+        value,
+      }),
     })
-
-    return this
-  }
-
-  /**
-   * Add a photo or logo by URL.
-   *
-   * @throws VCardException
-   */
-  private addMediaUrl(property: string, url: string, element: Element): this {
-    assertUri(url)
-
-    this.setProperty({
-      element,
-      key: `${property};VALUE=uri`,
-      value: url,
-    })
-
-    return this
-  }
-
-  /**
-   * Add a photo or logo by base64 content.
-   *
-   * @throws VCardException
-   */
-  private addMediaContent(
-    property: string,
-    content: string,
-    mime: string,
-    element: Element,
-  ): this {
-    assertString({ value: mime, label: 'MIME Media Type' })
-
-    const subtype = toImageSubtype(mime)
-
-    if (!isValidMimeType(subtype)) {
-      throw new VCardException(`The MIME Media Type is invalid (${mime})`)
-    }
-
-    assertNoControlChars({ value: content, label: 'Image' })
-
-    this.setProperty({
-      element,
-      key: `${property};ENCODING=b;TYPE=${subtype.toUpperCase()}`,
-      value: content,
-    })
-
-    return this
   }
 
   /**
@@ -323,13 +249,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addFullName(fullName: string): this {
-    this.setProperty({
-      element: 'fullname',
-      key: `FN`,
-      value: escapeText(fullName),
+    return this.storeProperties({
+      value: fullName,
+      map: (value) => ({
+        element: 'fullname',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -339,51 +265,55 @@ export default class VCard {
    * @throws VCardException
    */
   public addName(options: NameOptions = {}): this {
-    assertOptions({ value: options, label: 'addName()' })
-    const {
-      familyName = '',
-      givenName = '',
-      additionalNames = '',
-      honorificPrefix = '',
-      honorificSuffix = '',
-    } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addName()',
+      map: (options) => {
+        const {
+          familyName = '',
+          givenName = '',
+          additionalNames = '',
+          honorificPrefix = '',
+          honorificSuffix = '',
+        } = options
 
-    const values = [
-      honorificPrefix,
-      givenName,
-      additionalNames,
-      familyName,
-      honorificSuffix,
-    ].filter(Boolean)
+        const inputs: PropertyInput[] = [
+          {
+            element: 'name',
+            value: [
+              familyName,
+              givenName,
+              additionalNames,
+              honorificPrefix,
+              honorificSuffix,
+            ],
+          },
+        ]
 
-    const property = [
-      familyName,
-      givenName,
-      additionalNames,
-      honorificPrefix,
-      honorificSuffix,
-    ]
-      .map(escapeText)
-      .join(';')
-    this.setProperty({
-      element: 'name',
-      key: `N`,
-      value: property,
+        const parts = [
+          honorificPrefix,
+          givenName,
+          additionalNames,
+          familyName,
+          honorificSuffix,
+        ]
+        const hasFullName = this.properties.some(
+          (property) => property.key === 'FN',
+        )
+
+        // A non-string part makes the N input throw first. join() would throw
+        // a TypeError on a null-prototype object.
+        if (!hasFullName && parts.every((part) => typeof part === 'string')) {
+          const fullName = parts.filter(Boolean).join(' ').trim()
+
+          if (fullName !== '') {
+            inputs.push({ element: 'fullname', value: fullName })
+          }
+        }
+
+        return inputs
+      },
     })
-
-    const fnValue = escapeText(values.join(' ').trim())
-    const hasFullName = this.properties.some(
-      (property) => property.key === 'FN',
-    )
-    if (!hasFullName && fnValue !== '') {
-      this.setProperty({
-        element: 'fullname',
-        key: `FN`,
-        value: fnValue,
-      })
-    }
-
-    return this
   }
 
   /**
@@ -393,16 +323,14 @@ export default class VCard {
    * @throws VCardException
    */
   public addNickname(nickname: string | string[]): this {
-    const value = Array.isArray(nickname)
-      ? nickname.map(escapeText).join(',').trim()
-      : escapeText(nickname)
-    this.setProperty({
-      element: 'nickname',
-      key: `NICKNAME`,
-      value,
+    return this.storeProperties({
+      value: nickname,
+      map: (value) => ({
+        element: 'nickname',
+        valueType: Array.isArray(value) ? 'text-list' : 'text',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -412,13 +340,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addNote(note: string): this {
-    this.setProperty({
-      element: 'note',
-      key: `NOTE`,
-      value: escapeText(note),
+    return this.storeProperties({
+      value: note,
+      map: (value) => ({
+        element: 'note',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -428,20 +356,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addCategories(categories: string[]): this {
-    // Plain JavaScript callers can pass a string
-    if (!Array.isArray(categories)) {
-      throw new VCardException(
-        `Categories must be an array (got ${describeType(categories)})`,
-      )
-    }
-
-    this.setProperty({
-      element: 'categories',
-      key: `CATEGORIES`,
-      value: categories.map(escapeText).join(',').trim(),
+    return this.storeProperties({
+      value: categories,
+      map: (value) => ({
+        element: 'categories',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -451,34 +372,33 @@ export default class VCard {
    * @throws VCardException
    */
   public addPhoneNumber(options: PhoneOptions): this {
-    assertOptions({ value: options, label: 'addPhoneNumber()' })
-    const { number, type = [] } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addPhoneNumber()',
+      map: (options) => {
+        const { number, type = [] } = options
 
-    // Plain JavaScript callers can pass null or undefined, which would be
-    // written as text
-    if (typeof number !== 'string' && typeof number !== 'number') {
-      throw new VCardException(
-        `Phone number values must be strings or numbers (got ${describeType(number)})`,
-      )
-    }
+        // Plain JavaScript callers can pass null or undefined, which would be
+        // written as text
+        if (typeof number !== 'string' && typeof number !== 'number') {
+          throw new VCardException(
+            `Phone number values must be strings or numbers (got ${describeType(number)})`,
+          )
+        }
 
-    if (typeof number === 'number' && !Number.isFinite(number)) {
-      throw new VCardException(
-        `Phone number values must be finite numbers (got ${number})`,
-      )
-    }
+        if (typeof number === 'number' && !Number.isFinite(number)) {
+          throw new VCardException(
+            `Phone number values must be finite numbers (got ${number})`,
+          )
+        }
 
-    const value = `${number}`
-    assertNoControlChars({ value, label: 'Phone number' })
-
-    const resolved = resolveType(type)
-    this.setProperty({
-      element: 'phoneNumber',
-      key: `TEL${resolved !== '' ? `;${resolved}` : ''}`,
-      value,
+        return {
+          element: 'phoneNumber',
+          value: `${number}`,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -488,20 +408,11 @@ export default class VCard {
    * @throws VCardException
    */
   public addLogo(options: LogoOptions): this {
-    assertOptions({ value: options, label: 'addLogo()' })
-
-    if ('url' in options) {
-      this.addMediaUrl('LOGO', options.url, 'logo')
-    } else {
-      this.addMediaContent(
-        'LOGO',
-        options.image,
-        options.mime ?? constants.DEFAULT_MIME_TYPE,
-        'logo',
-      )
-    }
-
-    return this
+    return this.storeProperties({
+      options,
+      methodName: 'addLogo()',
+      map: (options) => toMediaInput('logo', options),
+    })
   }
 
   /**
@@ -511,20 +422,11 @@ export default class VCard {
    * @throws VCardException
    */
   public addPhoto(options: PhotoOptions): this {
-    assertOptions({ value: options, label: 'addPhoto()' })
-
-    if ('url' in options) {
-      this.addMediaUrl('PHOTO', options.url, 'photo')
-    } else {
-      this.addMediaContent(
-        'PHOTO',
-        options.image,
-        options.mime ?? constants.DEFAULT_MIME_TYPE,
-        'photo',
-      )
-    }
-
-    return this
+    return this.storeProperties({
+      options,
+      methodName: 'addPhoto()',
+      map: (options) => toMediaInput('photo', options),
+    })
   }
 
   /**
@@ -534,19 +436,19 @@ export default class VCard {
    * @throws VCardException
    */
   public addUrl(options: UrlOptions): this {
-    assertOptions({ value: options, label: 'addUrl()' })
-    const { url, type = [] } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addUrl()',
+      map: (options) => {
+        const { url, type = [] } = options
 
-    assertUri(url)
-
-    const resolved = resolveType(type)
-    this.setProperty({
-      element: 'url',
-      key: `URL${resolved !== '' ? `;${resolved}` : ''}`,
-      value: url,
+        return {
+          element: 'url',
+          value: url,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -557,24 +459,34 @@ export default class VCard {
    * @throws VCardException
    */
   public addSocial(options: SocialOptions): this {
-    assertOptions({ value: options, label: 'addSocial()' })
-    const { url, type, user = '' } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addSocial()',
+      map: (options) => {
+        const { url, type, user = '' } = options
 
-    // addImpp() checks too, but only after X-SOCIALPROFILE is stored
-    assertUri(url)
+        const socialParams: ParamSpec[] = []
+        const imppParams: ParamSpec[] = []
 
-    const socialUser = user !== '' ? `;x-user=${quoteParamValue(user)}` : ''
-    const socialProfile = type !== '' ? `;type=${quoteParamValue(type)}` : ''
+        if (type !== '') {
+          socialParams.push({ kind: 'single', name: 'type', value: type })
+          imppParams.push({
+            kind: 'single',
+            name: 'X-SERVICE-TYPE',
+            value: type,
+          })
+        }
 
-    this.setProperty({
-      element: 'social',
-      key: `X-SOCIALPROFILE${socialProfile}${socialUser}`,
-      value: url,
+        if (user !== '') {
+          socialParams.push({ kind: 'single', name: 'x-user', value: user })
+        }
+
+        return [
+          { element: 'social', value: url, params: socialParams },
+          { element: 'impp', value: url, params: imppParams },
+        ]
+      },
     })
-
-    this.addImpp({ uri: url, serviceType: type })
-
-    return this
   }
 
   /**
@@ -584,23 +496,22 @@ export default class VCard {
    * @throws VCardException
    */
   public addImpp(options: ImppOptions): this {
-    assertOptions({ value: options, label: 'addImpp()' })
-    const { uri, serviceType = '' } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addImpp()',
+      map: (options) => {
+        const { uri, serviceType = '' } = options
 
-    assertUri(uri)
-
-    const type =
-      serviceType !== ''
-        ? `;X-SERVICE-TYPE=${quoteParamValue(serviceType)}`
-        : ''
-
-    this.setProperty({
-      element: 'impp',
-      key: `IMPP${type}`,
-      value: uri,
+        return {
+          element: 'impp',
+          value: uri,
+          params:
+            serviceType !== ''
+              ? [{ kind: 'single', name: 'X-SERVICE-TYPE', value: serviceType }]
+              : [],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -610,11 +521,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addUid(uid: string): this {
-    assertNoControlChars({ value: uid, label: 'UID' })
-
-    this.setProperty({ element: 'uid', key: 'UID', value: uid })
-
-    return this
+    return this.storeProperties({
+      value: uid,
+      map: (value) => ({
+        element: 'uid',
+        value,
+      }),
+    })
   }
 
   /**
@@ -624,69 +537,14 @@ export default class VCard {
    * @throws VCardException
    */
   public addGeo(options: GeoOptions): this {
-    assertOptions({ value: options, label: 'addGeo()' })
-    const { latitude, longitude } = options
-
-    this.assertCoordinate({ name: 'latitude', value: latitude, limit: 90 })
-    this.assertCoordinate({ name: 'longitude', value: longitude, limit: 180 })
-
-    this.setProperty({
-      element: 'geo',
-      key: 'GEO',
-      value: `${formatFloat(latitude)};${formatFloat(longitude)}`,
+    return this.storeProperties({
+      options,
+      methodName: 'addGeo()',
+      map: (value) => ({
+        element: 'geo',
+        value,
+      }),
     })
-
-    return this
-  }
-
-  /**
-   * Check that a coordinate is a finite number from -limit to limit.
-   *
-   * @throws VCardException
-   */
-  private assertCoordinate({ name, value, limit }: CoordinateOptions): void {
-    if (!Number.isFinite(value)) {
-      // String() throws on objects without a usable toString()
-      const shown =
-        typeof value === 'object' && value !== null
-          ? typeof value
-          : String(value)
-      throw new VCardException(
-        `Invalid ${name}: ${shown}. Must be a finite number.`,
-      )
-    }
-
-    if (value < -limit || value > limit) {
-      throw new VCardException(
-        `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
-      )
-    }
-  }
-
-  /**
-   * Check that a date is a valid `Date` object.
-   *
-   * @throws VCardException
-   */
-  private assertValidDate({ date, label }: DateCheckOptions): void {
-    // Plain JavaScript callers can pass a string or other values
-    if (!(date instanceof Date)) {
-      throw new VCardException(
-        `Invalid ${label}: must be a Date (got ${describeType(date)})`,
-      )
-    }
-
-    if (Number.isNaN(date.getTime())) {
-      throw new VCardException(`Invalid ${label}: the Date is invalid`)
-    }
-
-    // toISOString() writes other years with a sign and 6 digits
-    const year = date.getUTCFullYear()
-    if (year < 0 || year > 9999) {
-      throw new VCardException(
-        `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,
-      )
-    }
   }
 
   /**
@@ -700,25 +558,19 @@ export default class VCard {
    * @throws VCardException
    */
   public addTimezone(timezone: string): this {
-    // exec() would turn an object into a string and match it
-    assertString({ value: timezone, label: 'Timezone' })
+    return this.storeProperties({
+      value: timezone,
+      map: (value) => {
+        // test() would turn an object into a string and match it
+        assertString({ value, label: 'Timezone' })
 
-    const offset = /^[+-](\d{2}):(\d{2})$/.exec(timezone)
-    const isUtcOffset = offset !== null
-
-    if (isUtcOffset && (Number(offset[1]) > 23 || Number(offset[2]) > 59)) {
-      throw new VCardException(
-        `Invalid timezone offset: ${timezone}. Hours must be 00 to 23 and minutes 00 to 59.`,
-      )
-    }
-
-    this.setProperty({
-      element: 'timezone',
-      key: isUtcOffset ? 'TZ' : 'TZ;VALUE=text',
-      value: isUtcOffset ? timezone : escapeText(timezone),
+        return {
+          element: 'timezone',
+          valueType: UTC_OFFSET.test(value) ? 'utc-offset' : 'text',
+          value,
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -728,13 +580,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addSortString(sortString: string): this {
-    this.setProperty({
-      element: 'sortString',
-      key: `SORT-STRING`,
-      value: escapeText(sortString),
+    return this.storeProperties({
+      value: sortString,
+      map: (value) => ({
+        element: 'sortString',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -747,15 +599,13 @@ export default class VCard {
    * @throws VCardException
    */
   public addRevision(date: Date): this {
-    this.assertValidDate({ date, label: 'revision' })
-
-    this.setProperty({
-      element: 'revision',
-      key: 'REV',
-      value: date.toISOString(),
+    return this.storeProperties({
+      value: date,
+      map: (value) => ({
+        element: 'revision',
+        value,
+      }),
     })
-
-    return this
   }
 
   /**
@@ -765,17 +615,19 @@ export default class VCard {
    * @throws VCardException
    */
   public addLabel(options: LabelOptions): this {
-    assertOptions({ value: options, label: 'addLabel()' })
-    const { label, type = ['intl', 'postal', 'parcel', 'work'] } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addLabel()',
+      map: (options) => {
+        const { label, type = ['intl', 'postal', 'parcel', 'work'] } = options
 
-    const resolved = resolveType(type)
-    this.setProperty({
-      element: 'label',
-      key: `LABEL${resolved !== '' ? `;${resolved}` : ''}`,
-      value: escapeText(label),
+        return {
+          element: 'label',
+          value: label,
+          params: [{ kind: 'list', name: 'TYPE', value: type }],
+        }
+      },
     })
-
-    return this
   }
 
   /**
@@ -797,30 +649,84 @@ export default class VCard {
    * vCard.addCustomProperty({ name: 'TEL', value: '+1-555', group: 'item1' })
    */
   public addCustomProperty(options: CustomPropertyOptions): this {
-    assertOptions({ value: options, label: 'addCustomProperty()' })
-    const { name, value, params = '', group } = options
+    return this.storeProperties({
+      options,
+      methodName: 'addCustomProperty()',
+      map: (options) => {
+        const { name, value, params = '', group } = options
 
-    assertName({ value: name, label: 'Property name' })
-    const upperName = name.toUpperCase()
-    const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)
-    if (hint !== undefined) {
-      throw new VCardException(
-        `Property name ${JSON.stringify(name)} is reserved${hint}`,
-      )
-    }
-    assertNoControlChars({ value, label: 'Property', allowTab: true })
-    assertNoControlChars({ value: params, label: 'Parameter', allowTab: true })
-    // An empty group writes no prefix
-    if (group !== undefined && group !== '') {
-      assertName({ value: group, label: 'Group' })
-    }
+        assertName({ value: name, label: 'Property name' })
+        const upperName = name.toUpperCase()
+        const hint = constants.RESERVED_PROPERTY_NAMES.get(upperName)
+        if (hint !== undefined) {
+          throw new VCardException(
+            `Property name ${JSON.stringify(name)} is reserved${hint}`,
+          )
+        }
 
-    this.setProperty({
-      element: 'custom',
-      key: `${upperName}${params !== '' ? `;${params}` : ''}`,
-      value,
-      group,
+        return {
+          element: 'custom',
+          name: upperName,
+          value,
+          rawParams: params,
+          group,
+        }
+      },
     })
+  }
+
+  /**
+   * Check the options, map them to property inputs, run the value pipeline
+   * and build the key of each input, then store them. Nothing is stored when
+   * an input throws.
+   *
+   * @throws VCardException
+   */
+  private storeProperties<T>(args: StorePropertiesOptions<T>): this {
+    let value: T
+    if ('options' in args) {
+      assertOptions({ value: args.options, label: args.methodName })
+      value = args.options
+    } else {
+      value = args.value
+    }
+
+    const mapped = args.map(value)
+    const inputs = Array.isArray(mapped) ? mapped : [mapped]
+
+    const properties: StoredProperty[] = inputs.map((input) => {
+      const spec = PROPERTIES[input.element]
+      const valueType = input.valueType ?? spec.valueType
+
+      const value = VALUE_PIPELINES[valueType](input.value, spec.label ?? '')
+      const key = buildKey({
+        name: input.name ?? spec.name,
+        valueType,
+        defaultType: spec.valueType,
+        params: input.params,
+        rawParams: input.rawParams,
+      })
+
+      // An empty group writes no prefix
+      if (input.group !== undefined && input.group !== '') {
+        assertName({ value: input.group, label: 'Group' })
+      }
+
+      return { element: input.element, key, value, group: input.group }
+    })
+
+    // A copy, so 2 inputs of the same single element in 1 call also throw
+    const definedElements = { ...this.definedElements }
+    for (const { element } of properties) {
+      if (!PROPERTIES[element].multiple && definedElements[element]) {
+        throw new VCardException(`This element already exists (${element})`)
+      }
+
+      definedElements[element] = true
+    }
+
+    this.definedElements = definedElements
+    this.properties.push(...properties)
 
     return this
   }
@@ -850,9 +756,7 @@ export default class VCard {
     const charsetStr = this.charsetParam()
     for (const property of this.properties) {
       const prefix = property.group ? `${property.group}.` : ''
-      const charset = constants.TEXT_ELEMENTS.has(property.element)
-        ? charsetStr
-        : ''
+      const charset = PROPERTIES[property.element].charset ? charsetStr : ''
       parts.push(
         fold(`${prefix}${property.key}${charset}:${property.value}\r\n`),
       )
@@ -1008,33 +912,5 @@ export default class VCard {
     assertString({ value, label: 'Filename' })
 
     this.filename = value
-  }
-
-  /**
-   * Set property.
-   *
-   * @throws VCardException
-   */
-  private setProperty({
-    element,
-    key,
-    value,
-    group,
-  }: SetPropertyOptions): void {
-    if (
-      !this.multiplePropertiesForElementAllowed.has(element) &&
-      this.definedElements[element]
-    ) {
-      throw new VCardException(`This element already exists (${element})`)
-    }
-
-    this.definedElements[element] = true
-
-    this.properties.push({
-      element,
-      key,
-      value,
-      group,
-    })
   }
 }

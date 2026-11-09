@@ -4,6 +4,7 @@ import {
   assertOptions,
   assertString,
   assertUri,
+  buildKey,
   escapeText,
   fold,
   formatFloat,
@@ -12,9 +13,11 @@ import {
   quoteParamValue,
   resolveType,
   toImageSubtype,
+  VALUE_PIPELINES,
 } from './functions'
 import { MIME_TYPES } from './constants'
 import VCardException from '../VCardException'
+import type { BuildKeyOptions, ValueType } from '../types/VCard'
 
 describe('quoteParamValue()', () => {
   it('should keep simple values as they are', () => {
@@ -581,5 +584,274 @@ describe('assertName()', () => {
     expect(() => assertName({ value: 'X:A', label: 'Property name' })).toThrow(
       'Property name values can contain only letters, digits and "-" ("X:A")',
     )
+  })
+})
+
+describe('VALUE_PIPELINES', () => {
+  const run = (type: ValueType, value: unknown, label = 'Label') =>
+    VALUE_PIPELINES[type](value, label)
+
+  describe('text', () => {
+    it('should escape the value', () => {
+      expect(run('text', 'a;b,c\\d\ne')).toBe('a\\;b\\,c\\\\d\\ne')
+    })
+
+    it('should throw on a control character', () => {
+      expect(() => run('text', 'a\x00b')).toThrow(
+        'Text values cannot contain control characters ("a\\u0000b")',
+      )
+    })
+  })
+
+  describe('text-structured', () => {
+    it('should escape each component and join with a semicolon', () => {
+      expect(run('text-structured', ['a;b', '', 'c'])).toBe('a\\;b;;c')
+    })
+
+    it('should throw on a non-string component', () => {
+      expect(() => run('text-structured', ['a', null])).toThrow(
+        'Text values must be strings (got null)',
+      )
+    })
+  })
+
+  describe('text-list', () => {
+    it('should escape each entry, join with a comma and trim', () => {
+      expect(run('text-list', [' a,b', 'c '])).toBe('a\\,b,c')
+    })
+
+    it('should throw on a non-string entry', () => {
+      expect(() => run('text-list', ['a', 42])).toThrow(
+        'Text values must be strings (got number)',
+      )
+    })
+
+    it('should throw on a non-array value with the label', () => {
+      expect(() => run('text-list', 'a')).toThrow(
+        'Label must be an array (got string)',
+      )
+    })
+  })
+
+  describe('uri', () => {
+    it('should keep the value as it is', () => {
+      expect(run('uri', 'https://example.com/a;b')).toBe(
+        'https://example.com/a;b',
+      )
+    })
+
+    it('should throw on a tab with the URI label', () => {
+      expect(() => run('uri', 'a\tb')).toThrow(
+        'URI values cannot contain control characters ("a\\tb")',
+      )
+    })
+  })
+
+  describe.each(['raw', 'binary'] as const)('%s', (type) => {
+    it('should keep the value as it is', () => {
+      expect(run(type, 'a;b,c')).toBe('a;b,c')
+    })
+
+    it('should throw on a tab with the label', () => {
+      expect(() => run(type, 'a\tb')).toThrow(
+        'Label values cannot contain control characters ("a\\tb")',
+      )
+    })
+  })
+
+  describe('raw-tab', () => {
+    it('should allow a tab', () => {
+      expect(run('raw-tab', 'a\tb')).toBe('a\tb')
+    })
+
+    it('should throw on a line break with the label', () => {
+      expect(() => run('raw-tab', 'a\nb')).toThrow(
+        'Label values cannot contain control characters ("a\\nb")',
+      )
+    })
+  })
+
+  describe('date-or-date-time', () => {
+    it('should write a Date as a date', () => {
+      expect(
+        run('date-or-date-time', new Date('1990-05-15T12:00:00Z'), 'Birthday'),
+      ).toBe('1990-05-15')
+    })
+
+    it.each(['1990-05-15', '19900515', '1953-10-15T23:10:00Z'])(
+      'should keep %j as it is',
+      (value) => {
+        expect(run('date-or-date-time', value, 'Birthday')).toBe(value)
+      },
+    )
+
+    it('should throw on an invalid string', () => {
+      expect(() => run('date-or-date-time', '1990-02-30', 'Birthday')).toThrow(
+        'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-02-30")',
+      )
+    })
+
+    it('should throw on a non-string, non-Date value', () => {
+      expect(() => run('date-or-date-time', 42, 'Birthday')).toThrow(
+        'Birthday values must be strings (got number)',
+      )
+    })
+
+    it('should throw on an invalid Date', () => {
+      expect(() => run('date-or-date-time', new Date('x'), 'Birthday')).toThrow(
+        'Invalid birthday: the Date is invalid',
+      )
+    })
+  })
+
+  describe('date-time', () => {
+    it('should write a Date as a date-time', () => {
+      expect(
+        run('date-time', new Date('2024-01-02T03:04:05Z'), 'Revision'),
+      ).toBe('2024-01-02T03:04:05.000Z')
+    })
+
+    it('should throw on a string', () => {
+      expect(() => run('date-time', '2024-01-02', 'Revision')).toThrow(
+        'Invalid revision: must be a Date (got string)',
+      )
+    })
+
+    it('should throw on a year above 9999', () => {
+      expect(() =>
+        run('date-time', new Date('+010000-01-01T00:00:00Z'), 'Revision'),
+      ).toThrow('Invalid revision: the year must be 0000 to 9999 (got 10000)')
+    })
+  })
+
+  describe('utc-offset', () => {
+    it.each(['+00:00', '-05:00', '+23:59'])('should keep %j', (value) => {
+      expect(run('utc-offset', value, 'Timezone')).toBe(value)
+    })
+
+    it.each(['+24:00', '+05:60', 'Europe/Lisbon'])(
+      'should throw on %j',
+      (value) => {
+        expect(() => run('utc-offset', value, 'Timezone')).toThrow(
+          `Invalid timezone offset: ${value}. Hours must be 00 to 23 and minutes 00 to 59.`,
+        )
+      },
+    )
+  })
+
+  describe('float-pair', () => {
+    it('should write latitude and longitude', () => {
+      expect(run('float-pair', { latitude: 1e-7, longitude: -180 })).toBe(
+        '0.0000001;-180',
+      )
+    })
+
+    it('should throw on an out-of-range latitude', () => {
+      expect(() => run('float-pair', { latitude: 91, longitude: 0 })).toThrow(
+        'Invalid latitude: 91. Must be between -90 and 90.',
+      )
+    })
+
+    it('should throw on a non-finite longitude', () => {
+      expect(() => run('float-pair', { latitude: 0, longitude: {} })).toThrow(
+        'Invalid longitude: object. Must be a finite number.',
+      )
+    })
+  })
+})
+
+describe('buildKey()', () => {
+  const key = (options: Partial<BuildKeyOptions> = {}) =>
+    buildKey({ name: 'X', valueType: 'text', defaultType: 'text', ...options })
+
+  it('should write the name alone without parameters', () => {
+    expect(key()).toBe('X')
+  })
+
+  it('should write VALUE when the RFC value type is not the default', () => {
+    expect(key({ valueType: 'uri', defaultType: 'binary' })).toBe('X;VALUE=uri')
+    expect(key({ valueType: 'text', defaultType: 'utc-offset' })).toBe(
+      'X;VALUE=text',
+    )
+  })
+
+  it('should treat the structured and list pipelines as RFC text', () => {
+    expect(key({ valueType: 'text-list', defaultType: 'text' })).toBe('X')
+  })
+
+  it('should write ENCODING=b for binary values', () => {
+    expect(key({ valueType: 'binary', defaultType: 'binary' })).toBe(
+      'X;ENCODING=b',
+    )
+  })
+
+  describe('list parameters', () => {
+    it('should quote and uppercase each entry', () => {
+      expect(
+        key({
+          params: [{ kind: 'list', name: 'TYPE', value: ['work', 'a,b'] }],
+        }),
+      ).toBe('X;TYPE=WORK,"A,B"')
+    })
+
+    it('should leave out an empty array', () => {
+      expect(key({ params: [{ kind: 'list', name: 'TYPE', value: [] }] })).toBe(
+        'X',
+      )
+    })
+
+    it('should throw on a non-array value', () => {
+      expect(() =>
+        key({ params: [{ kind: 'list', name: 'TYPE', value: 'work' }] }),
+      ).toThrow('Type values must be an array (got string)')
+    })
+  })
+
+  describe('single parameters', () => {
+    it('should keep the name and value case unless upper is set', () => {
+      expect(
+        key({
+          params: [
+            { kind: 'single', name: 'type', value: 'LinkedIn' },
+            { kind: 'single', name: 'TYPE', value: 'pgp', upper: true },
+          ],
+        }),
+      ).toBe('X;type=LinkedIn;TYPE=PGP')
+    })
+
+    it('should quote a value with a colon', () => {
+      expect(
+        key({ params: [{ kind: 'single', name: 'x-user', value: 'a:b' }] }),
+      ).toBe('X;x-user="a:b"')
+    })
+
+    it('should write an empty string', () => {
+      expect(
+        key({ params: [{ kind: 'single', name: 'TYPE', value: '' }] }),
+      ).toBe('X;TYPE=')
+    })
+
+    it('should throw on an array', () => {
+      expect(() =>
+        key({ params: [{ kind: 'single', name: 'TYPE', value: ['a'] }] }),
+      ).toThrow('Parameter values must be strings (got object)')
+    })
+  })
+
+  describe('raw parameters', () => {
+    it('should write them as they are', () => {
+      expect(key({ rawParams: 'TYPE=work;X-A=b' })).toBe('X;TYPE=work;X-A=b')
+    })
+
+    it('should leave out an empty string', () => {
+      expect(key({ rawParams: '' })).toBe('X')
+    })
+
+    it('should allow a tab and throw on a line break', () => {
+      expect(key({ rawParams: 'X-A=a\tb' })).toBe('X;X-A=a\tb')
+      expect(() => key({ rawParams: 'X-A=a\nb' })).toThrow(
+        'Parameter values cannot contain control characters ("X-A=a\\nb")',
+      )
+    })
   })
 })
