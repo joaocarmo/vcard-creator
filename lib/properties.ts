@@ -33,7 +33,6 @@ export type ParamSpec =
   | {
       /** A type array, written as `TYPE=A,B` and left out when empty */
       kind: 'list'
-      name: 'TYPE'
       value: unknown
     }
   | {

@@ -23,12 +23,13 @@
   "scripts": {
     "build:lib": "tsc -p tsconfig.build.json",
     "build": "pnpm clean && pnpm build:lib",
-    "clean": "rimraf ./dist/ ./node_modules/.cache/ *.vcf",
+    "clean": "rimraf ./dist/ ./node_modules/.cache/",
     "lint:fix": "oxlint --fix",
     "lint": "oxlint",
     "prepare": "husky",
     "pretty:fix": "prettier --write .",
     "pretty": "prettier --check .",
+    "test:coverage": "vitest run --coverage",
     "test:functional": "vitest run --config vitest.functional.config.ts",
     "test:unit": "vitest run",
     "type-check:watch": "pnpm type-check --watch",
@@ -38,7 +39,8 @@
     "*.{js,ts}": [
       "oxlint --fix",
       "prettier --write"
-    ]
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
   },
   "repository": {
     "type": "git",

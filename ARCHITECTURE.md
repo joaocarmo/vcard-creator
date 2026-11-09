@@ -2,6 +2,8 @@
 
 This file is a map of the source code. It says where things live and how a property travels from a method call to the output.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests.
+
 ## How a property is added
 
 1. A public `add*()` method in `lib/VCard.ts` maps its arguments to 1 or more property inputs and passes them to `storeProperties()`.
@@ -36,6 +38,7 @@ Each module in `lib/` has 1 job:
 1. Add the element name to `Element` in `types/VCard.ts`.
 2. Add its row to `PROPERTIES` in `properties.ts`. The type check fails until every element has a row.
 3. Add a public `add*()` method to `VCard` that maps its arguments to `storeProperties()`.
+4. Add its entry to `cases` in `VCard.input.test.ts` and its output to the mapping table in `VCard.properties.test.ts`. The type check fails until `cases` has an entry for every `add*()` method.
 
 ## Tests
 
@@ -44,7 +47,7 @@ Each module in `lib/` has 1 job:
 - `VCard` tests:
   - `VCard.test.ts`: the class itself, such as output, charset, `concat()` and grouping.
   - `VCard.properties.test.ts`: what each `add*()` method writes (property name, parameters and value type), plus behaviour that only that method has.
-  - `VCard.input.test.ts`: checks that run over every input of every `add*()` method.
+  - `VCard.input.test.ts`: checks that run over every input of every `add*()` method. 1 table, `cases`, lists the inputs of each method.
 - Test fixtures live in `test/fixtures/`. `test/fixtures/index.ts` loads them, so each test file imports a fixture by name.
 - Shared test setup lives in `test/helpers.ts`: `freezeTime()` fixes the clock for a suite, and `addMethods` lists the public `add*()` methods for the guard tests. Vitest restores `vi.spyOn()` spies after each test (`restoreMocks`).
 - The functional test lives in `test/functional/`. It tests the built package in `dist/`, with its own Vitest config (`vitest.functional.config.ts`).

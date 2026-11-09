@@ -36,6 +36,9 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
+      - name: Check formatting
+        run: pnpm pretty
+
   test:
     runs-on: ubuntu-latest
 
@@ -57,5 +60,5 @@ jobs:
 
       - name: Execute the tests
         run: |
-          pnpm test:unit
+          pnpm test:coverage
           pnpm test:functional
