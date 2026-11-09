@@ -367,11 +367,7 @@ export default class VCard {
   public addNickname(nickname: string | string[]): this {
     return this.storeProperties({
       value: nickname,
-      map: (value) => ({
-        element: 'nickname',
-        valueType: Array.isArray(value) ? 'text-list' : 'text',
-        value,
-      }),
+      map: (value) => ({ element: 'nickname', value }),
     })
   }
 
@@ -400,11 +396,7 @@ export default class VCard {
   public addCategories(categories: string | string[]): this {
     return this.storeProperties({
       value: categories,
-      map: (value) => ({
-        element: 'categories',
-        valueType: Array.isArray(value) ? 'text-list' : 'text',
-        value,
-      }),
+      map: (value) => ({ element: 'categories', value }),
     })
   }
 
