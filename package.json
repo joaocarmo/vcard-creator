@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A JavaScript vCard 3.0 creator library for both node.js and the web",
-  "module": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,12 +10,10 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "directories": {
-    "lib": "lib"
-  },
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "engines": {
     "node": ">=18"
   },
@@ -32,11 +29,10 @@
     "test:coverage": "vitest run --coverage",
     "test:functional": "vitest run --config vitest.functional.config.ts",
     "test:unit": "vitest run",
-    "type-check:watch": "pnpm type-check --watch",
     "type-check": "tsc --noEmit"
   },
   "lint-staged": {
-    "*.{js,ts}": [
+    "*.{js,mjs,ts}": [
       "oxlint --fix",
       "prettier --write"
     ],

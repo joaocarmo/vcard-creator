@@ -33,9 +33,6 @@ jobs:
       - name: Lint the source files
         run: pnpm lint
 
-      - name: Type check
-        run: pnpm type-check
-
       - name: Check formatting
         run: pnpm pretty
 
@@ -57,6 +54,10 @@ jobs:
 
       - name: Build the library
         run: pnpm build
+
+      # The functional test imports dist/, so the type check runs after the build
+      - name: Type check
+        run: pnpm type-check
 
       - name: Execute the tests
         run: |

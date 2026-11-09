@@ -21,9 +21,13 @@ pnpm test:coverage
 # Functional test (uses dist/, so run pnpm build first)
 pnpm test:functional
 
-# Lint, type check and format check
+# Lint
 pnpm lint
+
+# Type check (checks the functional test against dist/, so run pnpm build first)
 pnpm type-check
+
+# Format check
 pnpm pretty
 ```
 
@@ -31,7 +35,7 @@ pnpm pretty
 
 `pnpm test:unit` runs without coverage, so a filtered run such as `pnpm test:unit lib/index.test.ts` passes when its tests pass.
 
-Before you open a PR, run `pnpm test:coverage`, `pnpm lint`, `pnpm type-check` and `pnpm pretty`.
+Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm lint`, `pnpm type-check` and `pnpm pretty`.
 
 ## Documentation
 
