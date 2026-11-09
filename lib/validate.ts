@@ -1,7 +1,7 @@
 import VCardException from './VCardException.js'
 
 export interface CoordinateOptions {
-  name: string
+  label: string
   value: number
   limit: number
 }
@@ -152,7 +152,7 @@ export function assertNoControlChars({
 
   if (pattern.test(value)) {
     throw new VCardException(
-      `${label} values cannot contain control characters (${showValue(value)})`,
+      `${label} values must not contain control characters (got ${showValue(value)})`,
     )
   }
 }
@@ -210,7 +210,7 @@ export function assertName({ value, label }: PropertyNameOptions): void {
     const shown =
       typeof value === 'string' ? showValue(value) : describeType(value)
     throw new VCardException(
-      `${label} values can contain only letters, digits and "-" (${shown})`,
+      `${label} values must contain only letters, digits and "-" (got ${shown})`,
     )
   }
 }
@@ -232,7 +232,7 @@ export function assertUri({ value, label }: UriCheckOptions): void {
  * @throws VCardException
  */
 export function assertCoordinate({
-  name,
+  label,
   value,
   limit,
 }: CoordinateOptions): void {
@@ -246,13 +246,13 @@ export function assertCoordinate({
           ? showValue(value)
           : describeType(value)
     throw new VCardException(
-      `Invalid ${name}: ${shown}. Must be a finite number.`,
+      `${label} values must be finite numbers (got ${shown})`,
     )
   }
 
   if (value < -limit || value > limit) {
     throw new VCardException(
-      `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
+      `${label} values must be -${limit} to ${limit} (got ${value})`,
     )
   }
 }
@@ -280,20 +280,22 @@ export function assertValidDate({ date, label }: DateCheckOptions): void {
   // Plain JavaScript callers can pass a string or other values
   if (!isDate(date)) {
     throw new VCardException(
-      `Invalid ${label}: must be a Date (got ${describeType(date)})`,
+      `${label} values must be Dates (got ${describeType(date)})`,
     )
   }
 
   // The built-in methods, so an own or prototype override cannot fake the value
   if (Number.isNaN(Date.prototype.getTime.call(date))) {
-    throw new VCardException(`Invalid ${label}: the Date is invalid`)
+    throw new VCardException(
+      `${label} values must be valid Dates (got Invalid Date)`,
+    )
   }
 
   // toISOString() writes other years with a sign and 6 digits
   const year = Date.prototype.getUTCFullYear.call(date)
   if (year < 0 || year > 9999) {
     throw new VCardException(
-      `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,
+      `${label} values must have a UTC year from 0000 to 9999 (got ${year})`,
     )
   }
 }

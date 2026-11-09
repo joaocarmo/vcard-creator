@@ -190,7 +190,7 @@ describe('CHARSET handling', () => {
     vCard.addNote('Call me')
 
     expect(() => vCard.toString()).toThrow(
-      'Charset values cannot contain a double quote ("a\\"b")',
+      'Charset values must not contain a double quote (got "a\\"b")',
     )
   })
 
@@ -430,7 +430,9 @@ describe('error order', () => {
   it('should report the value before the parameters', () => {
     expect(() =>
       new VCard().addLabel({ label: 'a\x00b', type: 'work' as never }),
-    ).toThrow('Label values cannot contain control characters ("a\\u0000b")')
+    ).toThrow(
+      'Label values must not contain control characters (got "a\\u0000b")',
+    )
   })
 
   it('should report the parameters in output order', () => {
@@ -441,7 +443,7 @@ describe('error order', () => {
         user: 'c"d',
       }),
     ).toThrow(
-      'Social profile type values cannot contain a double quote ("a\\"b")',
+      'Social profile TYPE values must not contain a double quote (got "a\\"b")',
     )
   })
 })

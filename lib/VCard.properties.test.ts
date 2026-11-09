@@ -416,7 +416,7 @@ describe('addBirthday()', () => {
   it('should throw and store nothing on an invalid date string', () => {
     const vCard = new VCard()
     expect(() => vCard.addBirthday('1990-02-30')).toThrow(
-      'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "1990-02-30")',
+      'Birthday values must be RFC 2425 dates or date-times, such as 1990-05-15 (got "1990-02-30")',
     )
     expect(vCard.getProperties()).toEqual([])
   })
@@ -492,16 +492,33 @@ describe('addGeo()', () => {
   it('should throw and store nothing on an out-of-range latitude', () => {
     const vCard = new VCard()
     expect(() => vCard.addGeo({ latitude: 91, longitude: 0 })).toThrow(
-      'Invalid geo latitude: 91. Must be between -90 and 90.',
+      'Geo latitude values must be -90 to 90 (got 91)',
     )
     expect(vCard.getProperties()).toEqual([])
+  })
+
+  it.each([
+    ['latitude', { latitude: NaN, longitude: 0 }, 'NaN'],
+    ['longitude', { latitude: 0, longitude: '45' as never }, '"45"'],
+  ])('should name the %s on a value that is not finite', (name, geo, shown) => {
+    expect(() => new VCard().addGeo(geo)).toThrow(
+      `Geo ${name} values must be finite numbers (got ${shown})`,
+    )
+  })
+
+  it('should name the longitude on an out-of-range value', () => {
+    expect(() => new VCard().addGeo({ latitude: 0, longitude: -181 })).toThrow(
+      'Geo longitude values must be -180 to 180 (got -181)',
+    )
   })
 })
 
 describe('addTimezone()', () => {
   it('should store nothing on an out-of-range offset and accept a valid one after it', () => {
     const vCard = new VCard()
-    expect(() => vCard.addTimezone('+24:00')).toThrow(VCardException)
+    expect(() => vCard.addTimezone('+24:00')).toThrow(
+      'Timezone values must be UTC offsets with hours 00 to 23 and minutes 00 to 59 (got "+24:00")',
+    )
     expect(vCard.getProperties()).toEqual([])
     vCard.addTimezone('+01:00')
     expect(vCard.toString()).toContain('\r\nTZ:+01:00\r\n')
@@ -527,8 +544,16 @@ describe('addRevision()', () => {
     const vCard = new VCard()
     expect(() =>
       vCard.addRevision(new Date('+010000-01-01T00:00:00Z')),
-    ).toThrow('Invalid revision: the year must be 0000 to 9999 (got 10000)')
+    ).toThrow(
+      'Revision values must have a UTC year from 0000 to 9999 (got 10000)',
+    )
     expect(vCard.getProperties()).toEqual([])
+  })
+
+  it('should name the property on an invalid Date', () => {
+    expect(() => new VCard().addRevision(new Date('x'))).toThrow(
+      'Revision values must be valid Dates (got Invalid Date)',
+    )
   })
 })
 
@@ -636,7 +661,7 @@ describe.each([
     (value) => {
       const vCard = new VCard()
       expect(() => add(vCard, value)).toThrow(
-        `${label} values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got "${value}")`,
+        `${label} values must be raw base64 without the "data:" prefix, with the MIME type in mime (got "${value}")`,
       )
       expect(vCard.getProperties()).toEqual([])
     },
@@ -686,14 +711,14 @@ describe.each([
 ] as const)('%s() text errors', (_, label, add) => {
   it('should name the property on a control character', () => {
     expect(() => add(new VCard(), 'a\x00b')).toThrow(
-      `${label} values cannot contain control characters ("a\\u0000b")`,
+      `${label} values must not contain control characters (got "a\\u0000b")`,
     )
   })
 
   it('should show at most 64 characters and the length of a long value', () => {
     const value = `${'a'.repeat(9_999)}\x00`
     expect(() => add(new VCard(), value)).toThrow(
-      `${label} values cannot contain control characters ("${'a'.repeat(64)}"... (length 10000))`,
+      `${label} values must not contain control characters (got "${'a'.repeat(64)}"... (length 10000))`,
     )
   })
 })
@@ -733,7 +758,7 @@ describe.each([
   it('should name the property on a control character', () => {
     const vCard = new VCard()
     expect(() => add(vCard, value)).toThrow(
-      `${label} values cannot contain control characters (${JSON.stringify(value)})`,
+      `${label} values must not contain control characters (got ${JSON.stringify(value)})`,
     )
     expect(vCard.getProperties()).toEqual([])
   })
@@ -742,14 +767,16 @@ describe.each([
 describe('property errors', () => {
   it('should name the property on a second once-only call', () => {
     expect(() => new VCard().addSortString('a').addSortString('b')).toThrow(
-      'Sort string already exists (SORT-STRING)',
+      'Sort string values must be added only once (got a second SORT-STRING)',
     )
   })
 
   it('should name the property on an invalid group', () => {
     expect(() =>
       new VCard().addCustomProperty({ name: 'X-A', value: 'a', group: 'a.b' }),
-    ).toThrow('X-A group values can contain only letters, digits and "-"')
+    ).toThrow(
+      'X-A group values must contain only letters, digits and "-" (got "a.b")',
+    )
   })
 
   it.each([
@@ -761,7 +788,12 @@ describe('property errors', () => {
     [
       'a social profile user',
       (c: VCard) => c.addSocial({ url: 'u', type: 'x', user: 'a"b' }),
-      'Social profile x-user',
+      'Social profile X-USER',
+    ],
+    [
+      'a social profile type',
+      (c: VCard) => c.addSocial({ url: 'u', type: 'a"b' }),
+      'Social profile TYPE',
     ],
     [
       'a phone number type',
@@ -770,7 +802,7 @@ describe('property errors', () => {
     ],
   ])('should name the property on %s with a double quote', (_, add, label) => {
     expect(() => add(new VCard())).toThrow(
-      `${label} values cannot contain a double quote ("a\\"b")`,
+      `${label} values must not contain a double quote (got "a\\"b")`,
     )
   })
 })
@@ -788,7 +820,13 @@ describe('addBirthday() errors', () => {
 
   it('should name the property on an invalid date string', () => {
     expect(() => new VCard().addBirthday('foo')).toThrow(
-      'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "foo")',
+      'Birthday values must be RFC 2425 dates or date-times, such as 1990-05-15 (got "foo")',
+    )
+  })
+
+  it('should name the property on an invalid Date', () => {
+    expect(() => new VCard().addBirthday(new Date('x'))).toThrow(
+      'Birthday values must be valid Dates (got Invalid Date)',
     )
   })
 })
@@ -797,7 +835,7 @@ describe('addCustomProperty()', () => {
   it('should throw and store nothing on an invalid name', () => {
     const vCard = new VCard()
     expect(() => vCard.addCustomProperty({ name: 'X:A', value: 'a' })).toThrow(
-      VCardException,
+      'Property name values must contain only letters, digits and "-" (got "X:A")',
     )
     expect(vCard.getProperties()).toEqual([])
   })
@@ -830,7 +868,15 @@ describe('addCustomProperty()', () => {
   it.each(['REV', 'rev'])('should point %j to addRevision()', (name) => {
     expect(() =>
       new VCard().addCustomProperty({ name, value: '2024-01-01' }),
-    ).toThrow('addRevision()')
+    ).toThrow(
+      `Property name values must not be REV, use addRevision() with a Date (got "${name}")`,
+    )
+  })
+
+  it('should name a reserved name without a hint', () => {
+    expect(() =>
+      new VCard().addCustomProperty({ name: 'begin', value: 'a' }),
+    ).toThrow('Property name values must not be BEGIN (got "begin")')
   })
 
   it.each(['X-L=a:b', 'X-L=a"b', 'WORK'])(
@@ -840,7 +886,7 @@ describe('addCustomProperty()', () => {
       expect(() =>
         vCard.addCustomProperty({ name: 'x-a', value: 'v', params }),
       ).toThrow(
-        `X-A parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${JSON.stringify(params)})`,
+        `X-A parameter values must be name=value pairs separated by ";", with ";", ":" and "," only inside double quotes and no double quote in a value (got ${JSON.stringify(params)})`,
       )
       expect(vCard.getProperties()).toEqual([])
     },
@@ -854,7 +900,7 @@ describe('addCustomProperty()', () => {
         params: 'X=a\nb',
       }),
     ).toThrow(
-      'X-A parameter values cannot contain control characters ("X=a\\nb")',
+      'X-A parameter values must not contain control characters (got "X=a\\nb")',
     )
   })
 

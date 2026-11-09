@@ -24,6 +24,14 @@ interface MethodCases {
 
 const url = 'https://example.com'
 
+// Every message names the input, states the rule and shows the rejected value
+const MESSAGE_STYLE = /^.+ (values|options) must .+ \(got .+\)$/
+
+const expectStyledThrow = (call: () => unknown) => {
+  expect(call).toThrow(VCardException)
+  expect(call).toThrow(MESSAGE_STYLE)
+}
+
 // 1 entry per public add*() method
 const cases: Record<AddMethod, MethodCases> = {
   addAddress: {
@@ -290,6 +298,7 @@ describe('line breaks in every string input', () => {
       call(vCard, s)
     } catch (error) {
       expect(error).toBeInstanceOf(VCardException)
+      expect((error as VCardException).message).toMatch(MESSAGE_STYLE)
       expect(vCard.getProperties()).toEqual([])
       return null
     }
@@ -322,7 +331,7 @@ describe('line breaks in every string input', () => {
     for (const call of strings) {
       const vCard = new VCard()
 
-      expect(() => call(vCard, `a${char}b`)).toThrow(VCardException)
+      expectStyledThrow(() => call(vCard, `a${char}b`))
       expect(vCard.getProperties()).toEqual([])
     }
   })
@@ -387,7 +396,7 @@ describe('double quotes in parameter values', () => {
     'should throw and store nothing on a double quote in %s() in row %#',
     (_, add) => {
       const vCard = new VCard()
-      expect(() => add(vCard, 'a"b')).toThrow(VCardException)
+      expectStyledThrow(() => add(vCard, 'a"b'))
       expect(vCard.getProperties()).toEqual([])
     },
   )
@@ -411,7 +420,7 @@ describe('non-string input', () => {
 
   const expectThrow = (call: ValueCall, value: unknown) => {
     const vCard = new VCard()
-    expect(() => call(vCard, value as never)).toThrow(VCardException)
+    expectStyledThrow(() => call(vCard, value as never))
     expect(vCard.getProperties()).toEqual([])
   }
 
@@ -526,6 +535,12 @@ describe('non-string input', () => {
     ).toThrow('Email TYPE values must be an array (got null)')
   })
 
+  it('should throw on categories that are not an array', () => {
+    expect(() => new VCard().addCategories('Work' as never)).toThrow(
+      'Categories values must be an array (got string)',
+    )
+  })
+
   it('should throw on an invalid Date', () => {
     expect(() => new VCard().addBirthday(new Date('x'))).toThrow(VCardException)
     expect(() => new VCard().addRevision(new Date('x'))).toThrow(VCardException)
@@ -565,7 +580,7 @@ describe('non-string input', () => {
 
   it('should throw on a date string in addRevision()', () => {
     expect(() => new VCard().addRevision('2024-01-01' as never)).toThrow(
-      'Invalid revision: must be a Date (got string)',
+      'Revision values must be Dates (got string)',
     )
   })
 

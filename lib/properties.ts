@@ -196,5 +196,5 @@ export const RESERVED_PROPERTY_NAMES: ReadonlyMap<string, string> = new Map([
   ['END', ''],
   ['VERSION', ''],
   ['PRODID', ''],
-  ['REV', '. Use addRevision() with a Date'],
+  ['REV', ', use addRevision() with a Date'],
 ])
