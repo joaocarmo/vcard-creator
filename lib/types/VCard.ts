@@ -93,7 +93,6 @@ export interface BuildKeyOptions {
   defaultType: ValueType
   params?: ParamSpec[]
   rawParams?: unknown
-  quote?: (value: string) => string
 }
 
 export interface CoordinateOptions {

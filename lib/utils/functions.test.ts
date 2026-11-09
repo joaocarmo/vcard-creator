@@ -625,6 +625,12 @@ describe('VALUE_PIPELINES', () => {
         'Text values must be strings (got number)',
       )
     })
+
+    it('should throw on a non-array value with the label', () => {
+      expect(() => run('text-list', 'a')).toThrow(
+        'Label must be an array (got string)',
+      )
+    })
   })
 
   describe('uri', () => {
@@ -829,15 +835,6 @@ describe('buildKey()', () => {
       expect(() =>
         key({ params: [{ kind: 'single', name: 'TYPE', value: ['a'] }] }),
       ).toThrow('Parameter values must be strings (got object)')
-    })
-
-    it('should use the given quote function', () => {
-      expect(
-        key({
-          params: [{ kind: 'single', name: 'P', value: 'a' }],
-          quote: (value) => `<${value}>`,
-        }),
-      ).toBe('X;P=<a>')
     })
   })
 

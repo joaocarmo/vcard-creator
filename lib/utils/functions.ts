@@ -401,6 +401,11 @@ export function assertValidDate({ date, label }: DateCheckOptions): void {
 
 type ValuePipeline = (value: unknown, label: string) => string
 
+const rawPipeline: ValuePipeline = (value, label) => {
+  assertNoControlChars({ value: value as string, label })
+  return value as string
+}
+
 /**
  * Check a property value by its value type and return the string to store.
  * Plain JavaScript callers can pass any value, so each pipeline checks it.
@@ -408,23 +413,26 @@ type ValuePipeline = (value: unknown, label: string) => string
 export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
   text: (value) => escapeText(value as string),
   'text-structured': (value) => (value as string[]).map(escapeText).join(';'),
-  'text-list': (value) => (value as string[]).map(escapeText).join(',').trim(),
+  'text-list': (value, label) => {
+    // Plain JavaScript callers can pass a string
+    if (!Array.isArray(value)) {
+      throw new VCardException(
+        `${label} must be an array (got ${describeType(value)})`,
+      )
+    }
+
+    return value.map(escapeText).join(',').trim()
+  },
   uri: (value) => {
     assertUri(value as string)
     return value as string
   },
-  raw: (value, label) => {
-    assertNoControlChars({ value: value as string, label })
-    return value as string
-  },
+  raw: rawPipeline,
   'raw-tab': (value, label) => {
     assertNoControlChars({ value: value as string, label, allowTab: true })
     return value as string
   },
-  binary: (value, label) => {
-    assertNoControlChars({ value: value as string, label })
-    return value as string
-  },
+  binary: rawPipeline,
   'date-or-date-time': (value, label) => {
     const name = label.toLowerCase()
 
@@ -481,14 +489,14 @@ export function buildKey({
   defaultType,
   params = [],
   rawParams,
-  quote = quoteParamValue,
 }: BuildKeyOptions): string {
   const parts = [name]
   // The structured and list pipelines write RFC `text` values
-  const rfcType = valueType.startsWith('text') ? 'text' : valueType
-  const rfcDefaultType = defaultType.startsWith('text') ? 'text' : defaultType
+  const toRfcType = (type: ValueType) =>
+    type.startsWith('text') ? 'text' : type
+  const rfcType = toRfcType(valueType)
 
-  if (rfcType !== rfcDefaultType) {
+  if (rfcType !== toRfcType(defaultType)) {
     parts.push(`VALUE=${rfcType}`)
   }
 
@@ -503,7 +511,7 @@ export function buildKey({
         parts.push(resolved)
       }
     } else {
-      const value = quote(param.value as string)
+      const value = quoteParamValue(param.value as string)
       parts.push(`${param.name}=${param.upper ? value.toUpperCase() : value}`)
     }
   }

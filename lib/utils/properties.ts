@@ -21,6 +21,7 @@ export const PROPERTIES: Readonly<Record<Element, PropertySpec>> = {
     name: 'CATEGORIES',
     valueType: 'text-list',
     charset: true,
+    label: 'Categories',
   },
   company: {
     ...single,

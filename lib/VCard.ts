@@ -29,7 +29,6 @@ import {
   describeType,
   fold,
   isValidMimeType,
-  quoteParamValue,
   toImageSubtype,
   UTC_OFFSET,
   VALUE_PIPELINES,
@@ -348,16 +347,10 @@ export default class VCard {
    * @throws VCardException
    */
   public addCategories(categories: string[]): this {
-    return this.storeProperties(null, categories, (value) => {
-      // Plain JavaScript callers can pass a string
-      if (!Array.isArray(value)) {
-        throw new VCardException(
-          `Categories must be an array (got ${describeType(value)})`,
-        )
-      }
-
-      return { element: 'categories', value }
-    })
+    return this.storeProperties(null, categories, (value) => ({
+      element: 'categories',
+      value,
+    }))
   }
 
   /**
@@ -643,39 +636,17 @@ export default class VCard {
     const mapped = map(options)
     const inputs = Array.isArray(mapped) ? mapped : [mapped]
 
-    // 1 call can write the same value in 2 properties, such as the URL of
-    // addSocial(). Each string is checked once per step.
-    const cache = new Map<string, string>()
-    const once = (step: string, value: unknown, run: () => string) => {
-      if (typeof value !== 'string') {
-        return run()
-      }
-
-      const cacheKey = `${step}\0${value}`
-      let result = cache.get(cacheKey)
-      if (result === undefined) {
-        result = run()
-        cache.set(cacheKey, result)
-      }
-
-      return result
-    }
-
     const properties: StoredProperty[] = inputs.map((input) => {
       const spec = PROPERTIES[input.element]
       const valueType = input.valueType ?? spec.valueType
-      const label = spec.label ?? ''
 
-      const value = once(`${valueType}\0${label}`, input.value, () =>
-        VALUE_PIPELINES[valueType](input.value, label),
-      )
+      const value = VALUE_PIPELINES[valueType](input.value, spec.label ?? '')
       const key = buildKey({
         name: input.name ?? spec.name,
         valueType,
         defaultType: spec.valueType,
         params: input.params,
         rawParams: input.rawParams,
-        quote: (param) => once('param', param, () => quoteParamValue(param)),
       })
 
       // An empty group writes no prefix
@@ -686,16 +657,18 @@ export default class VCard {
       return { element: input.element, key, value, group: input.group }
     })
 
+    // A copy, so 2 inputs of the same single element in 1 call also throw
+    const definedElements = { ...this.definedElements }
     for (const { element } of properties) {
-      if (!PROPERTIES[element].multiple && this.definedElements[element]) {
+      if (!PROPERTIES[element].multiple && definedElements[element]) {
         throw new VCardException(`This element already exists (${element})`)
       }
+
+      definedElements[element] = true
     }
 
-    for (const property of properties) {
-      this.definedElements[property.element] = true
-      this.properties.push(property)
-    }
+    this.definedElements = definedElements
+    this.properties.push(...properties)
 
     return this
   }
