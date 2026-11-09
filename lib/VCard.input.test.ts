@@ -9,12 +9,279 @@ import type {
 } from './types/VCard'
 import { addMethods } from '../test/helpers'
 
-describe('line breaks in every string input', () => {
-  type Call = (card: VCard, s: string) => unknown
+type AddMethod = Extract<keyof VCard, `add${string}`>
+// `s` is appended to 1 string input. The other inputs are valid.
+type StringCall = (card: VCard, s: string) => unknown
+// `v` replaces 1 input, or the whole options argument
+type ValueCall = (card: VCard, v: never) => unknown
 
+interface MethodCases {
+  strings: StringCall[]
+  /** Inputs without a default */
+  required: ValueCall[]
+  /** Inputs with a default, which `undefined` selects */
+  optional?: ValueCall[]
+  /** Left out when the argument is the value itself */
+  options?: ValueCall
+  /** Escapes text values */
+  text?: true
+}
+
+const url = 'https://example.com'
+
+// 1 entry per public add*() method
+const cases: Record<AddMethod, MethodCases> = {
+  addAddress: {
+    strings: [
+      (c, s) => c.addAddress({ postOfficeBox: s }),
+      (c, s) => c.addAddress({ extended: s }),
+      (c, s) => c.addAddress({ street: s }),
+      (c, s) => c.addAddress({ locality: s }),
+      (c, s) => c.addAddress({ region: s }),
+      (c, s) => c.addAddress({ postalCode: s }),
+      (c, s) => c.addAddress({ country: s }),
+      (c, s) => c.addAddress({ type: [`home${s}` as AddressType] }),
+    ],
+    required: [],
+    optional: [
+      (c, v) => c.addAddress({ postOfficeBox: v }),
+      (c, v) => c.addAddress({ extended: v }),
+      (c, v) => c.addAddress({ street: v }),
+      (c, v) => c.addAddress({ locality: v }),
+      (c, v) => c.addAddress({ region: v }),
+      (c, v) => c.addAddress({ postalCode: v }),
+      (c, v) => c.addAddress({ country: v }),
+    ],
+    options: (c, v) => c.addAddress(v),
+    text: true,
+  },
+  addBirthday: {
+    strings: [(c, s) => c.addBirthday(`1990-05-15${s}` as DateString)],
+    required: [(c, v) => c.addBirthday(v)],
+  },
+  addCompany: {
+    strings: [
+      (c, s) => c.addCompany({ name: `Acme${s}` }),
+      (c, s) => c.addCompany({ name: 'Acme', department: `Dev${s}` }),
+    ],
+    required: [(c, v) => c.addCompany({ name: v })],
+    optional: [(c, v) => c.addCompany({ name: 'Acme', department: v })],
+    options: (c, v) => c.addCompany(v),
+    text: true,
+  },
+  addEmail: {
+    strings: [
+      (c, s) => c.addEmail({ address: `a@example.com${s}` }),
+      (c, s) =>
+        c.addEmail({
+          address: 'a@example.com',
+          type: [`work${s}` as EmailType],
+        }),
+    ],
+    required: [(c, v) => c.addEmail({ address: v })],
+    options: (c, v) => c.addEmail(v),
+    text: true,
+  },
+  addKey: {
+    strings: [
+      (c, s) => c.addKey({ url: `https://example.com/k${s}` }),
+      (c, s) => c.addKey({ key: `data${s}` }),
+      (c, s) => c.addKey({ key: 'data', mime: `PGP${s}` }),
+    ],
+    required: [(c, v) => c.addKey({ url: v }), (c, v) => c.addKey({ key: v })],
+    options: (c, v) => c.addKey(v),
+  },
+  addJobtitle: {
+    strings: [(c, s) => c.addJobtitle(s)],
+    required: [(c, v) => c.addJobtitle(v)],
+    text: true,
+  },
+  addRole: {
+    strings: [(c, s) => c.addRole(s)],
+    required: [(c, v) => c.addRole(v)],
+    text: true,
+  },
+  addFullName: {
+    strings: [(c, s) => c.addFullName(s)],
+    required: [(c, v) => c.addFullName(v)],
+    text: true,
+  },
+  addName: {
+    strings: [
+      (c, s) => c.addName({ familyName: s }),
+      (c, s) => c.addName({ givenName: s }),
+      (c, s) => c.addName({ additionalNames: s }),
+      (c, s) => c.addName({ honorificPrefix: s }),
+      (c, s) => c.addName({ honorificSuffix: s }),
+    ],
+    required: [],
+    optional: [
+      (c, v) => c.addName({ familyName: v }),
+      (c, v) => c.addName({ givenName: v }),
+      (c, v) => c.addName({ additionalNames: v }),
+      (c, v) => c.addName({ honorificPrefix: v }),
+      (c, v) => c.addName({ honorificSuffix: v }),
+    ],
+    options: (c, v) => c.addName(v),
+    text: true,
+  },
+  addNickname: {
+    strings: [(c, s) => c.addNickname(s), (c, s) => c.addNickname(['Jo', s])],
+    required: [(c, v) => c.addNickname(v), (c, v) => c.addNickname(['Jo', v])],
+    text: true,
+  },
+  addNote: {
+    strings: [(c, s) => c.addNote(s)],
+    required: [(c, v) => c.addNote(v)],
+    text: true,
+  },
+  addCategories: {
+    strings: [(c, s) => c.addCategories(['Work', s])],
+    required: [
+      (c, v) => c.addCategories(v),
+      (c, v) => c.addCategories(['Work', v]),
+    ],
+    text: true,
+  },
+  addPhoneNumber: {
+    strings: [
+      (c, s) => c.addPhoneNumber({ number: `+1-555-0100${s}` }),
+      (c, s) =>
+        c.addPhoneNumber({
+          number: '+1-555-0100',
+          type: [`cell${s}` as PhoneType],
+        }),
+    ],
+    // `number` also accepts a number, so it has its own test
+    required: [],
+    options: (c, v) => c.addPhoneNumber(v),
+  },
+  addLogo: {
+    strings: [
+      (c, s) => c.addLogo({ url: `https://example.com/l${s}` }),
+      (c, s) => c.addLogo({ image: `data${s}` }),
+      (c, s) => c.addLogo({ image: 'data', mime: `png${s}` }),
+    ],
+    required: [
+      (c, v) => c.addLogo({ url: v }),
+      (c, v) => c.addLogo({ image: v }),
+    ],
+    options: (c, v) => c.addLogo(v),
+  },
+  addPhoto: {
+    strings: [
+      (c, s) => c.addPhoto({ url: `https://example.com/p${s}` }),
+      (c, s) => c.addPhoto({ image: `data${s}` }),
+      (c, s) => c.addPhoto({ image: 'data', mime: `png${s}` }),
+    ],
+    required: [
+      (c, v) => c.addPhoto({ url: v }),
+      (c, v) => c.addPhoto({ image: v }),
+    ],
+    options: (c, v) => c.addPhoto(v),
+  },
+  addUrl: {
+    strings: [
+      (c, s) => c.addUrl({ url: `https://example.com/${s}` }),
+      (c, s) =>
+        c.addUrl({
+          url: 'https://example.com',
+          type: [`work${s}` as UrlType],
+        }),
+    ],
+    required: [(c, v) => c.addUrl({ url: v })],
+    options: (c, v) => c.addUrl(v),
+  },
+  addSocial: {
+    strings: [
+      (c, s) => c.addSocial({ url: `https://example.com/${s}`, type: 'x' }),
+      (c, s) => c.addSocial({ url: 'https://example.com', type: `x${s}` }),
+      (c, s) =>
+        c.addSocial({ url: 'https://example.com', type: 'x', user: `u${s}` }),
+    ],
+    required: [
+      (c, v) => c.addSocial({ url: v, type: 'x' }),
+      (c, v) => c.addSocial({ url, type: v }),
+    ],
+    optional: [(c, v) => c.addSocial({ url, type: 'x', user: v })],
+    options: (c, v) => c.addSocial(v),
+  },
+  addImpp: {
+    strings: [
+      (c, s) => c.addImpp({ uri: `xmpp:a@example.com${s}` }),
+      (c, s) =>
+        c.addImpp({ uri: 'xmpp:a@example.com', serviceType: `Jabber${s}` }),
+    ],
+    required: [(c, v) => c.addImpp({ uri: v })],
+    optional: [(c, v) => c.addImpp({ uri: url, serviceType: v })],
+    options: (c, v) => c.addImpp(v),
+  },
+  addUid: {
+    strings: [(c, s) => c.addUid(`uid${s}`)],
+    required: [(c, v) => c.addUid(v)],
+    text: true,
+  },
+  addGeo: {
+    strings: [],
+    // Covered by the float-pair pipeline tests
+    required: [],
+    options: (c, v) => c.addGeo(v),
+  },
+  addTimezone: {
+    strings: [(c, s) => c.addTimezone(`Europe/Lisbon${s}`)],
+    required: [(c, v) => c.addTimezone(v)],
+    text: true,
+  },
+  addSortString: {
+    strings: [(c, s) => c.addSortString(s)],
+    required: [(c, v) => c.addSortString(v)],
+    text: true,
+  },
+  addRevision: {
+    strings: [],
+    required: [(c, v) => c.addRevision(v)],
+  },
+  addLabel: {
+    strings: [
+      (c, s) => c.addLabel({ label: `Street 1${s}` }),
+      (c, s) =>
+        c.addLabel({ label: 'Street 1', type: [`home${s}` as AddressType] }),
+    ],
+    required: [(c, v) => c.addLabel({ label: v })],
+    options: (c, v) => c.addLabel(v),
+    text: true,
+  },
+  addCustomProperty: {
+    strings: [
+      (c, s) => c.addCustomProperty({ name: `X-A${s}`, value: 'v' }),
+      (c, s) => c.addCustomProperty({ name: 'X-A', value: s }),
+      (c, s) =>
+        c.addCustomProperty({ name: 'X-A', value: 'v', params: `X-P=1${s}` }),
+      (c, s) =>
+        c.addCustomProperty({ name: 'X-A', value: 'v', group: `item1${s}` }),
+    ],
+    required: [
+      (c, v) => c.addCustomProperty({ name: v, value: 'v' }),
+      (c, v) => c.addCustomProperty({ name: 'X-A', value: v }),
+    ],
+    optional: [
+      (c, v) => c.addCustomProperty({ name: 'X-A', value: 'v', params: v }),
+      (c, v) => c.addCustomProperty({ name: 'X-A', value: 'v', group: v }),
+    ],
+    options: (c, v) => c.addCustomProperty(v),
+  },
+}
+
+const entries = Object.entries(cases) as [AddMethod, MethodCases][]
+
+it('should cover every public add*() method', () => {
+  expect(Object.keys(cases).sort()).toEqual([...addMethods].sort())
+})
+
+describe('line breaks in every string input', () => {
   // Runs `call` on a fresh card. Returns the output, or null when the call
   // threw a VCardException and stored nothing.
-  const outputOrReject = (call: Call, s: string): string | null => {
+  const outputOrReject = (call: StringCall, s: string): string | null => {
     const vCard = new VCard()
 
     try {
@@ -28,117 +295,10 @@ describe('line breaks in every string input', () => {
     return vCard.toString()
   }
 
-  // Each call appends `s` to 1 string value and keeps the others valid
-  const calls: Record<string, Call[]> = {
-    addAddress: [
-      (c, s) => c.addAddress({ postOfficeBox: s }),
-      (c, s) => c.addAddress({ extended: s }),
-      (c, s) => c.addAddress({ street: s }),
-      (c, s) => c.addAddress({ locality: s }),
-      (c, s) => c.addAddress({ region: s }),
-      (c, s) => c.addAddress({ postalCode: s }),
-      (c, s) => c.addAddress({ country: s }),
-      (c, s) => c.addAddress({ type: [`home${s}` as AddressType] }),
-    ],
-    addBirthday: [(c, s) => c.addBirthday(`1990-05-15${s}` as DateString)],
-    addCompany: [
-      (c, s) => c.addCompany({ name: `Acme${s}` }),
-      (c, s) => c.addCompany({ name: 'Acme', department: `Dev${s}` }),
-    ],
-    addEmail: [
-      (c, s) => c.addEmail({ address: `a@example.com${s}` }),
-      (c, s) =>
-        c.addEmail({
-          address: 'a@example.com',
-          type: [`work${s}` as EmailType],
-        }),
-    ],
-    addKey: [
-      (c, s) => c.addKey({ url: `https://example.com/k${s}` }),
-      (c, s) => c.addKey({ key: `data${s}` }),
-      (c, s) => c.addKey({ key: 'data', mime: `PGP${s}` }),
-    ],
-    addJobtitle: [(c, s) => c.addJobtitle(s)],
-    addRole: [(c, s) => c.addRole(s)],
-    addFullName: [(c, s) => c.addFullName(s)],
-    addName: [
-      (c, s) => c.addName({ familyName: s }),
-      (c, s) => c.addName({ givenName: s }),
-      (c, s) => c.addName({ additionalNames: s }),
-      (c, s) => c.addName({ honorificPrefix: s }),
-      (c, s) => c.addName({ honorificSuffix: s }),
-    ],
-    addNickname: [
-      (c, s) => c.addNickname(s),
-      (c, s) => c.addNickname(['Jo', s]),
-    ],
-    addNote: [(c, s) => c.addNote(s)],
-    addCategories: [(c, s) => c.addCategories(['Work', s])],
-    addPhoneNumber: [
-      (c, s) => c.addPhoneNumber({ number: `+1-555-0100${s}` }),
-      (c, s) =>
-        c.addPhoneNumber({
-          number: '+1-555-0100',
-          type: [`cell${s}` as PhoneType],
-        }),
-    ],
-    addLogo: [
-      (c, s) => c.addLogo({ url: `https://example.com/l${s}` }),
-      (c, s) => c.addLogo({ image: `data${s}` }),
-      (c, s) => c.addLogo({ image: 'data', mime: `png${s}` }),
-    ],
-    addPhoto: [
-      (c, s) => c.addPhoto({ url: `https://example.com/p${s}` }),
-      (c, s) => c.addPhoto({ image: `data${s}` }),
-      (c, s) => c.addPhoto({ image: 'data', mime: `png${s}` }),
-    ],
-    addUrl: [
-      (c, s) => c.addUrl({ url: `https://example.com/${s}` }),
-      (c, s) =>
-        c.addUrl({
-          url: 'https://example.com',
-          type: [`work${s}` as UrlType],
-        }),
-    ],
-    addSocial: [
-      (c, s) => c.addSocial({ url: `https://example.com/${s}`, type: 'x' }),
-      (c, s) => c.addSocial({ url: 'https://example.com', type: `x${s}` }),
-      (c, s) =>
-        c.addSocial({ url: 'https://example.com', type: 'x', user: `u${s}` }),
-    ],
-    addImpp: [
-      (c, s) => c.addImpp({ uri: `xmpp:a@example.com${s}` }),
-      (c, s) =>
-        c.addImpp({ uri: 'xmpp:a@example.com', serviceType: `Jabber${s}` }),
-    ],
-    addUid: [(c, s) => c.addUid(`uid${s}`)],
-    addGeo: [],
-    addTimezone: [(c, s) => c.addTimezone(`Europe/Lisbon${s}`)],
-    addSortString: [(c, s) => c.addSortString(s)],
-    addRevision: [],
-    addLabel: [
-      (c, s) => c.addLabel({ label: `Street 1${s}` }),
-      (c, s) =>
-        c.addLabel({ label: 'Street 1', type: [`home${s}` as AddressType] }),
-    ],
-    addCustomProperty: [
-      (c, s) => c.addCustomProperty({ name: `X-A${s}`, value: 'v' }),
-      (c, s) => c.addCustomProperty({ name: 'X-A', value: s }),
-      (c, s) =>
-        c.addCustomProperty({ name: 'X-A', value: 'v', params: `X-P=1${s}` }),
-      (c, s) =>
-        c.addCustomProperty({ name: 'X-A', value: 'v', group: `item1${s}` }),
-    ],
-  }
-
-  it('should cover every public add*() method', () => {
-    expect(Object.keys(calls).sort()).toEqual([...addMethods].sort())
-  })
-
-  it.each(Object.entries(calls))(
+  it.each(entries)(
     'should escape or reject line breaks in %s()',
-    (_, methodCalls) => {
-      for (const call of methodCalls) {
+    (_, { strings }) => {
+      for (const call of strings) {
         // The other values are valid, so a throw below comes from `s`
         expect(() => call(new VCard(), '')).not.toThrow()
 
@@ -153,11 +313,11 @@ describe('line breaks in every string input', () => {
   )
 
   it.each(
-    Object.entries(calls).flatMap(([method, methodCalls]) =>
-      ['\x01', '\x7F'].map((char) => [char, method, methodCalls] as const),
+    entries.flatMap(([method, methodCases]) =>
+      ['\x01', '\x7F'].map((char) => [char, method, methodCases] as const),
     ),
-  )('should reject control character %j in %s()', (char, _, methodCalls) => {
-    for (const call of methodCalls) {
+  )('should reject control character %j in %s()', (char, _, { strings }) => {
+    for (const call of strings) {
       const vCard = new VCard()
 
       expect(() => call(vCard, `a${char}b`)).toThrow(VCardException)
@@ -165,39 +325,21 @@ describe('line breaks in every string input', () => {
     }
   })
 
-  // Built-in methods that escape text values
-  const textMethods = new Set([
-    'addAddress',
-    'addCategories',
-    'addCompany',
-    'addEmail',
-    'addFullName',
-    'addJobtitle',
-    'addLabel',
-    'addName',
-    'addNickname',
-    'addNote',
-    'addRole',
-    'addSortString',
-    'addTimezone',
-    'addUid',
-  ])
-
   it.each(
-    Object.entries(calls).flatMap(([method, methodCalls]) =>
+    entries.flatMap(([method, methodCases]) =>
       ['\x0B', '\x0C', '\x85', '\u{2028}', '\u{2029}'].map(
-        (char) => [method, char, methodCalls] as const,
+        (char) => [method, char, methodCases] as const,
       ),
     ),
   )(
     'should reject or escape a line separator in %s(): %j',
-    (method, char, methodCalls) => {
-      for (const call of methodCalls) {
+    (_, char, { strings, text }) => {
+      for (const call of strings) {
         const output = outputOrReject(call, `a${char}b`)
         if (output === null) continue
 
         // Only text values may escape the character
-        expect(textMethods).toContain(method)
+        expect(text).toBe(true)
 
         const unfolded = output.replace(/\r\n /g, '')
         expect(unfolded).toContain('a\\nb')
@@ -249,89 +391,8 @@ describe('double quotes in parameter values', () => {
 })
 
 describe('non-string input', () => {
-  // `v` replaces 1 string input. The other inputs are valid.
-  type Call = (card: VCard, v: never) => unknown
-
-  const url = 'https://example.com'
-
-  // Inputs without a default
-  const required: Record<string, Call[]> = {
-    addAddress: [],
-    addBirthday: [(c, v) => c.addBirthday(v)],
-    addCompany: [(c, v) => c.addCompany({ name: v })],
-    addEmail: [(c, v) => c.addEmail({ address: v })],
-    addKey: [(c, v) => c.addKey({ url: v }), (c, v) => c.addKey({ key: v })],
-    addJobtitle: [(c, v) => c.addJobtitle(v)],
-    addRole: [(c, v) => c.addRole(v)],
-    addFullName: [(c, v) => c.addFullName(v)],
-    addName: [],
-    addNickname: [
-      (c, v) => c.addNickname(v),
-      (c, v) => c.addNickname(['Jo', v]),
-    ],
-    addNote: [(c, v) => c.addNote(v)],
-    addCategories: [
-      (c, v) => c.addCategories(v),
-      (c, v) => c.addCategories(['Work', v]),
-    ],
-    // `number` also accepts a number, so it has its own test
-    addPhoneNumber: [],
-    addLogo: [
-      (c, v) => c.addLogo({ url: v }),
-      (c, v) => c.addLogo({ image: v }),
-    ],
-    addPhoto: [
-      (c, v) => c.addPhoto({ url: v }),
-      (c, v) => c.addPhoto({ image: v }),
-    ],
-    addUrl: [(c, v) => c.addUrl({ url: v })],
-    addSocial: [
-      (c, v) => c.addSocial({ url: v, type: 'x' }),
-      (c, v) => c.addSocial({ url, type: v }),
-    ],
-    addImpp: [(c, v) => c.addImpp({ uri: v })],
-    addUid: [(c, v) => c.addUid(v)],
-    // Covered by the float-pair pipeline tests
-    addGeo: [],
-    addTimezone: [(c, v) => c.addTimezone(v)],
-    addSortString: [(c, v) => c.addSortString(v)],
-    addRevision: [(c, v) => c.addRevision(v)],
-    addLabel: [(c, v) => c.addLabel({ label: v })],
-    addCustomProperty: [
-      (c, v) => c.addCustomProperty({ name: v, value: 'v' }),
-      (c, v) => c.addCustomProperty({ name: 'X-A', value: v }),
-    ],
-  }
-
-  // Inputs with a default, which `undefined` selects
-  const optional: Record<string, Call[]> = {
-    addAddress: [
-      (c, v) => c.addAddress({ postOfficeBox: v }),
-      (c, v) => c.addAddress({ extended: v }),
-      (c, v) => c.addAddress({ street: v }),
-      (c, v) => c.addAddress({ locality: v }),
-      (c, v) => c.addAddress({ region: v }),
-      (c, v) => c.addAddress({ postalCode: v }),
-      (c, v) => c.addAddress({ country: v }),
-    ],
-    addCompany: [(c, v) => c.addCompany({ name: 'Acme', department: v })],
-    addName: [
-      (c, v) => c.addName({ familyName: v }),
-      (c, v) => c.addName({ givenName: v }),
-      (c, v) => c.addName({ additionalNames: v }),
-      (c, v) => c.addName({ honorificPrefix: v }),
-      (c, v) => c.addName({ honorificSuffix: v }),
-    ],
-    addSocial: [(c, v) => c.addSocial({ url, type: 'x', user: v })],
-    addImpp: [(c, v) => c.addImpp({ uri: url, serviceType: v })],
-    addCustomProperty: [
-      (c, v) => c.addCustomProperty({ name: 'X-A', value: 'v', params: v }),
-      (c, v) => c.addCustomProperty({ name: 'X-A', value: 'v', group: v }),
-    ],
-  }
-
   // `null` selects the default, as `??` treats it as missing
-  const optionalMime: Call[] = [
+  const optionalMime: ValueCall[] = [
     (c, v) => c.addKey({ key: 'data', mime: v }),
     (c, v) => c.addLogo({ image: 'data', mime: v }),
     (c, v) => c.addPhoto({ image: 'data', mime: v }),
@@ -344,77 +405,34 @@ describe('non-string input', () => {
     ['{}', {}],
   ]
 
-  const expectThrow = (call: Call, value: unknown) => {
+  const expectThrow = (call: ValueCall, value: unknown) => {
     const vCard = new VCard()
     expect(() => call(vCard, value as never)).toThrow(VCardException)
     expect(vCard.getProperties()).toEqual([])
   }
 
-  it('should cover every public add*() method', () => {
-    expect(Object.keys(required).sort()).toEqual([...addMethods].sort())
-  })
-
   describe.each(values)('with %s', (_, value) => {
-    it.each(Object.entries(required))(
+    it.each(entries)(
       'should throw in every required input of %s()',
-      (_, calls) => {
-        for (const call of calls) {
+      (_, { required }) => {
+        for (const call of required) {
           expectThrow(call, value)
         }
       },
     )
 
-    it.each(Object.entries(optional))(
+    it.each(entries.filter(([, { optional }]) => optional))(
       'should throw in every optional input of %s()',
-      (_, calls) => {
+      (_, { optional = [] }) => {
         // Left-out inputs are tested below
         if (value === undefined) {
           return
         }
 
-        for (const call of calls) {
+        for (const call of optional) {
           expectThrow(call, value)
         }
       },
-    )
-  })
-
-  // `v` replaces the whole options argument
-  const options: Record<string, Call> = {
-    addAddress: (c, v) => c.addAddress(v),
-    addCompany: (c, v) => c.addCompany(v),
-    addEmail: (c, v) => c.addEmail(v),
-    addKey: (c, v) => c.addKey(v),
-    addName: (c, v) => c.addName(v),
-    addPhoneNumber: (c, v) => c.addPhoneNumber(v),
-    addLogo: (c, v) => c.addLogo(v),
-    addPhoto: (c, v) => c.addPhoto(v),
-    addUrl: (c, v) => c.addUrl(v),
-    addSocial: (c, v) => c.addSocial(v),
-    addImpp: (c, v) => c.addImpp(v),
-    addGeo: (c, v) => c.addGeo(v),
-    addLabel: (c, v) => c.addLabel(v),
-    addCustomProperty: (c, v) => c.addCustomProperty(v),
-  }
-
-  // Methods whose argument is the value itself
-  const valueArgMethods = new Set([
-    'addBirthday',
-    'addCategories',
-    'addFullName',
-    'addJobtitle',
-    'addNickname',
-    'addNote',
-    'addRevision',
-    'addRole',
-    'addSortString',
-    'addTimezone',
-    'addUid',
-  ])
-
-  it('should cover every add*() method that takes options', () => {
-    expect(Object.keys(options).sort()).toEqual(
-      addMethods.filter((name) => !valueArgMethods.has(name)).sort(),
     )
   })
 
@@ -427,7 +445,11 @@ describe('non-string input', () => {
     ["'x'", 'x'],
     ['[]', []],
   ])('with %s as the options argument', (_, value) => {
-    it.each(Object.entries(options))('should throw in %s()', (name, call) => {
+    it.each(
+      entries.flatMap(([name, { options }]) =>
+        options ? [[name, options] as const] : [],
+      ),
+    )('should throw in %s()', (name, call) => {
       if (value === undefined && optionalOptions.has(name)) {
         return
       }
