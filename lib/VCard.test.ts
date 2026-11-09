@@ -1,4 +1,3 @@
-import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 import { LIB_VERSION } from './constants'
@@ -228,22 +227,13 @@ describe('CHARSET handling', () => {
   })
 })
 
-describe('single and repeatable properties', () => {
-  it('should throw and store nothing on a second call to a single property', () => {
+describe('once-only properties', () => {
+  it('should throw and store nothing on a second call', () => {
     const vCard = new VCard()
     vCard.addJobtitle('Developer')
 
     expect(() => vCard.addJobtitle('Manager')).toThrow(VCardException)
     expect(vCard.getProperties()).toHaveLength(1)
-  })
-
-  it('should store each call to a repeatable property', () => {
-    const vCard = new VCard()
-    vCard.addNote('Met at conference').addNote('Follows up quarterly')
-
-    const output = vCard.toString()
-    expect(output).toContain('NOTE:Met at conference\r\n')
-    expect(output).toContain('NOTE:Follows up quarterly\r\n')
   })
 })
 

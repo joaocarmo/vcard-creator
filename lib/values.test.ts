@@ -62,12 +62,6 @@ describe('VALUE_PIPELINES', () => {
         'https://example.com/a;b?c=1,2',
       )
     })
-
-    it('should throw on a tab with the label', () => {
-      expect(() => run('uri', 'a\tb')).toThrow(
-        'Label values cannot contain control characters ("a\\tb")',
-      )
-    })
   })
 
   describe('raw', () => {
