@@ -181,12 +181,13 @@ export function formatFloat(value: number): string {
  * Format a `Date` as an RFC 2425 date-time in UTC, such as
  * `2024-01-15T10:30:00Z`. The grammar writes a fraction of a second with a
  * comma, so the milliseconds of `toISOString()` are cut. Cutting never moves
- * the second forward.
+ * the second forward. The built-in `toISOString()` runs, so an override
+ * cannot write other text.
  *
  * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
  */
 export function formatDateTime(date: Date): string {
-  return date.toISOString().replace(/\.\d{3}Z$/, 'Z')
+  return Date.prototype.toISOString.call(date).replace(/\.\d{3}Z$/, 'Z')
 }
 
 /**

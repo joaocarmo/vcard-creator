@@ -86,7 +86,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
   'date-or-date-time': (value, label) => {
     if (isDate(value)) {
       assertValidDate({ date: value, label: label.toLowerCase() })
-      return value.toISOString().slice(0, 10)
+      return Date.prototype.toISOString.call(value).slice(0, 10)
     }
 
     return checkDateString(value, label)

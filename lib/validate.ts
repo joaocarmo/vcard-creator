@@ -279,12 +279,13 @@ export function assertValidDate({ date, label }: DateCheckOptions): void {
     )
   }
 
-  if (Number.isNaN(date.getTime())) {
+  // The built-in methods, so an own or prototype override cannot fake the value
+  if (Number.isNaN(Date.prototype.getTime.call(date))) {
     throw new VCardException(`Invalid ${label}: the Date is invalid`)
   }
 
   // toISOString() writes other years with a sign and 6 digits
-  const year = date.getUTCFullYear()
+  const year = Date.prototype.getUTCFullYear.call(date)
   if (year < 0 || year > 9999) {
     throw new VCardException(
       `Invalid ${label}: the year must be 0000 to 9999 (got ${year})`,

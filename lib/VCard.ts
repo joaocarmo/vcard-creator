@@ -116,10 +116,10 @@ export default class VCard {
   /**
    * Add birthday.
    *
-   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
-   * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
    * A date-time string is written with `VALUE=date-time`.
    *
+   * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
+   * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
    * @param  date A Date object with a UTC year from 0000 to 9999, or a date or
    *              date-time string in the RFC 2425 format
    * @throws VCardException

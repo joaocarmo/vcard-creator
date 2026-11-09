@@ -536,6 +536,23 @@ describe('non-string input', () => {
     expect(() => call(new VCard(), fake)).toThrow(VCardException)
   })
 
+  it('should ignore Date method overrides', () => {
+    const date = new Date(0)
+    date.toISOString = () => 'x\r\nEVIL:1'
+    date.getUTCFullYear = () => 2000
+    const output = new VCard().addBirthday(date).addRevision(date).toString()
+    expect(output).toContain('BDAY:1970-01-01\r\n')
+    expect(output).toContain('REV:1970-01-01T00:00:00Z\r\n')
+    expect(output).not.toContain('EVIL')
+  })
+
+  it('should accept a Date without a prototype', () => {
+    const date = Object.setPrototypeOf(new Date(0), null) as Date
+    expect(new VCard().addRevision(date).toString()).toContain(
+      'REV:1970-01-01T00:00:00Z\r\n',
+    )
+  })
+
   it('should throw on a date string in addRevision()', () => {
     expect(() => new VCard().addRevision('2024-01-01' as never)).toThrow(
       'Invalid revision: must be a Date (got string)',
