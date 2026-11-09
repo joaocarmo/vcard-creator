@@ -258,7 +258,7 @@ export function buildKey({
     if (raw !== '') {
       if (!RAW_PARAMS.test(raw)) {
         throw new VCardException(
-          `${rawLabel} values must be name=value pairs separated by ";", with ";", ":" and "," only inside double quotes and no double quote in a value (got ${showValue(raw)})`,
+          `${rawLabel} values must be name=value pairs separated by ";" (got ${showValue(raw)}). Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote`,
         )
       }
       parts.push(raw)

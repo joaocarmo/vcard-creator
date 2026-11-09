@@ -79,7 +79,7 @@ export const VALUE_PIPELINES: Readonly<Record<ValueType, ValuePipeline>> = {
     // case.
     if (/^data:/i.test(value as string)) {
       throw new VCardException(
-        `${label} values must be raw base64 without the "data:" prefix, with the MIME type in mime (got ${showValue(value as string)})`,
+        `${label} values must be raw base64 without a "data:" prefix (got ${showValue(value as string)}). Pass the MIME type as mime`,
       )
     }
 

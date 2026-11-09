@@ -661,7 +661,7 @@ describe.each([
     (value) => {
       const vCard = new VCard()
       expect(() => add(vCard, value)).toThrow(
-        `${label} values must be raw base64 without the "data:" prefix, with the MIME type in mime (got "${value}")`,
+        `${label} values must be raw base64 without a "data:" prefix (got "${value}"). Pass the MIME type as mime`,
       )
       expect(vCard.getProperties()).toEqual([])
     },
@@ -767,7 +767,7 @@ describe.each([
 describe('property errors', () => {
   it('should name the property on a second once-only call', () => {
     expect(() => new VCard().addSortString('a').addSortString('b')).toThrow(
-      'Sort string values must be added only once (got a second SORT-STRING)',
+      'Sort string must be added only once (got a second SORT-STRING)',
     )
   })
 
@@ -869,7 +869,7 @@ describe('addCustomProperty()', () => {
     expect(() =>
       new VCard().addCustomProperty({ name, value: '2024-01-01' }),
     ).toThrow(
-      `Property name values must not be REV, use addRevision() with a Date (got "${name}")`,
+      `Property name values must not be REV (got "${name}"). Use addRevision() with a Date`,
     )
   })
 
@@ -886,7 +886,7 @@ describe('addCustomProperty()', () => {
       expect(() =>
         vCard.addCustomProperty({ name: 'x-a', value: 'v', params }),
       ).toThrow(
-        `X-A parameter values must be name=value pairs separated by ";", with ";", ":" and "," only inside double quotes and no double quote in a value (got ${JSON.stringify(params)})`,
+        `X-A parameter values must be name=value pairs separated by ";" (got ${JSON.stringify(params)}). Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote`,
       )
       expect(vCard.getProperties()).toEqual([])
     },

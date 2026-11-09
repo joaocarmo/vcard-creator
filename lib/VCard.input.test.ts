@@ -25,7 +25,7 @@ interface MethodCases {
 const url = 'https://example.com'
 
 // Every message names the input, states the rule and shows the rejected value
-const MESSAGE_STYLE = /^.+ (values|options) must .+ \(got .+\)$/
+const MESSAGE_STYLE = /^.+ (values|options) must .+ \(got .+\)(\. [^()]+)?$/
 
 const expectStyledThrow = (call: () => unknown) => {
   expect(call).toThrow(VCardException)

@@ -131,7 +131,7 @@ A call throws when:
 - a value has the wrong type, such as a number where a string is expected;
 - a value breaks a rule on this page or in the method's JSDoc, such as a control character, an invalid date or an unknown image type.
 
-Every message has the form `<Label> values must … (got …)`. The label names the property, such as `URL` or `Geo latitude`. After `got`, a string shows as JSON, so a tab shows as `\t`. A number shows as it is, and any other value as its type:
+Every message has the form `<Label> values must … (got …)`. The label names the property, such as `URL` or `Geo latitude`. After `got`, a string shows as JSON, so a tab shows as `\t`. A number shows as it is, and any other value as its type. Some messages end with a hint, such as `Pass the MIME type as mime`:
 
 ```txt
 URL values must not contain control characters (got "a\tb")

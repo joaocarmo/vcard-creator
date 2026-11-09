@@ -718,7 +718,7 @@ export default class VCard {
         const hint = RESERVED_PROPERTY_NAMES.get(upperName)
         if (hint !== undefined) {
           throw new VCardException(
-            `Property name values must not be ${upperName}${hint} (got ${showValue(name)})`,
+            `Property name values must not be ${upperName} (got ${showValue(name)})${hint}`,
           )
         }
 
@@ -782,7 +782,7 @@ export default class VCard {
       if (!PROPERTIES[element].multiple && definedElements[element]) {
         const { label, name } = PROPERTIES[element]
         throw new VCardException(
-          `${label} values must be added only once (got a second ${name})`,
+          `${label} must be added only once (got a second ${name})`,
         )
       }
 
