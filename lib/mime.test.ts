@@ -6,13 +6,18 @@ import {
   toMimeEssence,
 } from './mime'
 
+// Built from code points so the source stays ASCII
+const NO_BREAK_SPACE = String.fromCharCode(0xa0)
+const KELVIN_SIGN = String.fromCharCode(0x212a)
+
 describe('toMimeEssence()', () => {
   it.each([
     [' image/png ', 'image/png'],
     ['png;a=b', 'png'],
     ['\t\r\npng \n', 'png'],
     ['; charset=binary', ''],
-    [' png', ' png'],
+    // A no-break space is not HTTP whitespace
+    [`${NO_BREAK_SPACE}png`, `${NO_BREAK_SPACE}png`],
   ])('should map %j to %j', (mime, expected) => {
     expect(toMimeEssence(mime)).toBe(expected)
   })
@@ -49,12 +54,19 @@ describe('isValidMimeType()', () => {
     expect(isValidMimeType(mime)).toBe(true)
   })
 
-  it.each(['', 'foobar', 'jpg', 'image/png', 'x-', 'x_icon', 'pjpeg'])(
-    'should reject %j',
-    (mime) => {
-      expect(isValidMimeType(mime)).toBe(false)
-    },
-  )
+  it.each([
+    '',
+    'foobar',
+    'jpg',
+    'image/png',
+    'x-',
+    'x_icon',
+    'pjpeg',
+    // The Kelvin sign lower-cases to an ASCII "k"
+    `hej2${KELVIN_SIGN}`,
+  ])('should reject %j', (mime) => {
+    expect(isValidMimeType(mime)).toBe(false)
+  })
 
   it('should store every MIME_TYPES entry in lower case', () => {
     const notLowerCase = [...MIME_TYPES].filter(

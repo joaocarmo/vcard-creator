@@ -115,14 +115,19 @@ export function toImageSubtype(mime: string): string {
 }
 
 /**
- * Determines whether the given MIME Media Type is one of the IANA registered
- * image formats or a non-standard `x-` format (RFC 2425 `x-name`).
+ * Determines whether the given image subtype, such as `png` (not `image/png`),
+ * is one of the IANA registered image formats or a non-standard `x-` format
+ * (RFC 2425 `x-name`).
  *
  * @link    https://www.iana.org/assignments/media-types/media-types.xhtml#image
  * @link    https://tools.ietf.org/html/rfc2426#section-3.1.4
  */
 export function isValidMimeType(mime: string): boolean {
-  return MIME_TYPES.has(mime.toLowerCase()) || /^x-[a-z0-9-]+$/i.test(mime)
+  // toLowerCase() maps some non-ASCII letters, such as the Kelvin sign, to
+  // ASCII ones
+  const lowerCase = mime.replace(/[A-Z]+/g, (letters) => letters.toLowerCase())
+
+  return MIME_TYPES.has(lowerCase) || /^x-[a-z0-9-]+$/i.test(mime)
 }
 
 /**
