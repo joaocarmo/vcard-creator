@@ -397,8 +397,8 @@ describe('non-string input', () => {
     addCustomProperty: (c, v) => c.addCustomProperty(v),
   }
 
-  // Methods that take a string, not an options object
-  const stringArgMethods = new Set([
+  // Methods whose argument is the value itself
+  const valueArgMethods = new Set([
     'addBirthday',
     'addCategories',
     'addFullName',
@@ -414,7 +414,7 @@ describe('non-string input', () => {
 
   it('should cover every add*() method that takes options', () => {
     expect(Object.keys(options).sort()).toEqual(
-      addMethods.filter((name) => !stringArgMethods.has(name)).sort(),
+      addMethods.filter((name) => !valueArgMethods.has(name)).sort(),
     )
   })
 
