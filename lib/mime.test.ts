@@ -174,12 +174,16 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     },
   )
 
-  it.each(['foobar', 'image/foo', 'image/', 'jpgx', 'image/pjpeg'])(
-    'should throw on %j with the original value',
-    (mime) => {
-      expect(() => typeOf(mime)).toThrow(
-        `${label} MIME type values must be an image type (got ${JSON.stringify(mime)})`,
-      )
-    },
-  )
+  it.each([
+    'foobar',
+    'image/foo',
+    'image/',
+    'jpgx',
+    'image/pjpeg',
+    'image/example',
+  ])('should throw on %j with the original value', (mime) => {
+    expect(() => typeOf(mime)).toThrow(
+      `${label} MIME type values must be an image type (got ${JSON.stringify(mime)})`,
+    )
+  })
 })
