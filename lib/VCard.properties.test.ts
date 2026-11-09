@@ -449,7 +449,7 @@ describe('addGeo()', () => {
   it('should throw and store nothing on an out-of-range latitude', () => {
     const vCard = new VCard()
     expect(() => vCard.addGeo({ latitude: 91, longitude: 0 })).toThrow(
-      'Invalid latitude: 91. Must be between -90 and 90.',
+      'Invalid geo latitude: 91. Must be between -90 and 90.',
     )
     expect(vCard.getProperties()).toEqual([])
   })
@@ -566,15 +566,10 @@ describe.each([
   [
     'addPhoto',
     'PHOTO',
-    'Image',
+    'Photo',
     (c: VCard, v: string) => c.addPhoto({ image: v }),
   ],
-  [
-    'addLogo',
-    'LOGO',
-    'Image',
-    (c: VCard, v: string) => c.addLogo({ image: v }),
-  ],
+  ['addLogo', 'LOGO', 'Logo', (c: VCard, v: string) => c.addLogo({ image: v })],
   ['addKey', 'KEY', 'Key', (c: VCard, v: string) => c.addKey({ key: v })],
 ] as const)('%s() base64 value', (_, property, label, add) => {
   // Unfolds the card and returns the line of the property
@@ -593,6 +588,17 @@ describe.each([
     expect(vCard.getProperties()).toEqual([])
   })
 
+  it.each(['data:image/png;base64,AAAA', 'DATA:image/png;base64,AAAA'])(
+    'should throw and store nothing on the data URL %j',
+    (value) => {
+      const vCard = new VCard()
+      expect(() => add(vCard, value)).toThrow(
+        `${label} values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got "${value}")`,
+      )
+      expect(vCard.getProperties()).toEqual([])
+    },
+  )
+
   it('should write the sample image plain and wrapped as the same line', () => {
     const image = sampleImage
     const wrapped = image.replace(/.{76}/g, '$&\n')
@@ -610,6 +616,7 @@ describe.each([
 
 describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
   const name = method === 'addPhoto' ? 'PHOTO' : 'LOGO'
+  const label = method === 'addPhoto' ? 'Photo' : 'Logo'
 
   // Returns the content lines of a card with 1 image added with `mime`
   const linesOf = (mime?: string) =>
@@ -633,18 +640,7 @@ describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
     (mime) => {
       const vCard = new VCard()
       expect(() => vCard[method]({ image: 'data', mime })).toThrow(
-        `The MIME Media Type is invalid ("${mime}")`,
-      )
-      expect(vCard.getProperties()).toEqual([])
-    },
-  )
-
-  it.each(['data:image/png;base64,AAAA', 'DATA:image/png;base64,AAAA'])(
-    'should throw and store nothing on the data URL %j',
-    (image) => {
-      const vCard = new VCard()
-      expect(() => vCard[method]({ image, mime: 'png' })).toThrow(
-        `Image values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got "${image}")`,
+        `${label} MIME type values must be an image type (got "${mime}")`,
       )
       expect(vCard.getProperties()).toEqual([])
     },
@@ -688,6 +684,101 @@ describe.each([
     const value = `${'a'.repeat(9_999)}\x00`
     expect(() => add(new VCard(), value)).toThrow(
       `${label} values cannot contain control characters ("${'a'.repeat(64)}"... (length 10000))`,
+    )
+  })
+})
+
+// Each row: the method, a call with the given value, a value with a control
+// character and the label in the error message
+describe.each([
+  ['addUrl', (c: VCard, v: string) => c.addUrl({ url: v }), 'a\tb', 'URL'],
+  ['addImpp', (c: VCard, v: string) => c.addImpp({ uri: v }), 'a\tb', 'IMPP'],
+  [
+    'addSocial',
+    (c: VCard, v: string) => c.addSocial({ url: v, type: 'x' }),
+    'a\tb',
+    'Social profile',
+  ],
+  [
+    'addPhoto',
+    (c: VCard, v: string) => c.addPhoto({ url: v }),
+    'a\tb',
+    'Photo',
+  ],
+  ['addLogo', (c: VCard, v: string) => c.addLogo({ url: v }), 'a\tb', 'Logo'],
+  ['addKey', (c: VCard, v: string) => c.addKey({ url: v }), 'a\tb', 'Key'],
+  [
+    'addPhoneNumber',
+    (c: VCard, v: string) => c.addPhoneNumber({ number: v }),
+    '1\n2',
+    'Phone number',
+  ],
+  [
+    'addCustomProperty',
+    (c: VCard, v: string) => c.addCustomProperty({ name: 'x-a', value: v }),
+    'a\nb',
+    'X-A',
+  ],
+] as const)('%s() value errors', (_, add, value, label) => {
+  it('should name the property on a control character', () => {
+    const vCard = new VCard()
+    expect(() => add(vCard, value)).toThrow(
+      `${label} values cannot contain control characters (${JSON.stringify(value)})`,
+    )
+    expect(vCard.getProperties()).toEqual([])
+  })
+})
+
+describe('property errors', () => {
+  it('should name the property on a second once-only call', () => {
+    expect(() => new VCard().addSortString('a').addSortString('b')).toThrow(
+      'Sort string already exists (SORT-STRING)',
+    )
+  })
+
+  it('should name the property on an invalid group', () => {
+    expect(() =>
+      new VCard().addCustomProperty({ name: 'X-A', value: 'a', group: 'a.b' }),
+    ).toThrow('X-A group values can contain only letters, digits and "-"')
+  })
+
+  it.each([
+    [
+      'a key mime',
+      (c: VCard) => c.addKey({ key: 'AAAA', mime: 'a"b' }),
+      'Key TYPE',
+    ],
+    [
+      'a social profile user',
+      (c: VCard) => c.addSocial({ url: 'u', type: 'x', user: 'a"b' }),
+      'Social profile x-user',
+    ],
+    [
+      'a phone number type',
+      (c: VCard) => c.addPhoneNumber({ number: '1', type: ['a"b' as never] }),
+      'Phone number TYPE',
+    ],
+  ])('should name the property on %s with a double quote', (_, add, label) => {
+    expect(() => add(new VCard())).toThrow(
+      `${label} values cannot contain a double quote ("a\\"b")`,
+    )
+  })
+})
+
+describe('addBirthday() errors', () => {
+  it.each([
+    [42, 'number'],
+    [null, 'null'],
+    [{}, 'object'],
+  ])('should throw on %j', (value, type) => {
+    expect(() => new VCard().addBirthday(value as unknown as string)).toThrow(
+      `Birthday values must be strings or Dates (got ${type})`,
+    )
+  })
+
+  it('should name the property on an invalid date string', () => {
+    expect(() => new VCard().addBirthday('foo')).toThrow(
+      'Invalid birthday: must be an RFC 2425 date or date-time, such as 1990-05-15 (got "foo")',
     )
   })
 })
@@ -737,11 +828,25 @@ describe('addCustomProperty()', () => {
     (params) => {
       const vCard = new VCard()
       expect(() =>
-        vCard.addCustomProperty({ name: 'X-A', value: 'v', params }),
-      ).toThrow(VCardException)
+        vCard.addCustomProperty({ name: 'x-a', value: 'v', params }),
+      ).toThrow(
+        `X-A parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${JSON.stringify(params)})`,
+      )
       expect(vCard.getProperties()).toEqual([])
     },
   )
+
+  it('should name the property on a control character in params', () => {
+    expect(() =>
+      new VCard().addCustomProperty({
+        name: 'X-A',
+        value: 'v',
+        params: 'X=a\nb',
+      }),
+    ).toThrow(
+      'X-A parameter values cannot contain control characters ("X=a\\nb")',
+    )
+  })
 
   it.each(['X-L="a:b"', 'TYPE=work,home', 'TYPE=work;X-A=1'])(
     'should write params %j as they are',

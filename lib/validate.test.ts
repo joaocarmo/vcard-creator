@@ -190,22 +190,32 @@ describe('assertNoControlChars()', () => {
 
 describe('assertUri()', () => {
   it('should accept a URI with a comma and a semicolon', () => {
-    expect(() => assertUri('https://example.com/a;b?c=1,2')).not.toThrow()
+    expect(() =>
+      assertUri({ value: 'https://example.com/a;b?c=1,2', label: 'URL' }),
+    ).not.toThrow()
   })
 
   it('should accept a URI with other non-ASCII characters', () => {
-    expect(() => assertUri('https://müller.de')).not.toThrow()
+    expect(() =>
+      assertUri({ value: 'https://müller.de', label: 'URL' }),
+    ).not.toThrow()
   })
 
   // assertNoControlChars() owns the full character list
   it.each(['\n', '\t', '\x85', '\u{2028}'])(
     'should throw on control character %j',
     (char) => {
-      expect(() => assertUri(`https://example.com/a${char}b`)).toThrow(
-        VCardException,
-      )
+      expect(() =>
+        assertUri({ value: `https://example.com/a${char}b`, label: 'URL' }),
+      ).toThrow(VCardException)
     },
   )
+
+  it('should name the label in the message', () => {
+    expect(() => assertUri({ value: 'a\tb', label: 'IMPP' })).toThrow(
+      'IMPP values cannot contain control characters ("a\\tb")',
+    )
+  })
 })
 
 describe('isRfcDateOrDateTime()', () => {

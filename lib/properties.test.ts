@@ -37,4 +37,8 @@ describe('PROPERTIES', () => {
       'sortString',
     ])
   })
+
+  it.each(elements)('should give %s a non-empty error label', (element) => {
+    expect(PROPERTIES[element].label).not.toBe('')
+  })
 })

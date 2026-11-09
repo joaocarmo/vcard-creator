@@ -17,6 +17,11 @@ export interface PropertyNameOptions {
   label: string
 }
 
+export interface UriCheckOptions {
+  value: string
+  label: string
+}
+
 export interface DateCheckOptions {
   date: unknown
   label: string
@@ -217,8 +222,8 @@ export function assertName({ value, label }: PropertyNameOptions): void {
  * @link   https://tools.ietf.org/html/rfc3986#section-2
  * @throws VCardException
  */
-export function assertUri(value: string): void {
-  assertNoControlChars({ value, label: 'URI' })
+export function assertUri({ value, label }: UriCheckOptions): void {
+  assertNoControlChars({ value, label })
 }
 
 /**

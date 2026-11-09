@@ -77,6 +77,8 @@ describe('isValidMimeType()', () => {
 })
 
 describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
+  const label = element === 'photo' ? 'Photo' : 'Logo'
+
   // Returns the TYPE parameter value of an embedded image
   const typeOf = (mime?: unknown) => {
     const input = toMediaInput(element, {
@@ -121,7 +123,9 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     ['[]', []],
     ["Symbol('x')", Symbol('x')],
   ])('should throw on a non-string mime (%s)', (_, mime) => {
-    expect(() => typeOf(mime)).toThrow('MIME Media Type values must be strings')
+    expect(() => typeOf(mime)).toThrow(
+      `${label} MIME type values must be strings`,
+    )
   })
 
   it.each(['', '  ', '; charset=binary'])(
@@ -138,7 +142,7 @@ describe.each(['photo', 'logo'] as const)('toMediaInput(%j)', (element) => {
     'should throw on %j with the original value',
     (mime) => {
       expect(() => typeOf(mime)).toThrow(
-        `The MIME Media Type is invalid (${JSON.stringify(mime)})`,
+        `${label} MIME type values must be an image type (got ${JSON.stringify(mime)})`,
       )
     },
   )

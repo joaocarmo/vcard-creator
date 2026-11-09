@@ -593,7 +593,7 @@ export default class VCard {
       value: timezone,
       map: (value) => {
         // test() would turn an object into a string and match it
-        assertString({ value, label: 'Timezone' })
+        assertString({ value, label: PROPERTIES.timezone.label })
 
         return {
           element: 'timezone',
@@ -635,7 +635,10 @@ export default class VCard {
       value: date,
       map: (value) => {
         // The date-time pipeline also accepts strings, for birthdays
-        assertValidDate({ date: value, label: 'revision' })
+        assertValidDate({
+          date: value,
+          label: PROPERTIES.revision.label.toLowerCase(),
+        })
 
         return {
           element: 'revision',
@@ -710,6 +713,7 @@ export default class VCard {
           value,
           rawParams: params,
           group,
+          label: upperName,
         }
       },
     })
@@ -737,19 +741,21 @@ export default class VCard {
     const properties: StoredProperty[] = inputs.map((input) => {
       const spec = PROPERTIES[input.element]
       const valueType = input.valueType ?? spec.valueType
+      const label = input.label ?? spec.label
 
-      const value = VALUE_PIPELINES[valueType](input.value, spec.label ?? '')
+      const value = VALUE_PIPELINES[valueType](input.value, label)
       const key = buildKey({
         name: input.name ?? spec.name,
         valueType,
         defaultType: spec.valueType,
         params: input.params,
         rawParams: input.rawParams,
+        label,
       })
 
       // An empty group writes no prefix
       if (input.group !== undefined && input.group !== '') {
-        assertName({ value: input.group, label: 'Group' })
+        assertName({ value: input.group, label: `${label} group` })
       }
 
       return { element: input.element, key, value, group: input.group }
@@ -759,7 +765,8 @@ export default class VCard {
     const definedElements = { ...this.definedElements }
     for (const { element } of properties) {
       if (!PROPERTIES[element].multiple && definedElements[element]) {
-        throw new VCardException(`This element already exists (${element})`)
+        const { label, name } = PROPERTIES[element]
+        throw new VCardException(`${label} already exists (${name})`)
       }
 
       definedElements[element] = true
@@ -875,7 +882,7 @@ export default class VCard {
     })
 
     if (this.charset !== constants.DEFAULT_CHARACTER_SET) {
-      return `;CHARSET=${quoteParamValue(this.charset)}`
+      return `;CHARSET=${quoteParamValue({ value: this.charset, label: 'Charset' })}`
     }
 
     return ''

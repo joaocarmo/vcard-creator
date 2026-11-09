@@ -516,7 +516,7 @@ describe('non-string input', () => {
   it('should throw on type: null', () => {
     expect(() =>
       new VCard().addEmail({ address: 'a@example.com', type: null as never }),
-    ).toThrow('Type values must be an array (got null)')
+    ).toThrow('Email TYPE values must be an array (got null)')
   })
 
   it('should throw on an invalid Date', () => {
@@ -592,7 +592,7 @@ describe('non-string input', () => {
   it('should show at most 64 characters and the length of a long image', () => {
     const image = `${'A'.repeat(9_999)}!`
     expect(() => new VCard().addPhoto({ image })).toThrow(
-      `Image values must be base64 (got "${'A'.repeat(64)}"... (length 10000))`,
+      `Photo values must be base64 (got "${'A'.repeat(64)}"... (length 10000))`,
     )
   })
 

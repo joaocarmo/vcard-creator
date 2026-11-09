@@ -11,45 +11,52 @@ import VCardException from './VCardException'
 import type { BuildKeyOptions } from './format'
 
 describe('quoteParamValue()', () => {
+  const quote = (value: unknown) => quoteParamValue({ value: value as string })
+
   it('should keep simple values as they are', () => {
-    expect(quoteParamValue('X')).toEqual('X')
+    expect(quote('X')).toEqual('X')
   })
 
   it('should quote values with a semicolon, colon or comma', () => {
-    expect(quoteParamValue('My Site;x')).toEqual('"My Site;x"')
-    expect(quoteParamValue('a:b')).toEqual('"a:b"')
-    expect(quoteParamValue('a,b')).toEqual('"a,b"')
+    expect(quote('My Site;x')).toEqual('"My Site;x"')
+    expect(quote('a:b')).toEqual('"a:b"')
+    expect(quote('a,b')).toEqual('"a,b"')
   })
 
   it('should throw on a non-string value', () => {
-    expect(() => quoteParamValue(undefined as unknown as string)).toThrow(
-      VCardException,
-    )
-    expect(() => quoteParamValue(42 as unknown as string)).toThrow(
-      VCardException,
-    )
-    expect(() => quoteParamValue(null as unknown as string)).toThrow(
+    expect(() => quote(undefined)).toThrow(VCardException)
+    expect(() => quote(42)).toThrow(VCardException)
+    expect(() => quote(null)).toThrow(
       'Parameter values must be strings (got null)',
     )
   })
 
   it('should throw on a double quote', () => {
-    expect(() => quoteParamValue('a"b')).toThrow(
+    expect(() => quote('a"b')).toThrow(
       'Parameter values cannot contain a double quote ("a\\"b")',
     )
   })
 
   it('should throw on a control character', () => {
-    expect(() => quoteParamValue('a\r\nEMAIL:x')).toThrow(VCardException)
-    expect(() => quoteParamValue('a\nb')).toThrow(VCardException)
-    expect(() => quoteParamValue('a\x00b')).toThrow(VCardException)
-    expect(() => quoteParamValue('a\x7Fb')).toThrow(VCardException)
-    expect(() => quoteParamValue('a\x85b')).toThrow(VCardException)
-    expect(() => quoteParamValue('a\u{2028}b')).toThrow(VCardException)
+    expect(() => quote('a\r\nEMAIL:x')).toThrow(VCardException)
+    expect(() => quote('a\nb')).toThrow(VCardException)
+    expect(() => quote('a\x00b')).toThrow(VCardException)
+    expect(() => quote('a\x7Fb')).toThrow(VCardException)
+    expect(() => quote('a\x85b')).toThrow(VCardException)
+    expect(() => quote('a\u{2028}b')).toThrow(VCardException)
   })
 
   it('should allow a horizontal tab', () => {
-    expect(quoteParamValue('a\tb')).toEqual('a\tb')
+    expect(quote('a\tb')).toEqual('a\tb')
+  })
+
+  it('should name the label in each message', () => {
+    expect(() => quoteParamValue({ value: 'a"b', label: 'Charset' })).toThrow(
+      'Charset values cannot contain a double quote ("a\\"b")',
+    )
+    expect(() => quoteParamValue({ value: 'a\nb', label: 'Charset' })).toThrow(
+      'Charset values cannot contain control characters ("a\\nb")',
+    )
   })
 })
 
@@ -306,7 +313,13 @@ describe('resolveType()', () => {
 
 describe('buildKey()', () => {
   const key = (options: Partial<BuildKeyOptions> = {}) =>
-    buildKey({ name: 'X', valueType: 'text', defaultType: 'text', ...options })
+    buildKey({
+      name: 'X',
+      valueType: 'text',
+      defaultType: 'text',
+      label: 'X',
+      ...options,
+    })
 
   it('should write the name alone without parameters', () => {
     expect(key()).toBe('X')
@@ -344,7 +357,7 @@ describe('buildKey()', () => {
 
     it('should throw on a non-array value', () => {
       expect(() => key({ params: [{ kind: 'list', value: 'work' }] })).toThrow(
-        'Type values must be an array (got string)',
+        'X TYPE values must be an array (got string)',
       )
     })
   })
@@ -376,7 +389,7 @@ describe('buildKey()', () => {
     it('should throw on an array', () => {
       expect(() =>
         key({ params: [{ kind: 'single', name: 'TYPE', value: ['a'] }] }),
-      ).toThrow('Parameter values must be strings (got array)')
+      ).toThrow('X TYPE values must be strings (got array)')
     })
   })
 
@@ -392,7 +405,7 @@ describe('buildKey()', () => {
     it('should allow a tab and throw on a line break', () => {
       expect(key({ rawParams: 'X-A=a\tb' })).toBe('X;X-A=a\tb')
       expect(() => key({ rawParams: 'X-A=a\nb' })).toThrow(
-        'Parameter values cannot contain control characters ("X-A=a\\nb")',
+        'X parameter values cannot contain control characters ("X-A=a\\nb")',
       )
     })
 
@@ -424,7 +437,7 @@ describe('buildKey()', () => {
 
     it('should explain the grammar in the error', () => {
       expect(() => key({ rawParams: 'X-L=a:b' })).toThrow(
-        'Parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote ("X-L=a:b")',
+        'X parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote ("X-L=a:b")',
       )
     })
   })

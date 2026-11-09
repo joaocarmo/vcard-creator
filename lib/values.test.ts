@@ -63,9 +63,9 @@ describe('VALUE_PIPELINES', () => {
       )
     })
 
-    it('should throw on a tab with the URI label', () => {
+    it('should throw on a tab with the label', () => {
       expect(() => run('uri', 'a\tb')).toThrow(
-        'URI values cannot contain control characters ("a\\tb")',
+        'Label values cannot contain control characters ("a\\tb")',
       )
     })
   })
@@ -99,11 +99,14 @@ describe('VALUE_PIPELINES', () => {
       },
     )
 
-    it('should throw on a data URL', () => {
-      expect(() => run('binary', 'data:image/png;base64,AAAA')).toThrow(
-        'Label values must be base64 (got "data:image/png;base64,AAAA")',
-      )
-    })
+    it.each(['data:image/png;base64,AAAA', 'DATA:image/png;base64,AAAA'])(
+      'should throw on the data URL %j',
+      (value) => {
+        expect(() => run('binary', value)).toThrow(
+          `Label values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got "${value}")`,
+        )
+      },
+    )
 
     it.each(['A', 'AA', 'AAA', 'AA=', 'A===', '=AAA', 'AA==AAAA', 'AAAAA'])(
       'should throw on wrong padding %j',
@@ -210,7 +213,7 @@ describe('VALUE_PIPELINES', () => {
 
     it('should throw on a non-string, non-Date value', () => {
       expect(() => run('date-or-date-time', 42, 'Birthday')).toThrow(
-        'Birthday values must be strings (got number)',
+        'Birthday values must be strings or Dates (got number)',
       )
     })
 
@@ -295,7 +298,7 @@ describe('VALUE_PIPELINES', () => {
       expect(() =>
         run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
       ).toThrow(
-        `Invalid ${name}: ${value}. Must be between -${limit} and ${limit}.`,
+        `Invalid label ${name}: ${value}. Must be between -${limit} and ${limit}.`,
       )
     })
 
@@ -319,7 +322,7 @@ describe('VALUE_PIPELINES', () => {
     )('should throw on %s %s', (name, _, value) => {
       expect(() =>
         run('float-pair', { latitude: 0, longitude: 0, [name]: value }),
-      ).toThrow(new RegExp(`Invalid ${name}: .*finite number`))
+      ).toThrow(new RegExp(`Invalid label ${name}: .*finite number`))
     })
   })
 })

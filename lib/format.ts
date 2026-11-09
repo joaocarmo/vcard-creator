@@ -13,6 +13,14 @@ export interface BuildKeyOptions {
   defaultType: ValueType
   params?: ParamSpec[]
   rawParams?: unknown
+  /** Names the property in raw parameter error messages */
+  label: string
+}
+
+export interface QuoteParamValueOptions {
+  value: string
+  /** Names the parameter in error messages */
+  label?: string
 }
 
 export interface EscapeTextOptions {
@@ -51,18 +59,21 @@ const RAW_PARAMS = new RegExp(`^${PARAM}(?:;${PARAM})*$`)
  *
  * @throws VCardException
  */
-export function resolveType<T extends string>(type: T[]): string {
+export function resolveType<T extends string>(
+  type: T[],
+  label = 'Type',
+): string {
   // Plain JavaScript callers can pass a string or null
   if (!Array.isArray(type)) {
     throw new VCardException(
-      `Type values must be an array (got ${describeType(type)})`,
+      `${label} values must be an array (got ${describeType(type)})`,
     )
   }
 
   // Plain JavaScript callers can pass any entry value, so check it before
   // toUpperCase()
   return type.length > 0
-    ? `TYPE=${type.map((t) => quoteParamValue(t).toUpperCase()).join(',')}`
+    ? `TYPE=${type.map((t) => quoteParamValue({ value: t, label }).toUpperCase()).join(',')}`
     : ''
 }
 
@@ -100,17 +111,20 @@ export function escapeText({ value, label }: EscapeTextOptions): string {
  * @link   https://tools.ietf.org/html/rfc2426#section-4
  * @throws VCardException
  */
-export function quoteParamValue(value: string): string {
-  assertString({ value, label: 'Parameter' })
+export function quoteParamValue({
+  value,
+  label = 'Parameter',
+}: QuoteParamValueOptions): string {
+  assertString({ value, label })
 
   if (value.includes('"')) {
     throw new VCardException(
-      `Parameter values cannot contain a double quote (${showValue(value)})`,
+      `${label} values cannot contain a double quote (${showValue(value)})`,
     )
   }
 
   // Horizontal tab is allowed as WSP
-  assertNoControlChars({ value, label: 'Parameter', allowTab: true })
+  assertNoControlChars({ value, label, allowTab: true })
 
   return /[;:,]/.test(value) ? `"${value}"` : value
 }
@@ -206,6 +220,7 @@ export function buildKey({
   defaultType,
   params = [],
   rawParams,
+  label,
 }: BuildKeyOptions): string {
   const parts = [name]
   // The structured and list pipelines write RFC `text` values
@@ -223,23 +238,30 @@ export function buildKey({
 
   for (const param of params) {
     if (param.kind === 'list') {
-      const resolved = resolveType(param.value as string[])
+      const resolved = resolveType(param.value as string[], `${label} TYPE`)
       if (resolved !== '') {
         parts.push(resolved)
       }
     } else {
-      const value = quoteParamValue(param.value as string)
+      const value = quoteParamValue({
+        value: param.value as string,
+        label: `${label} ${param.name}`,
+      })
       parts.push(`${param.name}=${param.upper ? value.toUpperCase() : value}`)
     }
   }
 
   if (rawParams !== undefined) {
     const raw = rawParams as string
-    assertNoControlChars({ value: raw, label: 'Parameter', allowTab: true })
+    assertNoControlChars({
+      value: raw,
+      label: `${label} parameter`,
+      allowTab: true,
+    })
     if (raw !== '') {
       if (!RAW_PARAMS.test(raw)) {
         throw new VCardException(
-          `Parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${showValue(raw)})`,
+          `${label} parameters must be name=value pairs separated by ";". Put a value with ";", ":" or "," in double quotes. A value cannot contain a double quote (${showValue(raw)})`,
         )
       }
       parts.push(raw)

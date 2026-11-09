@@ -214,7 +214,9 @@ describe('CHARSET handling', () => {
     vCard.setCharset('a"b')
     vCard.addNote('Call me')
 
-    expect(() => vCard.toString()).toThrow(VCardException)
+    expect(() => vCard.toString()).toThrow(
+      'Charset values cannot contain a double quote ("a\\"b")',
+    )
   })
 
   it('should accept a tab in the charset', () => {
@@ -465,6 +467,8 @@ describe('error order', () => {
         type: 'a"b',
         user: 'c"d',
       }),
-    ).toThrow('Parameter values cannot contain a double quote ("a\\"b")')
+    ).toThrow(
+      'Social profile type values cannot contain a double quote ("a\\"b")',
+    )
   })
 })

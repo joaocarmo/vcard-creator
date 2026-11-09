@@ -1,5 +1,5 @@
 import VCardException from './VCardException.js'
-import type { PropertyInput } from './properties.js'
+import { PROPERTIES, type PropertyInput } from './properties.js'
 import type { LogoOptions, PhotoOptions } from './types/VCard.js'
 import { assertString, showValue } from './validate.js'
 
@@ -143,16 +143,9 @@ export function toMediaInput(
     return { element, valueType: 'uri', value: options.url }
   }
 
-  // A data URL, such as canvas.toDataURL() output. RFC 2397 schemes ignore
-  // case.
-  if (typeof options.image === 'string' && /^data:/i.test(options.image)) {
-    throw new VCardException(
-      `Image values must be raw base64. Remove the "data:" prefix and pass the MIME type as mime (got ${showValue(options.image)})`,
-    )
-  }
-
+  const label = `${PROPERTIES[element].label} MIME type`
   const mime = options.mime ?? DEFAULT_MIME_TYPE
-  assertString({ value: mime, label: 'MIME Media Type' })
+  assertString({ value: mime, label })
 
   // Browsers return an empty File.type for unknown files. TYPE is optional, and
   // the JPEG default would mislabel them.
@@ -164,7 +157,7 @@ export function toMediaInput(
 
   if (!isValidMimeType(subtype)) {
     throw new VCardException(
-      `The MIME Media Type is invalid (${showValue(mime)})`,
+      `${label} values must be an image type (got ${showValue(mime)})`,
     )
   }
 
