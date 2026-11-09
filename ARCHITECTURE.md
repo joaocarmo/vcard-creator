@@ -45,5 +45,6 @@ Each module in `lib/` has 1 job:
   - `VCard.test.ts`: the class itself, such as output, charset, `concat()` and grouping.
   - `VCard.properties.test.ts`: what each `add*()` method writes (property name, parameters and value type), plus behaviour that only that method has.
   - `VCard.input.test.ts`: checks that run over every input of every `add*()` method.
-- Test fixtures live in `test/fixtures/`.
+- Test fixtures live in `test/fixtures/`. `test/fixtures/index.ts` loads them, so each test file imports a fixture by name.
+- Shared test setup lives in `test/helpers.ts`: `freezeTime()` fixes the clock for a suite, and `addMethods` lists the public `add*()` methods for the guard tests. Vitest restores `vi.spyOn()` spies after each test (`restoreMocks`).
 - The functional test lives in `test/functional/`. It tests the built package in `dist/`, with its own Vitest config (`vitest.functional.config.ts`).

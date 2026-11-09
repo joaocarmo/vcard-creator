@@ -7,11 +7,7 @@ import type {
   PhoneType,
   UrlType,
 } from './types/VCard'
-
-// The public add*() methods, for the guard tests below
-const addMethods = Object.getOwnPropertyNames(VCard.prototype).filter((name) =>
-  name.startsWith('add'),
-)
+import { addMethods } from '../test/helpers'
 
 describe('line breaks in every string input', () => {
   type Call = (card: VCard, s: string) => unknown

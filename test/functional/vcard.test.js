@@ -1,10 +1,6 @@
-import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import VCard from '../../dist/index.js'
-
-const photo = readFileSync(new URL('../fixtures/sample.jpg', import.meta.url), {
-  encoding: 'base64',
-})
+import { sampleImage as photo } from '../fixtures/index.ts'
 
 const createCard = () =>
   new VCard()

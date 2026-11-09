@@ -2,18 +2,12 @@ import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 import { LIB_VERSION } from './constants'
+import { freezeTime } from '../test/helpers'
 
 describe('vCard output format', () => {
   const photoURL = 'https://example.com/img/photo.jpg'
 
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date())
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
+  freezeTime()
 
   it('should create and output the proper vCard format', () => {
     const vCard = new VCard()
@@ -228,15 +222,7 @@ describe('single and repeatable properties', () => {
 })
 
 describe('buildVCard()', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2024-01-15T10:00:00Z'))
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.restoreAllMocks()
-  })
+  freezeTime()
 
   it('should return the same string as toString()', () => {
     const vCard = new VCard()
@@ -270,10 +256,6 @@ describe('buildVCard()', () => {
 })
 
 describe('getCharsetString()', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
   it('should not be called by toString()', () => {
     const spy = vi.spyOn(VCard.prototype, 'getCharsetString')
     const vCard = new VCard()
@@ -294,15 +276,7 @@ describe('getCharsetString()', () => {
 })
 
 describe('concat()', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2024-01-15T10:00:00Z'))
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.restoreAllMocks()
-  })
+  freezeTime()
 
   function createCard(givenName: string, familyName: string): VCard {
     return new VCard()

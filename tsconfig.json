@@ -11,11 +11,10 @@
     "noImplicitAny": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "rootDir": "lib",
     "strict": true,
     "target": "esnext",
     "types": ["vitest/globals", "node"]
   },
-  "include": ["lib/**/*.ts"],
+  "include": ["lib/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist/**/*"]
 }

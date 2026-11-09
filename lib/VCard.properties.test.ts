@@ -1,8 +1,8 @@
-import { readFileSync } from 'node:fs'
-import { vi } from 'vitest'
 import VCard from './VCard'
 import VCardException from './VCardException'
 import type { DateString, SocialOptions } from './types/VCard'
+import { sampleImage } from '../test/fixtures'
+import { addMethods, freezeTime } from '../test/helpers'
 
 // Each row: the method, a call on a fresh card and 1 content line it writes.
 // The rows check the property name, the parameters and the value type. The
@@ -213,12 +213,8 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
 
 describe('property mapping', () => {
   it('should cover every public add*() method', () => {
-    const methods = Object.getOwnPropertyNames(VCard.prototype).filter((name) =>
-      name.startsWith('add'),
-    )
-
     expect([...new Set(mappings.map(([method]) => method))].sort()).toEqual(
-      methods.sort(),
+      [...addMethods].sort(),
     )
   })
 
@@ -398,14 +394,7 @@ describe('addTimezone()', () => {
 })
 
 describe('addRevision()', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
+  freezeTime('2026-01-01T00:00:00Z')
 
   it('should write the custom revision only', () => {
     const vCard = new VCard()
@@ -491,10 +480,7 @@ describe.each([
   })
 
   it('should write the sample image plain and wrapped as the same line', () => {
-    const image = readFileSync(
-      new URL('../test/fixtures/sample.jpg', import.meta.url),
-      'base64',
-    )
+    const image = sampleImage
     const wrapped = image.replace(/.{76}/g, '$&\n')
 
     const plain = new VCard()
