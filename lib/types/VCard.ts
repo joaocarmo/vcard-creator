@@ -88,6 +88,7 @@ export interface AddressOptions {
   postalCode?: string
   /** Country name */
   country?: string
+  /** Defaults to `['intl', 'postal', 'parcel', 'work']` */
   type?: AddressType[]
 }
 
@@ -131,16 +132,16 @@ export interface ImppOptions {
 export type PhotoOptions =
   | { url: string; image?: never; mime?: never }
   | {
-      /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
-      /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). A value that is empty after whitespace and parameters are removed writes no TYPE */ mime?: string
+      /** Base64-encoded image data, without a `data:` prefix. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
+      /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). It must be an IANA image type or an `x-` name. A value that is empty after whitespace and parameters are removed writes no TYPE */ mime?: string
       url?: never
     }
 
 export type LogoOptions =
   | { url: string; image?: never; mime?: never }
   | {
-      /** Base64-encoded image data. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
-      /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). A value that is empty after whitespace and parameters are removed writes no TYPE */ mime?: string
+      /** Base64-encoded image data, without a `data:` prefix. Spaces, tabs, CR and LF are removed. Any other character outside the base64 alphabet throws */ image: string
+      /** Image MIME type, such as 'png', 'jpg', 'image/png', 'image/png; charset=binary' or 'image/x-icon' (defaults to 'JPEG'). It must be an IANA image type or an `x-` name. A value that is empty after whitespace and parameters are removed writes no TYPE */ mime?: string
       url?: never
     }
 
@@ -160,12 +161,15 @@ export type KeyOptions =
     }
 
 export interface GeoOptions {
+  /** A finite number from -90 to 90 */
   latitude: number
+  /** A finite number from -180 to 180 */
   longitude: number
 }
 
 export interface LabelOptions {
   label: string
+  /** Defaults to `['intl', 'postal', 'parcel', 'work']` */
   type?: AddressType[]
 }
 

@@ -13,7 +13,7 @@ export interface BuildKeyOptions {
   defaultType: ValueType
   params?: ParamSpec[]
   rawParams?: unknown
-  /** Names the property in raw parameter error messages */
+  /** Names the property in parameter error messages */
   label: string
 }
 
@@ -84,7 +84,7 @@ export function resolveType<T extends string>(
  * (`\r\n`, `\n`, a lone `\r`, VT, FF, NEL, U+2028 and U+2029) become `\n`.
  * DEL and any other C0 control character except tab throw.
  *
- * @link   http://tools.ietf.org/html/rfc2426
+ * @link   https://tools.ietf.org/html/rfc2426
  * @throws VCardException
  */
 export function escapeText({ value, label }: EscapeTextOptions): string {
@@ -130,12 +130,12 @@ export function quoteParamValue({
 }
 
 /**
- * Fold a line according to RFC2425 section 5.8.1.
+ * Fold a line according to RFC 2425 section 5.8.1.
  *
  * Lines MUST be no longer than 75 octets, excluding the line break. Multi-byte
  * UTF-8 sequences are never split across a fold boundary.
  *
- * @link   http://tools.ietf.org/html/rfc2425#section-5.8.1
+ * @link   https://tools.ietf.org/html/rfc2425#section-5.8.1
  */
 export function fold(text: string): string {
   // Strip the trailing CRLF before measuring. RFC 2425 does not count the line

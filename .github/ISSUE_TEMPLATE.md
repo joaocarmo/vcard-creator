@@ -1,15 +1,15 @@
-### Expected Behavior
+## Expected behaviour
 
 <!-- {Please write here} -->
 
-### Actual Behavior
+## Actual behaviour
 
 <!-- {Please write here} -->
 
-### Steps to Reproduce
+## Steps to reproduce
 
 <!-- {Please write here, including precondition(s)} -->
 
-### Your Environment
+## Your environment
 
 <!-- {Add all relevant specs} -->

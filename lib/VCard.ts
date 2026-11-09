@@ -116,7 +116,10 @@ export default class VCard {
   /**
    * Add birthday.
    *
-   * A date-time string is written with `VALUE=date-time`.
+   * A string is written as it is, and its date must exist. A date-time string
+   * is written with `VALUE=date-time`. A `Date` is read in UTC: `new
+   * Date('1990-05-15')` is UTC midnight, while `new Date(1990, 4, 15)` is local
+   * midnight and gives the day before east of UTC.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.5
    * @link   https://tools.ietf.org/html/rfc2425#section-5.8.4
@@ -167,6 +170,9 @@ export default class VCard {
 
   /**
    * Add email.
+   *
+   * RFC 2426 allows 1 type, optionally followed by `'pref'`. More types are
+   * written as given, as vCard 4.0 allows.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.2
    * @throws VCardException
@@ -264,10 +270,9 @@ export default class VCard {
   }
 
   /**
-   * Add formatted name (FN) directly.
-   *
-   * When set, overrides the auto-generated FN from addName().
-   * Useful for mononyms, company-as-contact, or custom formatting.
+   * Add formatted name (FN) directly, such as a single name, a company as the
+   * contact or a custom format. Call it before `addName()`, which then keeps
+   * this FN. A card holds 1 FN, so calling it after `addName()` throws.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.1
    * @throws VCardException
@@ -284,6 +289,9 @@ export default class VCard {
 
   /**
    * Add name.
+   *
+   * Also writes FN from the name parts, unless the card already has an FN from
+   * `addFullName()` or `addCustomProperty()`.
    *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.1.2
    * @throws VCardException
@@ -393,7 +401,9 @@ export default class VCard {
    * Add phone number.
    *
    * @deprecated Pass `number` as a string. A number loses leading zeros and
-   * the `+` sign. Removed in the next major version.
+   * the `+` sign, `1e21` is written as `1e+21`, and integers above
+   * `Number.MAX_SAFE_INTEGER` change their last digits. Removed in the next
+   * major version.
    * @link   https://tools.ietf.org/html/rfc2426#section-3.3.1
    * @throws VCardException
    */
@@ -466,6 +476,9 @@ export default class VCard {
   /**
    * Add URL.
    *
+   * RFC 2426 allows no type on URL. A type is written as given, as vCard 4.0
+   * allows.
+   *
    * @link   https://tools.ietf.org/html/rfc2426#section-3.6.8
    * @throws VCardException
    */
@@ -524,7 +537,8 @@ export default class VCard {
   }
 
   /**
-   * Add IMPP (Instant Messaging and Presence Protocol) entry.
+   * Add IMPP (Instant Messaging and Presence Protocol) entry, for protocols
+   * such as XMPP and SIP.
    *
    * @link   https://tools.ietf.org/html/rfc4770#section-1
    * @throws VCardException
@@ -687,6 +701,7 @@ export default class VCard {
    * `;`, `:` or `,` in double quotes. A bare parameter, such as `WORK`,
    * throws.
    *
+   * @link   https://tools.ietf.org/html/rfc2425#section-5.8.2
    * @throws VCardException
    * @example
    * vCard.addCustomProperty({ name: 'X-PHONETIC-FIRST-NAME', value: 'Jon' })
@@ -785,6 +800,7 @@ export default class VCard {
    * Build vCard (.vcf).
    *
    * @deprecated Use `toString()`. Removed in the next major version.
+   * @throws VCardException when the deprecated `charset` is invalid
    */
   public buildVCard(): string {
     // Calls build() directly so a subclass toString() that calls
@@ -818,7 +834,9 @@ export default class VCard {
   }
 
   /**
-   * Get output as string.
+   * Get the vCard text, with CRLF line endings.
+   *
+   * @throws VCardException when the deprecated `charset` is invalid
    */
   public toString(): string {
     return this.build()
@@ -831,6 +849,7 @@ export default class VCard {
    * multi-contact .vcf file.
    *
    * @param cards The vCards to combine
+   * @throws VCardException when the deprecated `charset` of a card is invalid
    */
   static concat(...cards: VCard[]): string {
     return VCard._concat(cards)
@@ -843,6 +862,7 @@ export default class VCard {
    * Follows the same pattern as `Array.prototype.concat`.
    *
    * @param others Additional vCards to append
+   * @throws VCardException when the deprecated `charset` of a card is invalid
    */
   public concat(...others: VCard[]): string {
     return VCard._concat([this, ...others])
@@ -865,8 +885,8 @@ export default class VCard {
   /**
    * Get charset string.
    *
-   * @deprecated The output is always a UTF-8 string. Removed in the next
-   * major version.
+   * @deprecated No replacement: the output is always a UTF-8 string. Removed
+   * in the next major version.
    * @throws VCardException
    */
   public getCharsetString(): string {
@@ -892,7 +912,7 @@ export default class VCard {
   }
 
   /**
-   * Get content type.
+   * Get the content type for the file: `text/vcard`.
    */
   public getContentType(): string {
     return this.contentType
@@ -918,7 +938,7 @@ export default class VCard {
   }
 
   /**
-   * Get properties.
+   * Get the stored properties. Values are escaped, as written to the file.
    */
   public getProperties(): Property[] {
     return this.properties.map(({ key, value, group }) => ({
