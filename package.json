@@ -31,7 +31,8 @@
     "test:functional": "tsc -p test/functional && vitest run --config vitest.functional.config.ts",
     "test:smoke": "node test/smoke/node.mjs",
     "test:unit": "vitest run",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "version:set": "node scripts/sync-version.mjs"
   },
   "lint-staged": {
     "*.{js,mjs,ts}": [

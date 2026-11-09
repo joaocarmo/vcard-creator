@@ -1,28 +1,50 @@
 #!/usr/bin/env node
 
+// Sets the version in package.json and LIB_VERSION from a release tag name,
+// such as v1.2.3. Writes nothing unless both files can be updated.
+
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const { version } = JSON.parse(
-  readFileSync(resolve(root, 'package.json'), 'utf8'),
-)
-const file = resolve(root, 'lib/constants.ts')
+// SemVer 2.0: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+const SEMVER =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+const LIB_VERSION = /export const LIB_VERSION = '.*'/
 
-const src = readFileSync(file, 'utf8')
-const pattern = /export const LIB_VERSION = '.*'/
-
-if (!pattern.test(src)) {
-  console.error(`LIB_VERSION pattern not found in ${file}`)
+function fail(message) {
+  console.error(message)
   process.exit(1)
 }
 
-const updated = src.replace(pattern, `export const LIB_VERSION = '${version}'`)
+const tag = process.argv[2]
 
-if (src === updated) {
-  console.log(`LIB_VERSION already at ${version}`)
-} else {
-  writeFileSync(file, updated)
-  console.log(`LIB_VERSION synced to ${version}`)
+if (tag === undefined) {
+  fail('Usage: node scripts/sync-version.mjs <tag>, such as v1.2.3')
 }
+
+const version = tag.replace(/^v/, '')
+
+if (!SEMVER.test(version)) {
+  fail(`"${tag}" is not a SemVer version, such as v1.2.3`)
+}
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const pkgFile = resolve(root, 'package.json')
+const constantsFile = resolve(root, 'lib/constants.ts')
+
+const pkg = JSON.parse(readFileSync(pkgFile, 'utf8'))
+const constants = readFileSync(constantsFile, 'utf8')
+
+if (!LIB_VERSION.test(constants)) {
+  fail(`LIB_VERSION pattern not found in ${constantsFile}`)
+}
+
+pkg.version = version
+writeFileSync(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`)
+writeFileSync(
+  constantsFile,
+  constants.replace(LIB_VERSION, `export const LIB_VERSION = '${version}'`),
+)
+
+console.log(`Version set to ${version}`)

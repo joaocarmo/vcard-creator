@@ -1,21 +1,29 @@
 name: Publish
 
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 permissions:
-  id-token: write # Required for npm trusted publishing (OIDC)
   contents: read
 
 jobs:
+  checks:
+    uses: ./.github/workflows/tests.yml
+
   publish-npm:
+    needs: checks
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write # Required for npm trusted publishing (OIDC)
+      contents: read
+
     steps:
+      # Checks out the commit the release tag points to
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: 'main'
           persist-credentials: false
 
       # No cache: a restored store could inject poisoned packages into the release
@@ -24,8 +32,14 @@ jobs:
         with:
           require-lockfile: true
 
+      - name: Set the version from the release tag
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: pnpm version:set "$TAG_NAME"
+
       - name: Build
         run: pnpm build
 
+      # The checkout is a detached HEAD with the version change uncommitted
       - name: Publish to npm
-        run: pnpm publish
+        run: pnpm publish --no-git-checks
