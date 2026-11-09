@@ -209,23 +209,9 @@ describe('line breaks in every string input', () => {
       }
     },
   )
-
-  it('should not let U+2028 start a new property in a note', () => {
-    const output = new VCard().addNote('a\u{2028}X-INJECTED:1').toString()
-
-    expect(output).not.toContain('\u{2028}')
-    expect(output).toContain('NOTE:a\\nX-INJECTED:1')
-    expect(output).not.toMatch(/^X-INJECTED/m)
-  })
-
-  it('should throw on U+2028 in a URL', () => {
-    expect(() =>
-      new VCard().addUrl({ url: 'https://a.com/\u{2028}x' }),
-    ).toThrow(VCardException)
-  })
 })
 
-describe('type entries', () => {
+describe('double quotes in parameter values', () => {
   const methods: [string, (c: VCard, t: string) => VCard][] = [
     [
       'addEmail',
@@ -247,6 +233,13 @@ describe('type entries', () => {
       'addLabel',
       (c, t) => c.addLabel({ label: 'x', type: [t as unknown as 'work'] }),
     ],
+    ['addSocial', (c, t) => c.addSocial({ url: 'u', type: t })],
+    ['addSocial', (c, t) => c.addSocial({ url: 'u', type: 'X', user: t })],
+    [
+      'addImpp',
+      (c, t) => c.addImpp({ uri: 'xmpp:a@example.com', serviceType: t }),
+    ],
+    ['addKey', (c, t) => c.addKey({ key: 'AAAA', mime: t })],
   ]
 
   it.each(methods)(

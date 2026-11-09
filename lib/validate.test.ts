@@ -140,23 +140,15 @@ describe('assertUri()', () => {
     expect(() => assertUri('https://müller.de')).not.toThrow()
   })
 
-  it.each([
-    '\n',
-    '\r',
-    '\r\n',
-    '\t',
-    '\x00',
-    '\x7F',
-    '\x80',
-    '\x85',
-    '\x9F',
-    '\u{2028}',
-    '\u{2029}',
-  ])('should throw on control character %j', (char) => {
-    expect(() => assertUri(`https://example.com/a${char}b`)).toThrow(
-      VCardException,
-    )
-  })
+  // assertNoControlChars() owns the full character list
+  it.each(['\n', '\t', '\x85', '\u{2028}'])(
+    'should throw on control character %j',
+    (char) => {
+      expect(() => assertUri(`https://example.com/a${char}b`)).toThrow(
+        VCardException,
+      )
+    },
+  )
 })
 
 describe('isRfcDateOrDateTime()', () => {

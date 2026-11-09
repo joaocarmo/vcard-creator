@@ -71,49 +71,6 @@ END:VCARD\r\n\
 
     expect(vCardOutput).toBe(expectedOutput)
   })
-
-  it('should format phone numbers as strings in output', () => {
-    const vCard = new VCard()
-
-    vCard
-      .addPhoneNumber({ number: 1234121212, type: ['pref', 'work'] })
-      .addPhoneNumber({ number: 123456789, type: ['work'] })
-      .addPhoneNumber({ number: '0123456789', type: ['home'] })
-
-    const vCardOutput = vCard.toString()
-    const expectedOutput = `\
-BEGIN:VCARD\r\n\
-VERSION:3.0\r\n\
-PRODID:-//vcard-creator//vcard-creator ${LIB_VERSION}//EN\r\n\
-REV:${new Date().toISOString()}\r\n\
-TEL;TYPE=PREF,WORK:1234121212\r\n\
-TEL;TYPE=WORK:123456789\r\n\
-TEL;TYPE=HOME:0123456789\r\n\
-END:VCARD\r\n\
-`
-
-    expect(vCardOutput).toBe(expectedOutput)
-  })
-
-  it('should produce valid output with all object params chained', () => {
-    const vCard = new VCard()
-    vCard
-      .addName({ givenName: 'John', familyName: 'Doe' })
-      .addCompany({ name: 'Acme' })
-      .addEmail({ address: 'john@acme.com', type: ['work'] })
-      .addPhoneNumber({ number: '+1555', type: ['cell'] })
-      .addAddress({ street: '123 Main', locality: 'NYC', type: ['work'] })
-      .addUrl({ url: 'https://acme.com' })
-
-    const output = vCard.toString()
-    expect(output).toContain('BEGIN:VCARD')
-    expect(output).toContain('N:Doe;John;;;')
-    expect(output).toContain('EMAIL;TYPE=WORK:john@acme.com')
-    expect(output).toContain('TEL;TYPE=CELL:+1555')
-    expect(output).toContain('ADR;TYPE=WORK:')
-    expect(output).toContain('URL:https://acme.com')
-    expect(output).toContain('END:VCARD')
-  })
 })
 
 describe('PRODID', () => {

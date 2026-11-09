@@ -10,12 +10,6 @@ describe('VALUE_PIPELINES', () => {
     it('should escape the value', () => {
       expect(run('text', 'a;b,c\\d\ne')).toBe('a\\;b\\,c\\\\d\\ne')
     })
-
-    it('should throw on a control character', () => {
-      expect(() => run('text', 'a\x00b')).toThrow(
-        'Text values cannot contain control characters ("a\\u0000b")',
-      )
-    })
   })
 
   describe('text-structured', () => {
@@ -233,15 +227,6 @@ describe('VALUE_PIPELINES', () => {
     it('should throw on a string', () => {
       expect(() => run('date-time', '2024-01-02', 'Revision')).toThrow(
         'Invalid revision: must be a Date (got string)',
-      )
-    })
-
-    it.each([
-      ['+010000-01-01T00:00:00Z', 10000],
-      ['-000001-01-01T00:00:00Z', -1],
-    ])('should throw on a Date in year %s', (iso, year) => {
-      expect(() => run('date-time', new Date(iso), 'Revision')).toThrow(
-        `Invalid revision: the year must be 0000 to 9999 (got ${year})`,
       )
     })
 

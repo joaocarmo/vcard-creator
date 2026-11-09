@@ -133,6 +133,11 @@ const mappings: [string, (c: VCard) => unknown, string][] = [
     'PHOTO;ENCODING=b;TYPE=PNG:base64data==',
   ],
   [
+    'addPhoto',
+    (c) => c.addPhoto({ image: 'AAAA', mime: 'image/jpg' }),
+    'PHOTO;ENCODING=b;TYPE=JPEG:AAAA',
+  ],
+  [
     'addLogo',
     (c) => c.addLogo({ url: 'https://example.com/logo.png' }),
     'LOGO;VALUE=uri:https://example.com/logo.png',
@@ -370,15 +375,6 @@ describe('addSocial()', () => {
     expect(output).toContain('X-SOCIALPROFILE;type="My Site;x";x-user="a,b":u')
     expect(output).toContain('IMPP;X-SERVICE-TYPE="My Site;x":u')
   })
-
-  it.each([
-    ['type', { url: 'u', type: 'a"b' }],
-    ['user', { url: 'u', type: 'X', user: 'a"b' }],
-  ])('should store nothing when %s has a double quote', (_, options) => {
-    const vCard = new VCard()
-    expect(() => vCard.addSocial(options)).toThrow(VCardException)
-    expect(vCard.getProperties()).toEqual([])
-  })
 })
 
 describe('addGeo()', () => {
@@ -392,15 +388,10 @@ describe('addGeo()', () => {
 })
 
 describe('addTimezone()', () => {
-  it('should throw and store nothing on an out-of-range offset', () => {
+  it('should store nothing on an out-of-range offset and accept a valid one after it', () => {
     const vCard = new VCard()
     expect(() => vCard.addTimezone('+24:00')).toThrow(VCardException)
     expect(vCard.getProperties()).toEqual([])
-  })
-
-  it('should accept a valid offset after rejecting an invalid one', () => {
-    const vCard = new VCard()
-    expect(() => vCard.addTimezone('+24:00')).toThrow(VCardException)
     vCard.addTimezone('+01:00')
     expect(vCard.toString()).toContain('\r\nTZ:+01:00\r\n')
   })
@@ -522,16 +513,6 @@ describe.each(['addPhoto', 'addLogo'] as const)('%s() MIME type', (method) => {
     const vCard = new VCard()
     expect(() => vCard[method]({ image: 'data', mime: 'foobar' })).toThrow(
       'The MIME Media Type is invalid (foobar)',
-    )
-    expect(vCard.getProperties()).toEqual([])
-  })
-})
-
-describe('addKey()', () => {
-  it('should throw and store nothing on a double quote in mime', () => {
-    const vCard = new VCard()
-    expect(() => vCard.addKey({ key: 'AAAA', mime: 'a"b' })).toThrow(
-      VCardException,
     )
     expect(vCard.getProperties()).toEqual([])
   })
