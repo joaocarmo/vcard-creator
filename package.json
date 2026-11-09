@@ -1,6 +1,6 @@
 {
   "name": "vcard-creator",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "type": "module",
   "description": "A JavaScript vCard 3.0 creator library for both node.js and the web",
   "main": "./dist/index.js",
