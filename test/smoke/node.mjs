@@ -1,7 +1,8 @@
-// Runs the built package on the oldest supported Node.js versions, where
-// Vitest does not run. Needs `pnpm build` first.
+// Runs the built package with plain node on older Node.js versions. Imports it
+// by name, so Node.js resolves it through the package.json `exports`. Needs
+// `pnpm build` first.
 import assert from 'node:assert/strict'
-import VCard, { VCardException } from '../../dist/index.js'
+import VCard, { VCardException } from 'vcard-creator'
 
 const { NODE_MAJOR } = process.env
 
@@ -37,6 +38,22 @@ for (const line of [
 ]) {
   assert.ok(output.includes(`\r\n${line}\r\n`), `missing line: ${line}`)
 }
+
+// Folding measures UTF-8 octets with TextEncoder and TextDecoder
+const longNote = 'Ghent café '.repeat(10).trim()
+const folded = new VCard().addNote(longNote).toString()
+
+for (const line of folded.split('\r\n')) {
+  assert.ok(
+    Buffer.byteLength(line) <= 75,
+    `line longer than 75 octets: ${line}`,
+  )
+}
+
+assert.ok(
+  folded.replaceAll('\r\n ', '').includes(`\r\nNOTE:${longNote}\r\n`),
+  'missing folded note',
+)
 
 assert.throws(
   () => new VCard().addGeo({ latitude: 100, longitude: 0 }),

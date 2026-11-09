@@ -83,7 +83,7 @@ jobs:
         with:
           require-lockfile: true
           cache: true
-          save-cache: ${{ github.ref == 'refs/heads/main' }}
+          save-cache: false
 
       - name: Build the library
         run: pnpm build
@@ -93,7 +93,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Calls node directly: pnpm may not run on the older Node.js
       - name: Run the smoke test against dist/
         run: node test/smoke/node.mjs
         env:

@@ -51,4 +51,4 @@ Each module in `lib/` has 1 job:
 - Test fixtures live in `test/fixtures/`. `test/fixtures/index.ts` loads them, so each test file imports a fixture by name.
 - Shared test setup lives in `test/helpers.ts`: `freezeTime()` fixes the clock for a suite, and `addMethods` lists the public `add*()` methods for the guard tests. Vitest restores `vi.spyOn()` spies after each test (`restoreMocks`).
 - The functional test lives in `test/functional/`. It tests the built package in `dist/`, with its own Vitest config (`vitest.functional.config.ts`).
-- The smoke test lives in `test/smoke/`. It is a plain `node` script with no dependencies that runs `dist/` on the oldest supported Node.js versions. `CONTRIBUTING.md` lists the versions.
+- The smoke test lives in `test/smoke/`. It is a plain `node` script with no dependencies that runs `dist/` on older Node.js versions. `CONTRIBUTING.md` lists the versions.
