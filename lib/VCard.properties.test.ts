@@ -519,7 +519,7 @@ describe.each([
 })
 
 describe('addKey() text', () => {
-  it('should write an ASCII-armoured key on 1 line', () => {
+  it('should write an ASCII-armored key on 1 line', () => {
     const body = 'A'.repeat(64)
     const armored = [
       '-----BEGIN PGP PUBLIC KEY BLOCK-----',
