@@ -53,7 +53,10 @@ Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm test:functio
   - minor: new API, or a deprecation;
   - major: a removal. Deprecate first, and add the removal to the next-major tracking issue.
 - Code, comments and commit messages use American English. Docs, PRs and issues use British English, short sentences and digits for quantities.
-- A comment says only what the code cannot show. Leave ticket IDs, dates and history out of comments and test names.
+- A comment says only what the code cannot show. Leave ticket IDs, dates and history out of comments and test names, except in `TODO(#123)`. A reason for leaving something out goes in the commit or PR, not in a comment.
+- Test names start with "should".
+- A new dependency needs a reason that a few lines of code cannot cover, and a healthy project: recent releases, active maintenance and wide use on GitHub and npm.
+- GitHub Actions are pinned to a commit SHA, with the version in a comment, such as `uses: actions/checkout@<sha> # v7.0.1`.
 
 ## Release
 
@@ -71,6 +74,8 @@ Each fact lives in 1 place:
 - `docs/REFERENCE.md`: rules that apply to more than 1 method, such as escaping, parameters and errors.
 - `docs/MIGRATION.md`: breaking changes and deprecated members, with what to use instead.
 - `README.md`: what the library does, installation, a quick start and the method list. It links to the rest.
+
+Markdown files keep link references at the end, after a `<!-- References -->` comment, and use no em dashes.
 
 A new deprecation gets a `@deprecated` tag that says what to use instead and that the next major version removes it, a row in `docs/MIGRATION.md` and an entry in the next-major tracking issue.
 
