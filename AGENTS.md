@@ -4,23 +4,13 @@ Instructions for coding agents working on `vcard-creator`, a TypeScript library 
 
 Read these first. They are the rules for every contributor:
 
-- [CONTRIBUTING.md](CONTRIBUTING.md): setup, commands, design rules, documentation rules and releases.
+- [CONTRIBUTING.md](CONTRIBUTING.md): setup, checks, design rules, documentation rules and releases.
 - [ARCHITECTURE.md](ARCHITECTURE.md): how a property travels from a method call to the output, how to add a property, and where each test belongs.
 - [docs/REFERENCE.md](docs/REFERENCE.md): the rules that apply across methods, including the error message form.
 
 ## Before you finish
 
-Run every check and report the result:
-
-```sh
-pnpm build
-pnpm test:coverage
-pnpm test:functional
-pnpm test:smoke
-pnpm lint
-pnpm type-check
-pnpm pretty
-```
+Run the checks in [CONTRIBUTING.md](CONTRIBUTING.md#checks) and report each result.
 
 ## Pull requests
 
