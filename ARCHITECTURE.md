@@ -4,7 +4,7 @@ This file is a map of the source code. It says where things live and how a prope
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build and tests.
 
-## How a property is added
+## How a property is written
 
 1. A public `add*()` method in `lib/VCard.ts` maps its arguments to 1 or more property inputs and passes them to `storeProperties()`.
 2. `storeProperties()` handles each input:
@@ -49,6 +49,6 @@ Each module in `lib/` has 1 job:
   - `VCard.properties.test.ts`: what each `add*()` method writes (property name, parameters and value type), plus behaviour that only that method has.
   - `VCard.input.test.ts`: checks that run over every input of every `add*()` method. 1 table, `cases`, lists the inputs of each method.
 - Test fixtures live in `test/fixtures/`. `test/fixtures/index.ts` loads them, so each test file imports a fixture by name.
-- Shared test setup lives in `test/helpers.ts`: `freezeTime()` fixes the clock for a suite, and `addMethods` lists the public `add*()` methods for the guard tests. Vitest restores `vi.spyOn()` spies after each test (`restoreMocks`).
+- Shared test setup lives in `test/helpers.ts`: `freezeTime()` fixes the clock for a suite, and `addMethods` lists the public `add*()` methods for the guard tests.
 - The functional test lives in `test/functional/`. It tests the built package in `dist/`, with its own Vitest config (`vitest.functional.config.ts`).
 - The smoke test lives in `test/smoke/`. It is a plain `node` script with no dependencies that runs `dist/` on older Node.js versions. `CONTRIBUTING.md` lists the versions.

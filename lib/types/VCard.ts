@@ -180,6 +180,6 @@ export interface CustomPropertyOptions {
   value: string
   /** Optional parameters (e.g., 'TYPE=work'): `name=value` pairs separated by `;`, values separated by `,`. A value with `;`, `:` or `,` must be in double quotes */
   params?: string
-  /** Optional group prefix for property grouping (e.g., 'item1'). Only letters, digits and `-` */
+  /** Optional group prefix for property grouping (e.g., 'item1'). Only letters, digits and `-`. An empty group writes no prefix */
   group?: string
 }

@@ -20,12 +20,6 @@ These members still work in v1. Your editor marks them as deprecated. The next m
 | `addJobtitle()`                                    | `addJobTitle()`                                                                   |
 | The `Element` type                                 | Nothing. It is an internal key list, and no method takes or returns it.           |
 
-Notes:
-
-- `hasProperty()` matches the whole key, parameters included, such as `'TEL;TYPE=WORK'`. To match the property name only, compare `p.key.split(';')[0]`.
-- A phone number as a JavaScript number loses a leading `0` and the `+` sign ([#43][issue-43]). `1e21` is written as `1e+21`, and integers above `Number.MAX_SAFE_INTEGER` change their last digits.
-- A `charset` other than `'utf-8'` adds `;CHARSET=<value>` to text properties, except `EMAIL`, `UID` and `TZ`. RFC 2426 has no `CHARSET` parameter. The check is case-sensitive, so `'UTF-8'` also adds it. A double quote in it makes `toString()`, `buildVCard()`, `concat()` and `getCharsetString()` throw.
-
 ## From v0.x to v1
 
 The [v0.11.0 README][readme-v0.11] documents the old API.
@@ -49,6 +43,5 @@ The [v0.11.0 README][readme-v0.11] documents the old API.
 
 <!-- References -->
 
-[issue-43]: https://github.com/joaocarmo/vcard-creator/issues/43
 [issue-156]: https://github.com/joaocarmo/vcard-creator/issues/156
 [readme-v0.11]: https://github.com/joaocarmo/vcard-creator/blob/v0.11.0/README.md

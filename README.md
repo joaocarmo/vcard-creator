@@ -152,7 +152,7 @@ try {
 
 ## Learn more
 
-- [Reference](docs/REFERENCE.md): escaping, input rules, error messages, custom properties, property groups and multi-contact files.
+- [Reference](docs/REFERENCE.md): escaping, input rules, images, custom properties and groups, and error messages.
 - [Migration guide](docs/MIGRATION.md): upgrading from v0.x, and the deprecated members that the next major version removes.
 - [Contributing](CONTRIBUTING.md): setup, tests and releases. [Architecture](ARCHITECTURE.md): how the source is organised.
 
