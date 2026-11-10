@@ -44,6 +44,17 @@ pnpm pretty
 
 Before you open a PR, run `pnpm build`, `pnpm test:coverage`, `pnpm test:functional`, `pnpm test:smoke`, `pnpm lint`, `pnpm type-check` and `pnpm pretty`.
 
+## Design rules
+
+- Follow [RFC 2425][rfc2425] and [RFC 2426][rfc2426]: accept every form they allow, and throw a `VCardException` only for what they forbid. Where the library departs from them on purpose, `docs/REFERENCE.md` says so.
+- Give a function an options object when 2 or more of its parameters could be swapped, such as 2 strings.
+- Semantic versioning:
+  - patch: a bug fix, including a fix that makes the output or the input checks follow the RFCs;
+  - minor: new API, or a deprecation;
+  - major: a removal. Deprecate first, and add the removal to the next-major tracking issue.
+- Code, comments and commit messages use American English. Docs, PRs and issues use British English, short sentences and digits for quantities.
+- A comment says only what the code cannot show. Leave ticket IDs, dates and history out of comments and test names.
+
 ## Release
 
 The release tag is the only source of the version. On `main`, `package.json` and `LIB_VERSION` stay at `0.0.0-development`.
@@ -64,3 +75,8 @@ Each fact lives in 1 place:
 A new deprecation gets a `@deprecated` tag that says what to use instead and that the next major version removes it, a row in `docs/MIGRATION.md` and an entry in the next-major tracking issue.
 
 [ARCHITECTURE.md](ARCHITECTURE.md) describes the source layout and how a property is added.
+
+<!-- References -->
+
+[rfc2425]: https://tools.ietf.org/html/rfc2425
+[rfc2426]: https://tools.ietf.org/html/rfc2426
