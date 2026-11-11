@@ -49,6 +49,10 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Consumers do not need the Git hooks
+      - name: Remove the prepare script
+        run: pnpm pkg delete scripts.prepare
+
       # The checkout is a detached HEAD with the version change uncommitted
       - name: Publish to npm
         env:
