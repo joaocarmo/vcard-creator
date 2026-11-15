@@ -1,7 +1,7 @@
-import VCard from './VCard'
-import VCardException from './VCardException'
-import { LIB_VERSION } from './constants'
-import { freezeTime } from '../test/helpers'
+import VCard from './VCard.js'
+import VCardException from './VCardException.js'
+import { LIB_VERSION } from './constants.js'
+import { freezeTime } from '../test/helpers.js'
 
 describe('vCard output format', () => {
   const photoURL = 'https://example.com/img/photo.jpg'

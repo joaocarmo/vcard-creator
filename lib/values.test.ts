@@ -1,6 +1,6 @@
-import { VALUE_PIPELINES } from './values'
-import VCardException from './VCardException'
-import type { ValueType } from './properties'
+import { VALUE_PIPELINES } from './values.js'
+import VCardException from './VCardException.js'
+import type { ValueType } from './properties.js'
 
 describe('VALUE_PIPELINES', () => {
   const run = (type: ValueType, value: unknown, label = 'Label') =>

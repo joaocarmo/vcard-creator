@@ -1,8 +1,13 @@
 import { runInNewContext } from 'node:vm'
-import VCard from './VCard'
-import VCardException from './VCardException'
-import type { AddressType, EmailType, PhoneType, UrlType } from './types/VCard'
-import { addMethods } from '../test/helpers'
+import VCard from './VCard.js'
+import VCardException from './VCardException.js'
+import type {
+  AddressType,
+  EmailType,
+  PhoneType,
+  UrlType,
+} from './types/VCard.js'
+import { addMethods } from '../test/helpers.js'
 
 type AddMethod = Extract<keyof VCard, `add${string}`>
 // `s` is appended to 1 string input. The other inputs are valid.

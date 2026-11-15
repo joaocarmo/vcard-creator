@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import VCard from '../../dist/index.js'
-import { sampleImage as photo } from '../fixtures'
+import { sampleImage as photo } from '../fixtures/index.js'
 
 const createCard = () =>
   new VCard()

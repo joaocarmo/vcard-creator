@@ -1,6 +1,6 @@
-import DefaultExport, { VCard as NamedVCard, VCardException } from './index'
-import VCard from './VCard'
-import VCardExceptionClass from './VCardException'
+import DefaultExport, { VCard as NamedVCard, VCardException } from './index.js'
+import VCard from './VCard.js'
+import VCardExceptionClass from './VCardException.js'
 
 describe('index', () => {
   it('should export VCard as the default and a named export', () => {

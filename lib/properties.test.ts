@@ -1,5 +1,5 @@
-import { PROPERTIES } from './properties'
-import type { Element } from './types/VCard'
+import { PROPERTIES } from './properties.js'
+import type { Element } from './types/VCard.js'
 
 const elements = Object.keys(PROPERTIES) as Element[]
 
