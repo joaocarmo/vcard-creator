@@ -70,8 +70,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TODO(#156): remove 18 when the minimum Node.js version becomes 20.
-        node-version: [18, 20]
+        # TODO(#156): remove 18 when the minimum Node.js version becomes 22.
+        node-version: [18, 22]
 
     steps:
       - name: Checkout
