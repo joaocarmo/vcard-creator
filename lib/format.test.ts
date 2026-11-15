@@ -6,9 +6,9 @@ import {
   formatFloat,
   quoteParamValue,
   resolveType,
-} from './format'
-import VCardException from './VCardException'
-import type { BuildKeyOptions } from './format'
+} from './format.js'
+import VCardException from './VCardException.js'
+import type { BuildKeyOptions } from './format.js'
 
 describe('quoteParamValue()', () => {
   const quote = (value: unknown) => quoteParamValue({ value: value as string })

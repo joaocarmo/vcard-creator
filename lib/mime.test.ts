@@ -5,7 +5,7 @@ import {
   toMediaInput,
   toMimeEssence,
   trimHttpWhitespace,
-} from './mime'
+} from './mime.js'
 
 // Built from code points so the source stays ASCII
 const NO_BREAK_SPACE = String.fromCharCode(0xa0)

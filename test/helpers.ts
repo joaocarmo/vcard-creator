@@ -1,4 +1,4 @@
-import VCard from '../lib/VCard'
+import VCard from '../lib/VCard.js'
 
 /** The public add*() methods of VCard. */
 export const addMethods = Object.getOwnPropertyNames(VCard.prototype).filter(

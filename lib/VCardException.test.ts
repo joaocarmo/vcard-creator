@@ -1,4 +1,4 @@
-import VCardException from './VCardException'
+import VCardException from './VCardException.js'
 
 describe('VCardException', () => {
   it('should set the name and message', () => {

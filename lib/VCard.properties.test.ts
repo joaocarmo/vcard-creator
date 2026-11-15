@@ -1,8 +1,8 @@
-import VCard from './VCard'
-import VCardException from './VCardException'
-import type { SocialOptions } from './types/VCard'
-import { sampleImage } from '../test/fixtures'
-import { addMethods, freezeTime } from '../test/helpers'
+import VCard from './VCard.js'
+import VCardException from './VCardException.js'
+import type { SocialOptions } from './types/VCard.js'
+import { sampleImage } from '../test/fixtures/index.js'
+import { addMethods, freezeTime } from '../test/helpers.js'
 
 // Each row: the method, a call on a fresh card and 1 content line it writes.
 // The rows check the property name, the parameters and the value type. The

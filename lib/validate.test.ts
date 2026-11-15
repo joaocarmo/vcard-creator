@@ -11,8 +11,8 @@ import {
   isDate,
   isRfcDateOrDateTime,
   showValue,
-} from './validate'
-import VCardException from './VCardException'
+} from './validate.js'
+import VCardException from './VCardException.js'
 
 describe('showValue()', () => {
   it('should quote a value of 64 characters in full', () => {
