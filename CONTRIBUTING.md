@@ -18,7 +18,7 @@ pnpm pretty
 
 `pnpm test:unit` runs the unit tests without coverage, so a filtered run such as `pnpm test:unit lib/index.test.ts` works.
 
-CI runs the smoke test on Node.js 18 and 20, the oldest version `engines` allows and the next major's minimum. `tsconfig.build.json` targets ES2022 so that `dist/` runs there.
+CI runs the smoke test on Node.js 18 and 22, the oldest version `engines` allows and the next major's minimum. `tsconfig.build.json` targets ES2022 so that `dist/` runs there.
 
 ## Design rules
 
